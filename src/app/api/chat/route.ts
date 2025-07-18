@@ -254,8 +254,7 @@ export async function POST(request: NextRequest) {
   
   try {
     // 1. 最優先でChatGPT APIを使用
-    const openaiApiKey = process.env.OPENAI_API_KEY || 
-                          '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';
+    const openaiApiKey = process.env.OPENAI_API_KEY;
     
     console.log('Using OpenAI API Key:', openaiApiKey ? openaiApiKey.substring(0, 20) + '...' : 'Not found');
     
