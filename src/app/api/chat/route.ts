@@ -42,6 +42,13 @@ export async function POST(request: NextRequest) {
       const errorText = await openaiResponse.text();
       console.error('OpenAI API Error:', openaiResponse.status, errorText);
       
+      // クォータ超過の場合はフォールバック応答
+      if (openaiResponse.status === 429) {
+        return NextResponse.json({ 
+          response: `ご質問ありがとうございます：「${message}」\n\n申し訳ございませんが、現在AIサービスが利用制限に達しています。しばらく後にもう一度お試しください。`
+        });
+      }
+      
       return NextResponse.json({ 
         response: `OpenAI API エラー (${openaiResponse.status}): ${errorText}`
       }, { status: 500 });
