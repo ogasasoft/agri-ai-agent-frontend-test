@@ -1,68 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Client } from 'pg';
 
-// Mock data for testing
-const mockOrders = [
-  {
-    id: 1,
-    order_number: 'ORD-2024-001',
-    customer_name_masked: '田***郎',
-    total_amount: 3500,
-    order_date: '2024-01-15',
-    delivery_date: '2024-01-18',
-    status: 'pending',
-    has_memo: true,
-    created_at: '2024-01-15T10:00:00Z',
-    updated_at: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 2,
-    order_number: 'ORD-2024-002',
-    customer_name_masked: '佐***子',
-    total_amount: 2800,
-    order_date: '2024-01-16',
-    delivery_date: null,
-    status: 'processing',
-    has_memo: false,
-    created_at: '2024-01-16T14:30:00Z',
-    updated_at: '2024-01-16T14:30:00Z'
-  },
-  {
-    id: 3,
-    order_number: 'ORD-2024-003',
-    customer_name_masked: '山***一',
-    total_amount: 4200,
-    order_date: '2024-01-17',
-    delivery_date: '2024-01-20',
-    status: 'shipped',
-    has_memo: true,
-    created_at: '2024-01-17T09:15:00Z',
-    updated_at: '2024-01-17T16:45:00Z'
-  },
-  {
-    id: 4,
-    order_number: 'ORD-2024-004',
-    customer_name_masked: '鈴***美',
-    total_amount: 1500,
-    order_date: '2024-01-18',
-    delivery_date: null,
-    status: 'pending',
-    has_memo: false,
-    created_at: '2024-01-18T11:20:00Z',
-    updated_at: '2024-01-18T11:20:00Z'
-  },
-  {
-    id: 5,
-    order_number: 'ORD-2024-005',
-    customer_name_masked: '高***雄',
-    total_amount: 5600,
-    order_date: '2024-01-19',
-    delivery_date: '2024-01-22',
-    status: 'delivered',
-    has_memo: false,
-    created_at: '2024-01-19T15:45:00Z',
-    updated_at: '2024-01-21T10:30:00Z'
-  }
-];
+// データベース接続
+async function getDbClient(): Promise<Client> {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  });
+  
+  await client.connect();
+  return client;
+}
 
 function maskPersonalInfo(text: string): string {
   if (!text || text.length <= 2) return text;
@@ -73,36 +21,91 @@ function maskPersonalInfo(text: string): string {
 }
 
 export async function GET() {
-  return NextResponse.json(mockOrders);
+  try {
+    const client = await getDbClient();
+    
+    try {
+      const result = await client.query(`
+        SELECT 
+          id,
+          order_code as order_number,
+          customer_name as customer_name_masked,
+          price as total_amount,
+          order_date,
+          delivery_date,
+          'pending' as status,
+          CASE WHEN notes IS NOT NULL AND notes != '' THEN true ELSE false END as has_memo,
+          notes as memo,
+          created_at,
+          updated_at
+        FROM orders 
+        ORDER BY created_at DESC
+      `);
+      
+      return NextResponse.json(result.rows);
+    } finally {
+      await client.end();
+    }
+  } catch (error) {
+    console.error('Database error:', error);
+    // フォールバック: 空配列を返す
+    return NextResponse.json([]);
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const data = await request.json();
-  
-  // Mask personal information
-  const maskedName = maskPersonalInfo(data.customer_name);
-  const maskedPhone = maskPersonalInfo(data.customer_phone);
-  const maskedAddress = maskPersonalInfo(data.customer_address);
-  
-  const mockNewOrder = {
-    id: Date.now(),
-    order_number: data.order_number,
-    customer_name_masked: maskedName,
-    customer_phone_masked: maskedPhone,
-    customer_address_masked: maskedAddress,
-    total_amount: data.total_amount,
-    order_date: data.order_date,
-    delivery_date: data.delivery_date,
-    status: data.status || 'pending',
-    has_memo: !!data.memo,
-    memo: data.memo || null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
-  
-  return NextResponse.json({ 
-    id: mockNewOrder.id,
-    success: true,
-    order: mockNewOrder
-  });
+  try {
+    const data = await request.json();
+    
+    // Mask personal information
+    const maskedName = maskPersonalInfo(data.customer_name);
+    
+    const client = await getDbClient();
+    
+    try {
+      const result = await client.query(`
+        INSERT INTO orders (order_code, customer_name, phone, address, price, order_date, delivery_date, notes)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *
+      `, [
+        data.order_number,
+        maskedName,
+        data.customer_phone || '',
+        data.customer_address || '',
+        data.total_amount,
+        data.order_date,
+        data.delivery_date || null,
+        data.memo || ''
+      ]);
+      
+      const newOrder = result.rows[0];
+      
+      return NextResponse.json({ 
+        id: newOrder.id,
+        success: true,
+        order: {
+          id: newOrder.id,
+          order_number: newOrder.order_code,
+          customer_name_masked: newOrder.customer_name,
+          total_amount: newOrder.price,
+          order_date: newOrder.order_date,
+          delivery_date: newOrder.delivery_date,
+          status: 'pending',
+          has_memo: !!newOrder.notes,
+          memo: newOrder.notes,
+          created_at: newOrder.created_at,
+          updated_at: newOrder.updated_at
+        }
+      });
+    } finally {
+      await client.end();
+    }
+  } catch (error: any) {
+    console.error('Database error:', error);
+    return NextResponse.json({ 
+      success: false, 
+      message: 'データベースエラーが発生しました。',
+      error: error.message
+    }, { status: 500 });
+  }
 }

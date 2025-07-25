@@ -61,14 +61,19 @@ async function getDbClient(): Promise<Client> {
 
 // CSVデータをPostgreSQLに保存
 async function saveOrdersToDb(orders: any[]): Promise<{ inserted: number; errors: string[] }> {
+  console.log('🔌 Connecting to database...');
   const client = await getDbClient();
   let inserted = 0;
   const errors: string[] = [];
   
   try {
+    console.log('📊 Processing orders:', orders.length);
+    
     for (const order of orders) {
       try {
-        await client.query(`
+        console.log('💾 Inserting order:', order.order_code);
+        
+        const result = await client.query(`
           INSERT INTO orders (order_code, customer_name, phone, address, price, order_date, delivery_date, notes)
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
           ON CONFLICT (order_code) DO UPDATE SET
@@ -80,6 +85,7 @@ async function saveOrdersToDb(orders: any[]): Promise<{ inserted: number; errors
             delivery_date = EXCLUDED.delivery_date,
             notes = EXCLUDED.notes,
             updated_at = CURRENT_TIMESTAMP
+          RETURNING id
         `, [
           order.order_code,
           order.customer_name,
@@ -90,22 +96,34 @@ async function saveOrdersToDb(orders: any[]): Promise<{ inserted: number; errors
           order.delivery_date,
           order.notes
         ]);
+        
+        console.log('✅ Order saved with ID:', result.rows[0]?.id);
         inserted++;
       } catch (dbError: any) {
+        console.error('❌ DB Error for order', order.order_code, ':', dbError.message);
         errors.push(`注文番号 ${order.order_code}: ${dbError.message}`);
       }
     }
   } finally {
     await client.end();
+    console.log('🔌 Database connection closed');
   }
   
   return { inserted, errors };
 }
 
 export async function POST(request: NextRequest) {
+  console.log('📤 CSV Upload request received');
+  
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    
+    console.log('📁 File info:', {
+      name: file?.name,
+      size: file?.size,
+      type: file?.type
+    });
     
     if (!file) {
       return NextResponse.json({ 
@@ -124,11 +142,18 @@ export async function POST(request: NextRequest) {
     
     // ファイル内容を読み取り
     const text = await file.text();
+    console.log('📄 File content preview:', text.substring(0, 200) + '...');
     
     // CSV解析
     const parseResult = Papa.parse<Record<string, string>>(text, {
       header: true,
       skipEmptyLines: true,
+    });
+    
+    console.log('🔍 Parse result:', {
+      dataLength: parseResult.data.length,
+      errorsLength: parseResult.errors?.length || 0,
+      fields: parseResult.meta?.fields || 'not available'
     });
     
     if (parseResult.errors && parseResult.errors.length > 0) {
@@ -227,8 +252,12 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
+    console.log('💾 Saving to database:', processedOrders.length, 'orders');
+    
     // データベースに保存
     const saveResult = await saveOrdersToDb(processedOrders);
+    
+    console.log('✅ Save result:', saveResult);
     
     return NextResponse.json({ 
       success: true,

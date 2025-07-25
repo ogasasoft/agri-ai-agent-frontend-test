@@ -10,9 +10,10 @@ interface OrderListProps {
   orders: Order[];
   selectedOrders: string[];
   onSelectionChange: (selected: string[]) => void;
+  showShippingInfo?: boolean;
 }
 
-export function OrderList({ orders, selectedOrders, onSelectionChange }: OrderListProps) {
+export function OrderList({ orders, selectedOrders, onSelectionChange, showShippingInfo = false }: OrderListProps) {
   const [selectAll, setSelectAll] = useState(false);
 
   const handleSelectAll = (checked: boolean) => {
@@ -154,6 +155,14 @@ export function OrderList({ orders, selectedOrders, onSelectionChange }: OrderLi
                         </span>
                       )}
                     </div>
+                    {showShippingInfo && order.shipped_at && (
+                      <div className="flex justify-between mt-1">
+                        <span>
+                          発送日: {format(new Date(order.shipped_at), 'MM/dd', { locale: ja })}
+                        </span>
+                        {/* TODO: tracking_numberフィールドが追加されたら表示 */}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

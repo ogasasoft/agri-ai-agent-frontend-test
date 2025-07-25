@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Trash2, Save } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
 
 const orderSchema = z.object({
   order_number: z.string().min(1, '注文番号は必須です'),
@@ -55,31 +55,14 @@ export default function NewOrderPage() {
   ) || 0;
 
   const onSubmit = async (data: OrderFormData) => {
-    setIsSubmitting(true);
+    // セッションストレージに保存して確認画面に遷移
+    const orderData = {
+      ...data,
+      total_amount: totalAmount,
+    };
     
-    try {
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          total_amount: totalAmount,
-        }),
-      });
-
-      if (response.ok) {
-        router.push('/orders');
-      } else {
-        throw new Error('注文の作成に失敗しました');
-      }
-    } catch (error) {
-      console.error('Error creating order:', error);
-      alert('注文の作成に失敗しました。もう一度お試しください。');
-    } finally {
-      setIsSubmitting(false);
-    }
+    sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
+    router.push('/orders/register/confirm?type=manual');
   };
 
   return (
@@ -87,8 +70,16 @@ export default function NewOrderPage() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">
-          <h1 className="text-2xl font-semibold text-gray-900">新規注文登録</h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <div className="flex items-center gap-3 mb-2">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <h1 className="text-2xl font-semibold text-gray-900">新規注文登録</h1>
+          </div>
+          <p className="text-sm text-gray-600">
             電話・窓口での注文をシステムに登録します
           </p>
         </div>
@@ -314,11 +305,10 @@ export default function NewOrderPage() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="btn-primary flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
-              {isSubmitting ? '登録中...' : '注文登録'}
+              確認画面へ進む
             </button>
           </div>
         </form>

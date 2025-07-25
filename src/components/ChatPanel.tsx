@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Settings } from 'lucide-react';
 import { useChatStore } from '@/stores/chatStore';
+import { usePathname } from 'next/navigation';
 
 interface Message {
   id: string;
@@ -16,6 +17,28 @@ export function ChatPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { messages, addMessage, loadMessages } = useChatStore();
+  const pathname = usePathname();
+
+  // ページ情報を取得
+  const getPageContext = (): string => {
+    switch (pathname) {
+      case '/':
+      case '/dashboard':
+        return 'ダッシュボード - 売上統計、商品分析、AI提案を表示中';
+      case '/orders':
+        return '注文管理 - 注文一覧、検索、編集機能';
+      case '/orders/new':
+        return '新規注文作成 - 注文情報入力フォーム';
+      case '/upload':
+        return 'CSVアップロード - ファイルアップロード、内容確認、一括取り込み';
+      case '/settings':
+        return '設定 - UI設定、通知設定、EC連携設定';
+      case '/prompts':
+        return 'プロンプト管理 - AI設定、カスタムプロンプト';
+      default:
+        return `現在のページ: ${pathname}`;
+    }
+  };
 
   useEffect(() => {
     loadMessages();
@@ -49,7 +72,8 @@ export function ChatPanel() {
         },
         body: JSON.stringify({
           message: userMessage,
-          customerId: 'default' // TODO: Get from user context
+          customerId: 'default',
+          pageContext: getPageContext()
         })
       });
 
@@ -94,9 +118,14 @@ export function ChatPanel() {
           <div className="text-center text-gray-500 mt-8">
             <Bot className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p className="text-sm">
-              農業ECの売上分析や改善案について<br />
-              何でもお聞かせください
+              農業システムについて何でもお聞きください<br />
+              操作方法、エラー解決、データ分析など
             </p>
+            <div className="mt-4 text-xs text-gray-400 space-y-1">
+              <p>💡 「CSVファイルのアップロード方法は？」</p>
+              <p>💡 「エラーが出て困っています」</p>
+              <p>💡 「売上データの見方を教えて」</p>
+            </div>
           </div>
         )}
         

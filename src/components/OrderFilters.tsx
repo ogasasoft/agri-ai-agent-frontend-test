@@ -6,9 +6,10 @@ import type { OrderFilters } from '@/types/order';
 interface OrderFiltersProps {
   filters: OrderFilters;
   onFiltersChange: (filters: OrderFilters) => void;
+  hideStatusFilter?: boolean;
 }
 
-export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
+export function OrderFilters({ filters, onFiltersChange, hideStatusFilter = false }: OrderFiltersProps) {
   const handleFilterChange = (key: keyof OrderFilters, value: string) => {
     onFiltersChange({
       ...filters,
@@ -64,6 +65,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
           />
         </div>
 
+{!hideStatusFilter && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             ステータス
@@ -80,6 +82,7 @@ export function OrderFilters({ filters, onFiltersChange }: OrderFiltersProps) {
             <option value="delivered">配達完了</option>
           </select>
         </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

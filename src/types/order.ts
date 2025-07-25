@@ -11,6 +11,7 @@ export interface Order {
   has_memo: boolean;
   memo?: string;
   ec_source?: string;
+  shipped_at?: string;
   created_at: string;
   updated_at: string;
 }

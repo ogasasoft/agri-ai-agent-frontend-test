@@ -13,9 +13,9 @@ import {
 } from 'lucide-react';
 
 const navigation = [
-  { name: '注文管理', href: '/orders', icon: Package },
+  { name: '注文管理', href: '/orders/shipping/pending', icon: Package },
   { name: 'ダッシュボード', href: '/dashboard', icon: BarChart3 },
-  { name: '注文登録', href: '/orders/new', icon: Plus },
+  { name: '注文登録', href: '/orders/register/choose', icon: Plus },
   { name: 'CSVアップロード', href: '/upload', icon: Upload },
   { name: 'システムプロンプト', href: '/prompts', icon: MessageSquare },
   { name: '設定', href: '/settings', icon: Settings },
