@@ -65,6 +65,8 @@ vercel --prod        # Deploy to production
 ### Key Features
 - Order management with two-pane delivery date separation
 - CSV upload with preview confirmation before import
+- Shipping workflow with Yamato Transport API integration
+- Three-step order registration flow: choose method → confirm → complete
 - Persistent AI chat with live database context awareness
 - Personal information masking throughout the application (`田中太郎` → `田***郎`)
 - Dashboard analytics with AI-powered insights and recommendations
@@ -78,6 +80,9 @@ API routes (`src/app/api/`) implement:
 - `/api/settings` - Application settings persistence
 - `/api/upload` - CSV processing with preview and bulk import
 - `/api/ai-insights` - Dashboard analytics with OpenAI integration
+- `/api/shipping` - Shipping workflow management
+- `/api/customers` - Customer data registration from shipping completion
+- `/api/yamato` - Yamato Transport API integration (mock implementation with TODO markers)
 
 ## AI Chat Architecture
 
@@ -106,6 +111,13 @@ The chat system (`src/app/api/chat/route.ts`) implements:
 - BroadcastChannel API for real-time updates across browser tabs
 - Graceful fallback when browser APIs are unavailable
 
+### Shipping Workflow Architecture
+- **Order Selection**: Multi-select orders from pending shipments page
+- **Label Generation**: Yamato API integration with delivery type selection (normal/cool/frozen)
+- **Customer Registration**: Automatic customer data registration upon shipping completion
+- **Two-Pane Management**: Separate views for pending vs completed shipments
+- **Session Storage**: Temporary order data storage for multi-step flows
+
 ### Japanese Business Context
 - Complete Japanese UI with agricultural terminology
 - Date formatting with Japanese locale (`date-fns/locale/ja`)
@@ -115,9 +127,12 @@ The chat system (`src/app/api/chat/route.ts`) implements:
 ## Important Notes
 
 - **Quick Start**: `npm run dev` → `http://localhost:3000/orders`
+- **Entry Point**: `/orders` redirects to `/orders/shipping/pending` (main order management)
+- **Order Registration Flow**: `/orders/register/choose` → `/orders/register/confirm` → `/orders/register/complete`
+- **Shipping Flow**: Pending orders → Select → Create labels → Complete → Customer registration
 - API routes work consistently between development and production on Vercel
-- The chat API has basic error handling - additional fallback systems may be needed
 - Personal data masking is crucial - maintain this pattern in all new features
+- **Yamato API**: Currently mock implementation with TODO markers for production integration
 - The application uses Japanese language throughout the UI and AI responses
 
 ## Vercel Deployment
@@ -130,6 +145,9 @@ The chat system (`src/app/api/chat/route.ts`) implements:
 Set in Vercel dashboard or via CLI:
 - `DATABASE_URL`: PostgreSQL connection string (Neon database)
 - `OPENAI_API_KEY`: Your OpenAI API key for chat functionality
+- `YAMATO_API_KEY`: Yamato Transport API key for shipping labels
+- `YAMATO_API_SECRET`: Yamato Transport API secret
+- `YAMATO_API_BASE_URL`: Yamato API base URL (default: https://api.yamato.co.jp/v1)
 
 ### Deployment Steps
 1. `vercel` - First deployment (follow prompts)
