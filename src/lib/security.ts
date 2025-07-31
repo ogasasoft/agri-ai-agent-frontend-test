@@ -74,7 +74,7 @@ export function sanitizeInput(input: string): string {
 
 // SQLインジェクション対策のための文字列検証
 export function validateSqlInput(input: string): boolean {
-  const sqlInjectionPattern = /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|SCRIPT)\b|[';--])/i;
+  const sqlInjectionPattern = /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|SCRIPT)\b|[';-]|--)/i;
   return !sqlInjectionPattern.test(input);
 }
 

@@ -14,9 +14,9 @@ export function ExportModal({ selectedOrders, orders, onClose }: ExportModalProp
   const [exportFormat, setExportFormat] = useState<'yamato' | 'sagawa' | 'custom'>('yamato');
   const [isExporting, setIsExporting] = useState(false);
 
-  const selectedOrderData = orders.filter(order => 
+  const selectedOrderData = Array.isArray(orders) ? orders.filter(order => 
     selectedOrders.includes(order.id.toString())
-  );
+  ) : [];
 
   const handleExport = async () => {
     setIsExporting(true);

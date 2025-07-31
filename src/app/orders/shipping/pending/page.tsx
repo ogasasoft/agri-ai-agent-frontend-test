@@ -67,9 +67,19 @@ export default function ShippingPendingPage() {
     try {
       const response = await fetch('/api/orders');
       const data = await response.json();
-      setOrders(data);
+      
+      // APIレスポンスの構造に応じて配列を設定
+      if (data.success && Array.isArray(data.orders)) {
+        setOrders(data.orders);
+      } else if (Array.isArray(data)) {
+        setOrders(data);
+      } else {
+        console.error('予期しないAPIレスポンス形式:', data);
+        setOrders([]);
+      }
     } catch (error) {
       console.error('注文データの取得に失敗しました:', error);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -88,7 +98,7 @@ export default function ShippingPendingPage() {
     }
   };
 
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = Array.isArray(orders) ? orders.filter(order => {
     // 発送済みは除外
     if (order.status === 'shipped' || order.status === 'delivered') return false;
     
@@ -103,7 +113,7 @@ export default function ShippingPendingPage() {
     if (filters.hasMemo === 'yes' && !order.has_memo) return false;
     if (filters.hasMemo === 'no' && order.has_memo) return false;
     return true;
-  });
+  }) : [];
 
   const ordersWithDeliveryDate = filteredOrders.filter(order => order.delivery_date);
   const ordersWithoutDeliveryDate = filteredOrders.filter(order => !order.delivery_date);
@@ -181,7 +191,7 @@ export default function ShippingPendingPage() {
             {categories.map((category) => {
               const IconComponent = iconComponents[category.icon as keyof typeof iconComponents] || Package;
               const isSelected = categoryFilter === category.id;
-              const orderCount = orders.filter(o => o.category_id === category.id && o.status !== 'shipped' && o.status !== 'delivered').length;
+              const orderCount = Array.isArray(orders) ? orders.filter(o => o.category_id === category.id && o.status !== 'shipped' && o.status !== 'delivered').length : 0;
               
               return (
                 <button
@@ -216,7 +226,7 @@ export default function ShippingPendingPage() {
             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">発送対象注文がありません</h3>
             <p className="text-gray-600">
-              {orders.length === 0 
+              {!Array.isArray(orders) || orders.length === 0 
                 ? '注文データが登録されていません。' 
                 : 'すべての注文が発送済みです。'
               }

@@ -28,15 +28,25 @@ export default function ShippingCompletedPage() {
     try {
       const response = await fetch('/api/orders');
       const data = await response.json();
-      setOrders(data);
+      
+      // APIレスポンスの構造に応じて配列を設定
+      if (data.success && Array.isArray(data.orders)) {
+        setOrders(data.orders);
+      } else if (Array.isArray(data)) {
+        setOrders(data);
+      } else {
+        console.error('予期しないAPIレスポンス形式:', data);
+        setOrders([]);
+      }
     } catch (error) {
       console.error('注文データの取得に失敗しました:', error);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = Array.isArray(orders) ? orders.filter(order => {
     // 発送済みまたは配達完了のみ表示
     if (order.status !== 'shipped' && order.status !== 'delivered') return false;
     
@@ -48,7 +58,7 @@ export default function ShippingCompletedPage() {
     if (filters.hasMemo === 'yes' && !order.has_memo) return false;
     if (filters.hasMemo === 'no' && order.has_memo) return false;
     return true;
-  });
+  }) : [];
 
   const shippedOrders = filteredOrders.filter(order => order.status === 'shipped');
   const deliveredOrders = filteredOrders.filter(order => order.status === 'delivered');
