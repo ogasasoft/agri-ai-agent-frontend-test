@@ -367,6 +367,112 @@ export async function authenticateUserEnhanced(
   }
 }
 
+// Auto-login with remember token
+export async function autoLoginWithRememberToken(
+  selector: string,
+  validator: string,
+  ipAddress: string,
+  userAgent: string
+): Promise<{
+  success: boolean;
+  user?: User;
+  session?: Session;
+  rememberToken?: RememberToken;
+  message: string;
+}> {
+  const client = await getDbClient();
+  
+  try {
+    const result = await client.query(`
+      SELECT rt.*, u.id as user_id, u.username, u.email, u.is_active, u.last_login_at, u.created_at
+      FROM remember_tokens rt
+      JOIN users u ON rt.user_id = u.id
+      WHERE rt.selector = $1 AND rt.expires_at > NOW() AND u.is_active = true
+    `, [selector]);
+
+    if (result.rows.length === 0) {
+      await logSecurityEvent({
+        event_type: 'invalid_remember_token',
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        details: { selector },
+        severity: 'medium'
+      });
+      return { success: false, message: '無効なRemember tokenです。' };
+    }
+
+    const tokenData = result.rows[0];
+    
+    // Verify validator
+    const isValidToken = await bcrypt.compare(validator, tokenData.token_hash);
+    if (!isValidToken) {
+      // Invalid token - possible attack, remove all remember tokens for this user
+      await client.query('DELETE FROM remember_tokens WHERE user_id = $1', [tokenData.user_id]);
+      
+      await logSecurityEvent({
+        event_type: 'remember_token_theft',
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        target_username: tokenData.username,
+        details: { selector },
+        severity: 'critical'
+      });
+      
+      return { success: false, message: 'セキュリティ上の理由によりログアウトしました。再度ログインしてください。' };
+    }
+
+    // Create new session
+    const sessionToken = await generateSessionToken();
+    const csrfToken = await generateCSRFToken();
+    const expiresAt = new Date(Date.now() + (24 * 60 * 60 * 1000));
+
+    const sessionResult = await client.query(`
+      INSERT INTO sessions (user_id, session_token, csrf_token, expires_at, ip_address, user_agent)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
+    `, [tokenData.user_id, sessionToken, csrfToken, expiresAt, ipAddress, userAgent]);
+
+    const newSession = sessionResult.rows[0];
+
+    // Create new remember token to replace the used one
+    const newSelector = randomBytes(16).toString('hex');
+    const newValidator = randomBytes(32).toString('hex');
+    const newTokenHash = await bcrypt.hash(newValidator, 12);
+    const rememberExpiresAt = new Date(Date.now() + REMEMBER_TOKEN_DURATION);
+
+    // Remove old remember token and create new one
+    await client.query('DELETE FROM remember_tokens WHERE selector = $1', [selector]);
+    await client.query(`
+      INSERT INTO remember_tokens (user_id, token_hash, selector, expires_at, ip_address, user_agent)
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `, [tokenData.user_id, newTokenHash, newSelector, rememberExpiresAt, ipAddress, userAgent]);
+
+    await logAuditEvent(tokenData.user_id, 'AUTO_LOGIN_SUCCESS', 'user', tokenData.user_id, { remember_token: true }, ipAddress, userAgent);
+
+    return {
+      success: true,
+      user: {
+        id: tokenData.user_id,
+        username: tokenData.username,
+        email: tokenData.email,
+        is_active: tokenData.is_active,
+        last_login_at: tokenData.last_login_at,
+        created_at: tokenData.created_at
+      },
+      session: newSession,
+      rememberToken: {
+        selector: newSelector,
+        validator: newValidator,
+        expires_at: rememberExpiresAt
+      },
+      message: '自動ログインしました。'
+    };
+
+  } finally {
+    await client.end();
+  }
+}
+
 // Remember token validation
 export async function validateRememberToken(selector: string, validator: string): Promise<{ user: User; newSession: Session } | null> {
   const client = await getDbClient();

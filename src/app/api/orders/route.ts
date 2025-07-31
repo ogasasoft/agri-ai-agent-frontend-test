@@ -12,13 +12,6 @@ async function getDbClient(): Promise<Client> {
   return client;
 }
 
-function maskPersonalInfo(text: string): string {
-  if (!text || text.length <= 2) return text;
-  const first = text.charAt(0);
-  const last = text.charAt(text.length - 1);
-  const middle = '*'.repeat(text.length - 2);
-  return `${first}${middle}${last}`;
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,9 +32,9 @@ export async function GET(request: NextRequest) {
         SELECT 
           o.id,
           o.order_code as order_number,
-          o.customer_name as customer_name_masked,
-          o.phone as customer_phone_masked,
-          o.address as customer_address_masked,
+          o.customer_name,
+          o.phone as customer_phone,
+          o.address as customer_address,
           o.price as total_amount,
           o.order_date,
           o.delivery_date,
@@ -86,9 +79,6 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
     
-    // Mask personal information
-    const maskedName = maskPersonalInfo(data.customer_name);
-    
     const client = await getDbClient();
     
     try {
@@ -116,7 +106,7 @@ export async function POST(request: NextRequest) {
         RETURNING *
       `, [
         data.order_code || data.order_number,
-        maskedName,
+        data.customer_name,
         data.phone || data.customer_phone || '',
         data.address || data.customer_address || '',
         data.price || data.total_amount,

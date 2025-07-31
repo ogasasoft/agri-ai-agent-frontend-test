@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { CustomerRegistration } from '@/types/shipping';
 
-// 個人情報マスキング関数
-const maskPersonalInfo = (text: string): string => {
-  if (!text || text.length <= 2) return text;
-  return text.charAt(0) + '*'.repeat(text.length - 2) + text.charAt(text.length - 1);
-};
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,9 +17,6 @@ export async function POST(request: NextRequest) {
     // 顧客データを処理してDBに保存
     const processedCustomers = customers.map(customer => ({
       ...customer,
-      customer_name_masked: maskPersonalInfo(customer.customer_name),
-      customer_phone_masked: customer.customer_phone ? maskPersonalInfo(customer.customer_phone) : undefined,
-      customer_address_masked: customer.customer_address ? maskPersonalInfo(customer.customer_address) : undefined,
       registered_at: new Date().toISOString()
     }));
 
@@ -69,16 +61,16 @@ export async function GET(request: NextRequest) {
       {
         id: 1,
         order_code: 'ORD-001',
-        customer_name_masked: '田***郎',
-        customer_phone_masked: '090-****-5678',
-        customer_address_masked: '東***区',
+        customer_name: '田中太郎',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区',
         registered_at: new Date().toISOString()
       }
     ];
 
     const filteredCustomers = search 
       ? mockCustomers.filter(customer => 
-          customer.customer_name_masked.includes(search) ||
+          customer.customer_name.includes(search) ||
           customer.order_code.includes(search)
         )
       : mockCustomers;

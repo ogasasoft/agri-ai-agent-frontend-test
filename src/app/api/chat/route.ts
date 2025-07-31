@@ -1,9 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { validateSession } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
-  const { message } = await request.json();
-  
   try {
+    // 認証チェック
+    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    
+    if (!sessionToken) {
+      return NextResponse.json({
+        success: false,
+        response: '認証が必要です。'
+      }, { status: 401 });
+    }
+
+    const sessionData = await validateSession(sessionToken);
+    if (!sessionData) {
+      return NextResponse.json({
+        success: false,
+        response: 'セッションが無効です。'
+      }, { status: 401 });
+    }
+
+    // CSRF トークンチェック
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (csrfToken !== sessionData.session.csrf_token) {
+      return NextResponse.json({
+        success: false,
+        response: 'CSRF検証に失敗しました。'
+      }, { status: 403 });
+    }
+
+    const { message } = await request.json();
+    
+    // メッセージの検証
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return NextResponse.json({
+        success: false,
+        response: 'メッセージが必要です。'
+      }, { status: 400 });
+    }
+
+    // メッセージ長制限（DoS攻撃防止）
+    if (message.length > 4000) {
+      return NextResponse.json({
+        success: false,
+        response: 'メッセージが長すぎます。'
+      }, { status: 400 });
+    }
+  
     const openaiApiKey = process.env.OPENAI_API_KEY;
     
     if (!openaiApiKey || openaiApiKey === 'your_openai_api_key_here') {
@@ -43,10 +87,13 @@ export async function POST(request: NextRequest) {
       response: 'AI機能が使用できません。'
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Chat API error:', error);
     return NextResponse.json({ 
-      response: 'AI機能が使用できません。'
-    });
+      success: false,
+      response: 'AI機能が使用できません。',
+      // 本番環境では詳細エラー情報を隠す
+      ...(process.env.NODE_ENV === 'development' && { error: error.message })
+    }, { status: 500 });
   }
 }

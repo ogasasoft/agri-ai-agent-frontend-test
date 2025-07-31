@@ -69,14 +69,12 @@ export default function AdminLayout({
   }
 
   const navigation = [
-    { name: 'ダッシュボード', href: '/admin', icon: Home },
-    { name: 'ユーザー管理', href: '/admin/users', icon: Users, superAdminOnly: true },
-    { name: '顧客管理', href: '/admin/customers', icon: Database },
-    { name: 'システム設定', href: '/admin/settings', icon: Settings },
-    { name: 'AI プロンプト', href: '/admin/prompts', icon: MessageSquare },
-    { name: 'API 連携', href: '/admin/integrations', icon: Plug, superAdminOnly: true },
-    { name: 'セキュリティ', href: '/admin/security', icon: Shield, superAdminOnly: true },
-    { name: 'アナリティクス', href: '/admin/analytics', icon: BarChart3 },
+    { name: '管理ダッシュボード', href: '/admin', icon: Home },
+    { name: 'ユーザーID発行', href: '/admin/users', icon: Users, superAdminOnly: true },
+    { name: '顧客データ管理', href: '/admin/customers', icon: Database },
+    { name: 'システム設定', href: '/admin/settings', icon: Settings, superAdminOnly: true },
+    { name: 'API 連携設定', href: '/admin/integrations', icon: Plug, superAdminOnly: true },
+    { name: 'セキュリティ監視', href: '/admin/security', icon: Shield, superAdminOnly: true },
   ];
 
   const filteredNavigation = navigation.filter(item => 

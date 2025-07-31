@@ -12,6 +12,8 @@ async function getDbClient(): Promise<Client> {
   return client;
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;

@@ -8,9 +8,9 @@ interface ShippingLabelButtonProps {
   selectedOrders: Array<{
     id: number;
     order_number: string;
-    customer_name_masked: string;
-    customer_address_masked?: string;
-    customer_phone_masked?: string;
+    customer_name: string;
+    customer_address?: string;
+    customer_phone?: string;
     delivery_date?: string;
   }>;
   onShippingComplete: (response: YamatoApiResponse) => void;
@@ -44,9 +44,9 @@ export default function ShippingLabelButton({
         },
         recipients: selectedOrders.map(order => ({
           order_id: order.id,
-          name: order.customer_name_masked.replace(/\*/g, '●'), // マスキング解除は実際のDBから取得
-          address: order.customer_address_masked || '',
-          phone: order.customer_phone_masked,
+          name: order.customer_name,
+          address: order.customer_address || '',
+          phone: order.customer_phone,
           delivery_date: order.delivery_date,
         })),
         delivery_type: deliveryType,

@@ -12,6 +12,8 @@ async function getDbClient(): Promise<Client> {
   return client;
 }
 
+export const dynamic = 'force-dynamic';
+
 // GET - Get all API integrations
 export async function GET(request: NextRequest) {
   try {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Papa from 'papaparse';
 import { Client } from 'pg';
+import { validateSession } from '@/lib/auth';
 
 // CSV日本語ヘッダーと英語カラム名のマッピング
 const COLUMN_MAPPING: Record<string, string> = {
@@ -14,14 +15,6 @@ const COLUMN_MAPPING: Record<string, string> = {
   '備考': 'notes',
 };
 
-// maskPersonalInfo関数 (orders/route.tsから移植)
-function maskPersonalInfo(text: string): string {
-  if (!text || text.length <= 2) return text;
-  const first = text.charAt(0);
-  const last = text.charAt(text.length - 1);
-  const middle = '*'.repeat(text.length - 2);
-  return `${first}${middle}${last}`;
-}
 
 // 日付フォーマット変換 (YYYY-MM-DD形式に統一)
 function formatDate(dateStr: string): string | null {
@@ -60,7 +53,7 @@ async function getDbClient(): Promise<Client> {
 }
 
 // CSVデータをPostgreSQLに保存
-async function saveOrdersToDb(orders: any[]): Promise<{ inserted: number; errors: string[] }> {
+async function saveOrdersToDb(orders: any[], userId: string): Promise<{ inserted: number; errors: string[] }> {
   console.log('🔌 Connecting to database...');
   const client = await getDbClient();
   let inserted = 0;
@@ -74,8 +67,8 @@ async function saveOrdersToDb(orders: any[]): Promise<{ inserted: number; errors
         console.log('💾 Inserting order:', order.order_code);
         
         const result = await client.query(`
-          INSERT INTO orders (order_code, customer_name, phone, address, price, order_date, delivery_date, notes)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          INSERT INTO orders (order_code, customer_name, phone, address, price, order_date, delivery_date, notes, user_id)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
           ON CONFLICT (order_code) DO UPDATE SET
             customer_name = EXCLUDED.customer_name,
             phone = EXCLUDED.phone,
@@ -85,6 +78,7 @@ async function saveOrdersToDb(orders: any[]): Promise<{ inserted: number; errors
             delivery_date = EXCLUDED.delivery_date,
             notes = EXCLUDED.notes,
             updated_at = CURRENT_TIMESTAMP
+          WHERE orders.user_id = EXCLUDED.user_id
           RETURNING id
         `, [
           order.order_code,
@@ -94,7 +88,8 @@ async function saveOrdersToDb(orders: any[]): Promise<{ inserted: number; errors
           order.price,
           order.order_date,
           order.delivery_date,
-          order.notes
+          order.notes,
+          userId
         ]);
         
         console.log('✅ Order saved with ID:', result.rows[0]?.id);
@@ -116,6 +111,35 @@ export async function POST(request: NextRequest) {
   console.log('📤 CSV Upload request received');
   
   try {
+    // 認証チェック
+    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    
+    if (!sessionToken) {
+      return NextResponse.json({
+        success: false,
+        message: '認証が必要です。'
+      }, { status: 401 });
+    }
+
+    const sessionData = await validateSession(sessionToken);
+    if (!sessionData) {
+      return NextResponse.json({
+        success: false,
+        message: 'セッションが無効です。'
+      }, { status: 401 });
+    }
+
+    const userId = sessionData.user.id.toString();
+
+    // CSRF トークンチェック
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (csrfToken !== sessionData.session.csrf_token) {
+      return NextResponse.json({
+        success: false,
+        message: 'CSRF検証に失敗しました。'
+      }, { status: 403 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     
@@ -131,9 +155,18 @@ export async function POST(request: NextRequest) {
         message: 'ファイルが選択されていません。' 
       }, { status: 400 });
     }
+
+    // ファイルサイズ制限（10MB）
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({
+        success: false,
+        message: 'ファイルサイズが大きすぎます。10MB以下のファイルをアップロードしてください。'
+      }, { status: 400 });
+    }
     
     // CSVファイルの検証
-    if (!file.name.endsWith('.csv')) {
+    if (!file.name.endsWith('.csv') && file.type !== 'text/csv' && file.type !== 'application/csv') {
       return NextResponse.json({ 
         success: false, 
         message: 'CSVファイルのみ対応しています。' 
@@ -225,12 +258,9 @@ export async function POST(request: NextRequest) {
         const deliveryDateStr = row[Object.keys(COLUMN_MAPPING)[6]] || row['希望配達日'] || '';
         const deliveryDate = deliveryDateStr ? formatDate(deliveryDateStr) : null;
         
-        // 顧客名をマスキング
-        const maskedCustomerName = maskPersonalInfo(customerName);
-        
         processedOrders.push({
           order_code: orderCode.trim(),
-          customer_name: maskedCustomerName,
+          customer_name: customerName,
           phone: (row[Object.keys(COLUMN_MAPPING)[2]] || row['電話番号'] || '').trim(),
           address: (row[Object.keys(COLUMN_MAPPING)[3]] || row['住所'] || '').trim(),
           price,
@@ -255,7 +285,7 @@ export async function POST(request: NextRequest) {
     console.log('💾 Saving to database:', processedOrders.length, 'orders');
     
     // データベースに保存
-    const saveResult = await saveOrdersToDb(processedOrders);
+    const saveResult = await saveOrdersToDb(processedOrders, userId);
     
     console.log('✅ Save result:', saveResult);
     

@@ -1,49 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateRememberToken } from '@/lib/auth-enhanced';
+import { autoLoginWithRememberToken, getClientInfo } from '@/lib/auth-enhanced';
 
 export async function POST(request: NextRequest) {
   try {
-    const rememberToken = request.cookies.get('remember_token')?.value;
-    
-    if (!rememberToken) {
+    const { ipAddress, userAgent } = getClientInfo(request);
+    const rememberTokenCookie = request.cookies.get('remember_token')?.value;
+
+    if (!rememberTokenCookie) {
       return NextResponse.json({
         success: false,
-        message: 'Remember token not found'
+        message: 'Remember tokenが見つかりません。'
       }, { status: 401 });
     }
 
-    // Parse selector:validator format
-    const [selector, validator] = rememberToken.split(':');
+    // Parse selector:validator from cookie
+    const [selector, validator] = rememberTokenCookie.split(':');
     
     if (!selector || !validator) {
       return NextResponse.json({
         success: false,
-        message: 'Invalid remember token format'
+        message: '無効なRemember tokenです。'
       }, { status: 401 });
     }
 
-    const result = await validateRememberToken(selector, validator);
-    
-    if (!result) {
-      // Invalid token - clear the cookie
+    const authResult = await autoLoginWithRememberToken(
+      selector, 
+      validator, 
+      ipAddress, 
+      userAgent
+    );
+
+    if (!authResult.success) {
+      // Clear invalid remember token
       const response = NextResponse.json({
         success: false,
-        message: 'Invalid or expired remember token'
+        message: authResult.message
       }, { status: 401 });
-      
-      response.cookies.delete('remember_token');
+
+      response.cookies.set('remember_token', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 0,
+        path: '/'
+      });
+
       return response;
     }
 
-    // Create new session cookies
+    // Set new session cookies
     const response = NextResponse.json({
       success: true,
       message: '自動ログインしました。',
-      user: result.user
+      user: authResult.user
     });
 
-    // Set session cookie (HTTP-only, secure, SameSite)
-    response.cookies.set('session_token', result.newSession.session_token, {
+    // Set session cookie
+    response.cookies.set('session_token', authResult.session!.session_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -52,7 +65,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Set CSRF token cookie
-    response.cookies.set('csrf_token', result.newSession.csrf_token, {
+    response.cookies.set('csrf_token', authResult.session!.csrf_token, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -60,18 +73,25 @@ export async function POST(request: NextRequest) {
       path: '/'
     });
 
+    // Set new remember token if provided
+    if (authResult.rememberToken) {
+      const rememberValue = `${authResult.rememberToken.selector}:${authResult.rememberToken.validator}`;
+      response.cookies.set('remember_token', rememberValue, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+        path: '/'
+      });
+    }
+
     return response;
 
   } catch (error: any) {
     console.error('Auto-login error:', error);
-    
-    // Clear remember token on error
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: false,
       message: 'サーバーエラーが発生しました。'
     }, { status: 500 });
-    
-    response.cookies.delete('remember_token');
-    return response;
   }
 }

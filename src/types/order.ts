@@ -1,9 +1,9 @@
 export interface Order {
   id: number;
   order_number: string;
-  customer_name_masked: string;
-  customer_phone_masked?: string;
-  customer_address_masked?: string;
+  customer_name: string;
+  customer_phone?: string;
+  customer_address?: string;
   total_amount: number;
   order_date: string;
   delivery_date?: string;

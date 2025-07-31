@@ -138,7 +138,7 @@ export function OrderList({ orders, selectedOrders, onSelectionChange, showShipp
                   {/* Customer and amount */}
                   <div className="text-sm text-gray-600 mb-2">
                     <div className="flex justify-between">
-                      <span>{order.customer_name_masked}</span>
+                      <span>{order.customer_name}</span>
                       <span className="font-medium">{formatCurrency(order.total_amount)}</span>
                     </div>
                   </div>

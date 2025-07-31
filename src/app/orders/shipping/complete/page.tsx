@@ -81,9 +81,9 @@ function ShippingCompleteContent() {
       // 顧客情報をDB登録用の形式に変換
       const customerData: CustomerRegistration[] = shippingResult.orders.map(order => ({
         order_code: order.order_number,
-        customer_name: order.customer_name_masked, // マスクされた状態で保存
-        customer_phone: order.customer_phone_masked,
-        customer_address: order.customer_address_masked,
+        customer_name: order.customer_name,
+        customer_phone: order.customer_phone,
+        customer_address: order.customer_address,
         delivery_date: order.delivery_date,
         total_amount: order.total_amount,
         memo: order.memo
@@ -213,7 +213,7 @@ function ShippingCompleteContent() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500">顧客名</span>
-                            <p className="font-medium">{order.customer_name_masked}</p>
+                            <p className="font-medium">{order.customer_name}</p>
                           </div>
                           <div>
                             <span className="text-gray-500">金額</span>

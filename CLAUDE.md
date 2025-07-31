@@ -19,7 +19,7 @@ This is a comprehensive agricultural AI agent frontend application built with Ne
 - **Multi-tenancy**: Row Level Security (RLS) with user_id isolation
 - **Security Tables**: Sessions, remember_tokens, rate_limits, security_events, admin_audit_logs
 - **Dynamic Schema**: Categories, system_settings, api_integrations tables
-- **Personal Data Masking**: Built-in masking system (`田中太郎` → `田***郎`)
+- **Security Framework**: Comprehensive security utility functions (`src/lib/security.ts`)
 
 ### AI Integration
 - **Primary**: OpenAI ChatGPT API (gpt-3.5-turbo)
@@ -56,7 +56,7 @@ vercel --prod        # Deploy to production
 2. **Database initialization**: Run migration endpoints after server starts
 3. **Always run linting and type checking** before committing changes
 4. **Test with different user roles**: regular user (admin/admin123) and super admin (silentogasasoft@gmail.com/Ogasa1995)
-5. **Personal data masking is critical** - maintain this pattern in all new features
+5. **Security validation is critical** - ensure all API routes have proper authentication, CSRF protection, and input validation
 
 ## Authentication & Security Architecture
 
@@ -67,10 +67,13 @@ vercel --prod        # Deploy to production
 
 ### Security Features
 - **Progressive Lockout**: 5min → 15min → 30min → 1hr → 2hr → 4hr → 8hr → 24hr
-- **Rate Limiting**: 20 attempts per 15 minutes per IP
+- **Rate Limiting**: API endpoint specific limits (Login: 10/min, Upload: 5/min, Chat: 30/min)
 - **Remember Me**: 30-day persistent login with selector/validator pattern
 - **Password Security**: bcrypt + salt with configurable complexity
 - **Attack Detection**: Password spray, account enumeration, brute force monitoring
+- **Security Headers**: Comprehensive security headers via `next.config.js` and `src/lib/security.ts`
+- **Input Sanitization**: SQL injection prevention and input validation
+- **CSRF Protection**: All authenticated API routes require CSRF token validation
 
 ### Middleware Route Protection
 - **Public Routes**: `/login`, `/api/auth/login`, `/api/auth/auto-login`
@@ -117,11 +120,11 @@ vercel --prod        # Deploy to production
 - Admin can view all categories across users
 - Category-specific CSV upload workflows
 
-### Personal Data Masking System
-- Automatic masking function: `maskPersonalInfo()`
-- Pattern: first character + asterisks + last character
-- Applied consistently across names, phones, and addresses
-- Essential for privacy compliance in agricultural business context
+### Security Utility Framework
+- Comprehensive security functions in `src/lib/security.ts`
+- Standardized error responses with security headers
+- Input sanitization and SQL injection prevention
+- Logging sanitization to prevent sensitive data exposure
 
 ### Two-Pane Order Management
 - Orders separated by delivery date presence (with/without dates)
@@ -181,11 +184,12 @@ vercel --prod        # Deploy to production
 - **Order Registration Flow**: choose method → confirm → complete
 
 ### Critical Security Considerations
-- Personal data masking is mandatory for all customer-facing data
-- All database operations must include proper user_id filtering
+- All API routes must have authentication, CSRF protection, and input validation
+- All database operations must include proper user_id filtering for multi-tenancy
 - Admin operations require audit logging
 - Session tokens are HTTP-only with CSRF protection
 - Remember tokens use secure selector/validator pattern
+- File uploads must have size limits, type validation, and security scanning
 
 ### Database Migration Sequence
 1. `/api/migrate-auth` - Basic authentication tables
@@ -208,3 +212,41 @@ vercel --prod        # Deploy to production
 - Environment variables are set in Vercel dashboard
 - API routes work consistently between development and production
 - SSL is automatically handled for database connections
+
+## Security Framework Details
+
+### Comprehensive Security Implementation
+The application has undergone extensive security hardening with the following measures:
+
+#### API Route Security Pattern
+All protected API routes follow this security pattern:
+```typescript
+// 1. Session validation
+const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+if (!sessionToken) return unauthorized();
+
+// 2. CSRF token validation
+const csrfToken = request.headers.get('x-csrf-token');
+if (csrfToken !== sessionData.session.csrf_token) return forbidden();
+
+// 3. Input validation and sanitization
+// 4. User isolation in database queries
+```
+
+#### Security Utilities (`src/lib/security.ts`)
+- `addSecurityHeaders()` - Adds comprehensive security headers
+- `createErrorResponse()` - Standardized error responses with security headers
+- `sanitizeInput()` - Input sanitization and XSS prevention
+- `validateSqlInput()` - SQL injection pattern detection
+- `sanitizeForLogging()` - Removes sensitive data from logs
+
+#### Rate Limiting Implementation
+- Memory-based rate limiting in middleware
+- Endpoint-specific limits (login: 10/min, upload: 5/min, chat: 30/min)
+- IP-based tracking with automatic window reset
+
+#### File Upload Security
+- File size limits (10MB maximum)
+- File type validation (CSV only for uploads)
+- Content validation and sanitization
+- User isolation for uploaded data

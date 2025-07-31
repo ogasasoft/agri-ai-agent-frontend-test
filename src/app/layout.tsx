@@ -1,7 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Sidebar } from '@/components/Sidebar';
-import { ChatPanel } from '@/components/ChatPanel';
+import { LayoutWrapper } from '@/components/LayoutWrapper';
 
 export const metadata: Metadata = {
   title: 'Agri AI Agent - 農業EC統合管理システム',
@@ -16,24 +15,9 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className="bg-gray-50">
-        <div className="flex h-screen">
-          {/* Sidebar */}
-          <div className="w-64 bg-white shadow-sm border-r border-gray-200">
-            <Sidebar />
-          </div>
-          
-          {/* Main Content */}
-          <div className="flex-1 flex">
-            <main className="flex-1 overflow-auto">
-              {children}
-            </main>
-            
-            {/* AI Chat Panel */}
-            <div className="w-80 bg-white shadow-sm border-l border-gray-200">
-              <ChatPanel />
-            </div>
-          </div>
-        </div>
+        <LayoutWrapper>
+          {children}
+        </LayoutWrapper>
       </body>
     </html>
   );

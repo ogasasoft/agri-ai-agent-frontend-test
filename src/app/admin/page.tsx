@@ -235,14 +235,14 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Admin Quick Actions */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            クイックアクション
+            管理者アクション
           </h3>
           
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <a
               href="/admin/users"
               className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary-500 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
@@ -254,16 +254,16 @@ export default function AdminDashboard() {
               </div>
               <div className="mt-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  ユーザー管理
+                  ユーザーID発行
                 </h3>
                 <p className="mt-2 text-sm text-gray-500">
-                  システムユーザーの追加・編集・削除
+                  お客様用のアカウントを新規発行
                 </p>
               </div>
             </a>
 
             <a
-              href="/admin/settings"
+              href="/admin/customers"
               className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary-500 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
             >
               <div>
@@ -273,29 +273,10 @@ export default function AdminDashboard() {
               </div>
               <div className="mt-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  システム設定
+                  顧客データ管理
                 </h3>
                 <p className="mt-2 text-sm text-gray-500">
-                  アプリケーション設定の管理
-                </p>
-              </div>
-            </a>
-
-            <a
-              href="/admin/integrations"
-              className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary-500 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-            >
-              <div>
-                <span className="rounded-lg inline-flex p-3 bg-purple-50 text-purple-700 ring-4 ring-white">
-                  <Activity className="h-6 w-6" />
-                </span>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                  API連携
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  外部サービスとの連携設定
+                  全顧客のデータを統合管理
                 </p>
               </div>
             </a>
@@ -311,10 +292,10 @@ export default function AdminDashboard() {
               </div>
               <div className="mt-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  セキュリティ
+                  セキュリティ監視
                 </h3>
                 <p className="mt-2 text-sm text-gray-500">
-                  セキュリティ設定とログ監視
+                  システムセキュリティとログ監視
                 </p>
               </div>
             </a>

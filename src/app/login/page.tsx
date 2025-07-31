@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Lock, User, Eye, EyeOff, AlertCircle, CheckCircle, FileText } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
@@ -34,11 +34,28 @@ export default function LoginPage() {
     try {
       const response = await fetch('/api/auth/me');
       if (response.ok) {
-        // User is already logged in, redirect
-        router.push(redirectPath);
+        // User is already logged in, check role and redirect
+        await checkUserRoleAndRedirect();
       }
     } catch (error) {
       // User not logged in, stay on login page
+    }
+  };
+
+  const checkUserRoleAndRedirect = async () => {
+    try {
+      // Check if user has admin privileges
+      const adminResponse = await fetch('/api/admin/me');
+      if (adminResponse.ok) {
+        // User is admin, redirect to admin page
+        router.push('/admin');
+      } else {
+        // Regular user, redirect to default path
+        router.push(redirectPath);
+      }
+    } catch (error) {
+      // If admin check fails, redirect to default path
+      router.push(redirectPath);
     }
   };
 
@@ -95,7 +112,8 @@ export default function LoginPage() {
         if (data.requiresPasswordChange) {
           router.push('/change-password?forced=true');
         } else {
-          router.push(redirectPath);
+          // Check if user is admin and redirect accordingly
+          await checkUserRoleAndRedirect();
         }
       } else {
         setError(data.message);
@@ -240,14 +258,14 @@ export default function LoginPage() {
           </div>
         </form>
 
-        {/* Default Credentials Info */}
+        {/* Login Help */}
         <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">🔐 初回ログイン情報</h4>
+          <h4 className="font-medium text-blue-900 mb-2">📞 ログインについて</h4>
           <div className="text-sm text-blue-800 space-y-1">
-            <p><strong>ユーザー名:</strong> admin</p>
-            <p><strong>パスワード:</strong> admin123</p>
+            <p>ユーザーIDとパスワードがご不明な場合は、</p>
+            <p>システム管理者にお問い合わせください。</p>
             <p className="text-xs text-blue-600 mt-2">
-              ⚠️ セキュリティのため、初回ログイン後にパスワードの変更が必要です。
+              🔒 このシステムはお客様専用のアカウントでご利用いただけます。
             </p>
           </div>
         </div>
@@ -261,5 +279,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

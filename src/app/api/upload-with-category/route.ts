@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Papa from 'papaparse';
 import { Client } from 'pg';
+import { validateSession } from '@/lib/auth';
 
 // CSV日本語ヘッダーと英語カラム名のマッピング
 const COLUMN_MAPPING: Record<string, string> = {
@@ -14,14 +15,6 @@ const COLUMN_MAPPING: Record<string, string> = {
   '備考': 'notes',
 };
 
-// maskPersonalInfo関数
-function maskPersonalInfo(text: string): string {
-  if (!text || text.length <= 2) return text;
-  const first = text.charAt(0);
-  const last = text.charAt(text.length - 1);
-  const middle = '*'.repeat(text.length - 2);
-  return `${first}${middle}${last}`;
-}
 
 // 日付フォーマット変換 (YYYY-MM-DD形式に統一)
 function formatDate(dateStr: string): string | null {
@@ -132,12 +125,33 @@ export async function POST(request: NextRequest) {
   console.log('📤 Category CSV Upload request received');
   
   try {
-    // Get user ID from middleware
-    const userId = request.headers.get('x-user-id');
-    if (!userId) {
-      return NextResponse.json({ 
+    // 認証チェック
+    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    
+    if (!sessionToken) {
+      return NextResponse.json({
+        success: false,
         message: '認証が必要です。'
       }, { status: 401 });
+    }
+
+    const sessionData = await validateSession(sessionToken);
+    if (!sessionData) {
+      return NextResponse.json({
+        success: false,
+        message: 'セッションが無効です。'
+      }, { status: 401 });
+    }
+
+    const userId = sessionData.user.id.toString();
+
+    // CSRF トークンチェック
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (csrfToken !== sessionData.session.csrf_token) {
+      return NextResponse.json({
+        success: false,
+        message: 'CSRF検証に失敗しました。'
+      }, { status: 403 });
     }
 
     const formData = await request.formData();
@@ -153,7 +167,17 @@ export async function POST(request: NextRequest) {
     
     if (!file) {
       return NextResponse.json({ 
+        success: false,
         message: 'ファイルが選択されていません。' 
+      }, { status: 400 });
+    }
+
+    // ファイルサイズ制限（10MB）
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({
+        success: false,
+        message: 'ファイルサイズが大きすぎます。10MB以下のファイルをアップロードしてください。'
       }, { status: 400 });
     }
     
@@ -265,12 +289,9 @@ export async function POST(request: NextRequest) {
         const deliveryDateStr = row[Object.keys(COLUMN_MAPPING)[6]] || row['希望配達日'] || '';
         const deliveryDate = deliveryDateStr ? formatDate(deliveryDateStr) : null;
         
-        // 顧客名をマスキング
-        const maskedCustomerName = maskPersonalInfo(customerName);
-        
         processedOrders.push({
           order_code: orderCode.trim(),
-          customer_name: maskedCustomerName,
+          customer_name: customerName,
           phone: (row[Object.keys(COLUMN_MAPPING)[2]] || row['電話番号'] || '').trim(),
           address: (row[Object.keys(COLUMN_MAPPING)[3]] || row['住所'] || '').trim(),
           price,

@@ -1,5 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// シンプルなレート制限実装（メモリベース）
+const rateLimit = new Map<string, { count: number; resetTime: number }>();
+
+function checkRateLimit(ip: string, limit: number = 100, windowMs: number = 60000): boolean {
+  const now = Date.now();
+  const key = ip;
+  
+  if (!rateLimit.has(key)) {
+    rateLimit.set(key, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  const entry = rateLimit.get(key)!;
+  
+  if (now > entry.resetTime) {
+    // ウィンドウをリセット
+    entry.count = 1;
+    entry.resetTime = now + windowMs;
+    return true;
+  }
+  
+  if (entry.count >= limit) {
+    return false;
+  }
+  
+  entry.count++;
+  return true;
+}
+
 // Routes that don't require authentication
 const PUBLIC_ROUTES = [
   '/api/auth/login',
@@ -46,6 +75,29 @@ const PROTECTED_PAGE_ROUTES = [
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  
+  // レート制限チェック（APIエンドポイントのみ）
+  if (pathname.startsWith('/api/')) {
+    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    
+    // APIごとに異なるレート制限
+    let limit = 100; // デフォルト: 1分間に100リクエスト
+    
+    if (pathname.startsWith('/api/auth/login')) {
+      limit = 10; // ログインは1分間に10回まで
+    } else if (pathname.startsWith('/api/upload')) {
+      limit = 5; // アップロードは1分間に5回まで
+    } else if (pathname.startsWith('/api/chat')) {
+      limit = 30; // チャットは1分間に30回まで
+    }
+    
+    if (!checkRateLimit(ip, limit)) {
+      return NextResponse.json({
+        success: false,
+        message: 'レート制限に達しました。しばらく待ってから再試行してください。'
+      }, { status: 429 });
+    }
+  }
   
   // Skip middleware for static files and Next.js internals
   if (

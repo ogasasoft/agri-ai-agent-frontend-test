@@ -81,13 +81,13 @@ export function ExportModal({ selectedOrders, orders, onClose }: ExportModalProp
       order.order_number,
       '宅急便',
       '', // 郵便番号 - マスク済みのため空
-      order.customer_address_masked || '',
+      order.customer_address || '',
       '',
       '',
       '',
-      order.customer_name_masked,
+      order.customer_name,
       '',
-      order.customer_phone_masked || '',
+      order.customer_phone || '',
       order.delivery_date ? new Date(order.delivery_date).toISOString().split('T')[0].replace(/-/g, '/') : '',
       '',
       '1',
@@ -113,9 +113,9 @@ export function ExportModal({ selectedOrders, orders, onClose }: ExportModalProp
     
     const rows = orders.map(order => [
       order.order_number,
-      order.customer_name_masked,
-      order.customer_address_masked || '',
-      order.customer_phone_masked || '',
+      order.customer_name,
+      order.customer_address || '',
+      order.customer_phone || '',
       order.delivery_date || '',
       '1',
       '農産物'
@@ -141,9 +141,9 @@ export function ExportModal({ selectedOrders, orders, onClose }: ExportModalProp
     
     const rows = orders.map(order => [
       order.order_number,
-      order.customer_name_masked,
-      order.customer_address_masked || '',
-      order.customer_phone_masked || '',
+      order.customer_name,
+      order.customer_address || '',
+      order.customer_phone || '',
       order.order_date,
       order.delivery_date || '',
       order.total_amount.toString(),
@@ -184,7 +184,7 @@ export function ExportModal({ selectedOrders, orders, onClose }: ExportModalProp
               <div className="text-sm font-medium text-gray-700 mb-1">選択中の注文</div>
               <div className="text-xs text-gray-500 max-h-20 overflow-y-auto">
                 {selectedOrderData.map(order => (
-                  <div key={order.id}>{order.order_number} - {order.customer_name_masked}</div>
+                  <div key={order.id}>{order.order_number} - {order.customer_name}</div>
                 ))}
               </div>
             </div>
