@@ -15,12 +15,14 @@ interface ShippingLabelButtonProps {
   }>;
   onShippingComplete: (response: YamatoApiResponse) => void;
   disabled?: boolean;
+  buttonText?: string;
 }
 
 export default function ShippingLabelButton({ 
   selectedOrders, 
   onShippingComplete, 
-  disabled = false 
+  disabled = false,
+  buttonText = "発送書類作成"
 }: ShippingLabelButtonProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -86,7 +88,7 @@ export default function ShippingLabelButton({
         className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
       >
         <Truck className="w-4 h-4" />
-        発送書類作成 ({selectedOrders.length}件)
+        {buttonText} ({selectedOrders.length}件)
       </button>
 
       {showModal && (

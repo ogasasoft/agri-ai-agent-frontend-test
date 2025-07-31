@@ -167,18 +167,7 @@ async function analyzeDataAndGenerateInsights(data: DashboardData): Promise<AIIn
     });
   }
   
-  // OpenAI APIを使用したより詳細な分析（オプション）
-  if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'your_openai_api_key_here') {
-    try {
-      const aiAnalysis = await getOpenAIInsights(data);
-      if (aiAnalysis) {
-        insights.push(...aiAnalysis);
-      }
-    } catch (error) {
-      console.error('OpenAI analysis failed:', error);
-      // フォールバック: 基本的な分析のみ使用
-    }
-  }
+  // OpenAI APIによる追加分析は削除し、基本分析のみ使用
   
   // 優先度順でソート
   return insights.sort((a, b) => {
@@ -187,56 +176,3 @@ async function analyzeDataAndGenerateInsights(data: DashboardData): Promise<AIIn
   });
 }
 
-async function getOpenAIInsights(data: DashboardData): Promise<AIInsight[] | null> {
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: `あなたは農産物販売の専門家です。以下のダッシュボードデータを分析して、ビジネス改善のための具体的な提案を3つ以内で提供してください。
-            
-            回答は以下のJSON形式で返してください：
-            [
-              {
-                "type": "success|warning|info|trend",
-                "title": "提案のタイトル",
-                "message": "現状の分析",
-                "suggestion": "具体的な改善提案",
-                "priority": "high|medium|low"
-              }
-            ]`
-          },
-          {
-            role: 'user',
-            content: JSON.stringify(data)
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
-
-    const result = await response.json();
-    const content = result.choices[0]?.message?.content;
-    
-    if (content) {
-      return JSON.parse(content);
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('OpenAI analysis error:', error);
-    return null;
-  }
-}

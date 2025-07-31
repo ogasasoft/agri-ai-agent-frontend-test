@@ -11,6 +11,10 @@ export interface Order {
   has_memo: boolean;
   memo?: string;
   ec_source?: string;
+  category_id?: number;
+  category_name?: string;
+  category_color?: string;
+  category_icon?: string;
   shipped_at?: string;
   created_at: string;
   updated_at: string;

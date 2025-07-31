@@ -53,6 +53,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
   const [insightsLoading, setInsightsLoading] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -203,9 +204,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex gap-6 p-6">
+    <div className="p-6">
       {/* Main Content */}
-      <div className="flex-1 space-y-6">
+      <div className="space-y-6">
         {/* Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -230,6 +231,19 @@ export default function DashboardPage() {
                   className="input-field text-sm"
                 />
               </div>
+              
+              <button
+                onClick={() => setShowAIModal(true)}
+                className="btn-secondary flex items-center gap-2 mr-3"
+              >
+                <Lightbulb className="w-4 h-4" />
+                AI提案
+                {aiInsights.length > 0 && (
+                  <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {aiInsights.length}
+                  </span>
+                )}
+              </button>
               
               <button
                 onClick={exportToCsv}
@@ -380,76 +394,99 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* AI Insights Panel */}
-      <div className="w-80 flex-shrink-0">
-        <div className="card h-full">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-blue-500" />
-              <h2 className="text-lg font-semibold text-gray-900">AI提案</h2>
-            </div>
-            <p className="text-xs text-gray-500 mt-1">データ分析に基づく改善提案</p>
-          </div>
-          
-          <div className="p-6">
-            {insightsLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                <span className="ml-2 text-sm text-gray-500">分析中...</span>
+      {/* AI Insights Modal */}
+      {showAIModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] mx-4 flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-blue-500" />
+                <h2 className="text-lg font-semibold text-gray-900">AI提案</h2>
               </div>
-            ) : aiInsights.length > 0 ? (
-              <div className="space-y-4">
-                {aiInsights.map((insight, index) => (
-                  <div
-                    key={index}
-                    className={`p-4 rounded-lg border ${getInsightBgColor(insight.type)}`}
-                  >
-                    <div className="flex items-start gap-3">
-                      {getInsightIcon(insight.type)}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-gray-900 text-sm mb-1">
-                          {insight.title}
-                        </h3>
-                        <p className="text-xs text-gray-600 mb-2">
-                          {insight.message}
-                        </p>
-                        {insight.suggestion && (
-                          <div className="bg-white bg-opacity-50 rounded p-2">
-                            <p className="text-xs text-gray-700 font-medium">
-                              💡 提案: {insight.suggestion}
-                            </p>
+              <button
+                onClick={() => setShowAIModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-1"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto flex-1">
+              <p className="text-sm text-gray-600 mb-4">データ分析に基づく改善提案</p>
+              
+              {insightsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                  <span className="ml-2 text-sm text-gray-500">分析中...</span>
+                </div>
+              ) : aiInsights.length > 0 ? (
+                <div className="space-y-4">
+                  {aiInsights.map((insight, index) => (
+                    <div
+                      key={index}
+                      className={`p-4 rounded-lg border ${getInsightBgColor(insight.type)}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        {getInsightIcon(insight.type)}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-gray-900 text-sm mb-1">
+                            {insight.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 mb-2">
+                            {insight.message}
+                          </p>
+                          {insight.suggestion && (
+                            <div className="bg-white bg-opacity-50 rounded p-3 mb-2">
+                              <p className="text-sm text-gray-700 font-medium">
+                                💡 提案: {insight.suggestion}
+                              </p>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between">
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              insight.priority === 'high' 
+                                ? 'bg-red-100 text-red-600' 
+                                : insight.priority === 'medium'
+                                ? 'bg-yellow-100 text-yellow-600'
+                                : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              優先度: {insight.priority === 'high' ? '高' : insight.priority === 'medium' ? '中' : '低'}
+                            </span>
                           </div>
-                        )}
-                        <div className="flex items-center justify-between mt-2">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            insight.priority === 'high' 
-                              ? 'bg-red-100 text-red-600' 
-                              : insight.priority === 'medium'
-                              ? 'bg-yellow-100 text-yellow-600'
-                              : 'bg-gray-100 text-gray-600'
-                          }`}>
-                            {insight.priority === 'high' ? '高' : insight.priority === 'medium' ? '中' : '低'}
-                          </span>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Lightbulb className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-sm text-gray-500">
-                  データが不足しています
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  注文データを追加してください
-                </p>
-              </div>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Lightbulb className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500">
+                    AI提案はまだありません
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    注文データが蓄積されると、改善提案が表示されます
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => setShowAIModal(false)}
+                className="btn-secondary"
+              >
+                閉じる
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

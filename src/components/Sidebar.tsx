@@ -1,28 +1,66 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { 
   Package, 
   BarChart3, 
   Plus, 
-  Upload, 
   Settings,
   MessageSquare,
-  FileText
+  FileText,
+  Tags,
+  LogOut,
+  User,
+  Shield
 } from 'lucide-react';
 
 const navigation = [
-  { name: '注文管理', href: '/orders/shipping/pending', icon: Package },
+  { name: '新規登録', href: '/orders/register/choose', icon: Plus },
+  { name: '発送待ちの注文一覧', href: '/orders/shipping/pending', icon: Package },
+  { name: '発送済の注文一覧', href: '/orders/shipping/completed', icon: Package },
   { name: 'ダッシュボード', href: '/dashboard', icon: BarChart3 },
-  { name: '注文登録', href: '/orders/register/choose', icon: Plus },
-  { name: 'CSVアップロード', href: '/upload', icon: Upload },
+  { name: 'カテゴリ管理', href: '/categories', icon: Tags },
   { name: 'システムプロンプト', href: '/prompts', icon: MessageSquare },
   { name: '設定', href: '/settings', icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
+
+  const fetchUserInfo = async () => {
+    try {
+      const response = await fetch('/api/auth/me');
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user info:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    if (confirm('ログアウトしますか？')) {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        router.push('/login');
+      } catch (error) {
+        console.error('Logout error:', error);
+        router.push('/login');
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -35,6 +73,29 @@ export function Sidebar() {
           <div>
             <h1 className="text-lg font-semibold text-gray-900">Agri AI</h1>
             <p className="text-xs text-gray-500">EC統合管理</p>
+          </div>
+        </div>
+      </div>
+
+      {/* User Info */}
+      <div className="px-6 py-3 border-b border-gray-200 bg-gray-50">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+            <User className="w-4 h-4 text-gray-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            {loading ? (
+              <div className="animate-pulse">
+                <div className="h-3 bg-gray-300 rounded w-20"></div>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user?.username || 'Unknown'}
+                </p>
+                <p className="text-xs text-gray-500">ログイン中</p>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -62,10 +123,26 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="px-4 py-4 border-t border-gray-200">
-        <div className="text-xs text-gray-500 text-center">
-          Powered by Cloudflare
+      {/* Footer Actions */}
+      <div className="px-4 py-4 border-t border-gray-200 space-y-2">
+        <Link
+          href="/change-password"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+        >
+          <Shield className="w-4 h-4" />
+          パスワード変更
+        </Link>
+        
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-700 hover:bg-red-50 transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          ログアウト
+        </button>
+        
+        <div className="text-xs text-gray-500 text-center pt-2">
+          🔐 セキュア認証システム
         </div>
       </div>
     </div>
