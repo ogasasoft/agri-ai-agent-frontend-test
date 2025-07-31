@@ -200,7 +200,7 @@ export async function authenticateUserEnhanced(
 
     // Get user with enhanced lockout info
     const userResult = await client.query(`
-      SELECT id, username, email, password_hash, salt, is_active, 
+      SELECT id, username, email, password_hash, salt, is_active, is_super_admin,
              failed_login_attempts, locked_until, lockout_level, 
              consecutive_failures, last_failed_ip, password_changed_at,
              last_login_at, created_at
@@ -353,6 +353,7 @@ export async function authenticateUserEnhanced(
         username: user.username,
         email: user.email,
         is_active: user.is_active,
+        is_super_admin: user.is_super_admin || false,
         last_login_at: user.last_login_at,
         created_at: user.created_at
       },
@@ -384,7 +385,7 @@ export async function autoLoginWithRememberToken(
   
   try {
     const result = await client.query(`
-      SELECT rt.*, u.id as user_id, u.username, u.email, u.is_active, u.last_login_at, u.created_at
+      SELECT rt.*, u.id as user_id, u.username, u.email, u.is_active, u.is_super_admin, u.last_login_at, u.created_at
       FROM remember_tokens rt
       JOIN users u ON rt.user_id = u.id
       WHERE rt.selector = $1 AND rt.expires_at > NOW() AND u.is_active = true
@@ -456,6 +457,7 @@ export async function autoLoginWithRememberToken(
         username: tokenData.username,
         email: tokenData.email,
         is_active: tokenData.is_active,
+        is_super_admin: tokenData.is_super_admin || false,
         last_login_at: tokenData.last_login_at,
         created_at: tokenData.created_at
       },
@@ -479,7 +481,7 @@ export async function validateRememberToken(selector: string, validator: string)
   
   try {
     const result = await client.query(`
-      SELECT rt.*, u.id as user_id, u.username, u.email, u.is_active, u.last_login_at, u.created_at
+      SELECT rt.*, u.id as user_id, u.username, u.email, u.is_active, u.is_super_admin, u.last_login_at, u.created_at
       FROM remember_tokens rt
       JOIN users u ON rt.user_id = u.id
       WHERE rt.selector = $1 AND rt.expires_at > NOW() AND u.is_active = true
@@ -528,6 +530,7 @@ export async function validateRememberToken(selector: string, validator: string)
         username: tokenData.username,
         email: tokenData.email,
         is_active: tokenData.is_active,
+        is_super_admin: tokenData.is_super_admin || false,
         last_login_at: tokenData.last_login_at,
         created_at: tokenData.created_at
       },

@@ -71,7 +71,8 @@ function LoginForm() {
 
       if (data.success) {
         setSuccess('自動ログインしました。');
-        router.push(redirectPath);
+        // Check user role and redirect appropriately
+        await checkUserRoleAndRedirect();
       } else {
         // Auto-login failed, show normal login form
         setError('自動ログインできませんでした。再度ログインしてください。');

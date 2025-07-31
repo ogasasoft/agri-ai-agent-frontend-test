@@ -8,6 +8,7 @@ export interface User {
   username: string;
   email?: string;
   is_active: boolean;
+  is_super_admin: boolean;
   last_login_at?: string;
   created_at: string;
 }
@@ -98,7 +99,7 @@ export async function authenticateUser(
   try {
     // Get user and check if account is locked
     const userResult = await client.query(`
-      SELECT id, username, email, password_hash, salt, is_active, 
+      SELECT id, username, email, password_hash, salt, is_active, is_super_admin,
              failed_login_attempts, locked_until, password_changed_at,
              last_login_at, created_at
       FROM users 
@@ -184,6 +185,7 @@ export async function authenticateUser(
         username: user.username,
         email: user.email,
         is_active: user.is_active,
+        is_super_admin: user.is_super_admin || false,
         last_login_at: user.last_login_at,
         created_at: user.created_at
       },
@@ -202,7 +204,7 @@ export async function validateSession(sessionToken: string): Promise<{ user: Use
   
   try {
     const result = await client.query(`
-      SELECT s.*, u.id as user_id, u.username, u.email, u.is_active, u.last_login_at, u.created_at
+      SELECT s.*, u.id as user_id, u.username, u.email, u.is_active, u.is_super_admin, u.last_login_at, u.created_at
       FROM sessions s
       JOIN users u ON s.user_id = u.id
       WHERE s.session_token = $1 AND s.is_active = true AND s.expires_at > NOW() AND u.is_active = true
@@ -220,6 +222,7 @@ export async function validateSession(sessionToken: string): Promise<{ user: Use
         username: row.username,
         email: row.email,
         is_active: row.is_active,
+        is_super_admin: row.is_super_admin || false,
         last_login_at: row.last_login_at,
         created_at: row.created_at
       },

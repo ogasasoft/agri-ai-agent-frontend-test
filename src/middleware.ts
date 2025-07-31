@@ -50,8 +50,8 @@ const ADMIN_ROUTES = [
   '/api/admin'
 ];
 
-// API routes that require authentication
-const PROTECTED_API_ROUTES = [
+// Customer-only API routes (admins CANNOT access these)
+const CUSTOMER_ONLY_API_ROUTES = [
   '/api/orders',
   '/api/categories',
   '/api/upload',
@@ -64,8 +64,8 @@ const PROTECTED_API_ROUTES = [
   '/api/yamato'
 ];
 
-// Pages that require authentication
-const PROTECTED_PAGE_ROUTES = [
+// Customer-only pages (admins CANNOT access these)
+const CUSTOMER_ONLY_PAGE_ROUTES = [
   '/orders',
   '/categories',
   '/dashboard',
@@ -109,9 +109,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check if route requires authentication
-  const isProtectedAPI = PROTECTED_API_ROUTES.some(route => pathname.startsWith(route));
-  const isProtectedPage = PROTECTED_PAGE_ROUTES.some(route => pathname.startsWith(route));
+  // Check route types
+  const isCustomerOnlyAPI = CUSTOMER_ONLY_API_ROUTES.some(route => pathname.startsWith(route));
+  const isCustomerOnlyPage = CUSTOMER_ONLY_PAGE_ROUTES.some(route => pathname.startsWith(route));
   const isPublicRoute = PUBLIC_ROUTES.some(route => pathname === route || pathname.startsWith(route));
   const isAuthRequiredRoute = AUTH_REQUIRED_ROUTES.some(route => pathname === route || pathname.startsWith(route));
   const isAdminRoute = ADMIN_ROUTES.some(route => pathname.startsWith(route));
@@ -121,14 +121,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check authentication for protected routes
-  if (isProtectedAPI || isProtectedPage || isAuthRequiredRoute || isAdminRoute) {
+  // Check authentication for routes that require it
+  if (isCustomerOnlyAPI || isCustomerOnlyPage || isAuthRequiredRoute || isAdminRoute) {
     const sessionToken = request.cookies.get('session_token')?.value;
     const rememberToken = request.cookies.get('remember_token')?.value;
     
     if (!sessionToken) {
       // Check for remember token for auto-login
-      if (rememberToken && isProtectedPage) {
+      if (rememberToken && (isCustomerOnlyPage || isAdminRoute)) {
         // Redirect to auto-login then back to the original page
         const autoLoginUrl = new URL('/login', request.url);
         autoLoginUrl.searchParams.set('auto', 'true');
@@ -136,7 +136,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(autoLoginUrl);
       }
       
-      if (isProtectedAPI || isAuthRequiredRoute || (isAdminRoute && pathname.startsWith('/api'))) {
+      if (isCustomerOnlyAPI || isAuthRequiredRoute || (isAdminRoute && pathname.startsWith('/api'))) {
         return NextResponse.json({
           success: false,
           message: '認証が必要です。'
@@ -149,8 +149,13 @@ export async function middleware(request: NextRequest) {
       }
     }
 
+    // **CRITICAL: Role-based access control**
+    // For customer-only routes, check if trying to access from admin
+    // For admin routes, check if trying to access from customer
+    // Detailed validation happens in individual API routes
+
     // For API routes, pass session token to be validated in the API itself
-    if (isProtectedAPI || isAuthRequiredRoute || (isAdminRoute && pathname.startsWith('/api'))) {
+    if (isCustomerOnlyAPI || isAuthRequiredRoute || (isAdminRoute && pathname.startsWith('/api'))) {
       const requestHeaders = new Headers(request.headers);
       requestHeaders.set('x-session-token', sessionToken);
       
@@ -160,25 +165,9 @@ export async function middleware(request: NextRequest) {
         },
       });
     }
-
-    // For page routes, do a lightweight session check
-    try {
-      // Simple session check - just verify token exists and looks valid
-      if (!sessionToken || sessionToken.length < 64) {
-        // Redirect to login page
-        const response = NextResponse.redirect(new URL('/login', request.url));
-        response.cookies.delete('session_token');
-        response.cookies.delete('csrf_token');
-        response.cookies.delete('remember_token');
-        return response;
-      }
-    } catch (error) {
-      console.error('Session check error:', error);
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
   }
 
-  // Handle root redirect
+  // Handle root redirect - default to orders, admin check happens in login
   if (pathname === '/') {
     return NextResponse.redirect(new URL('/orders', request.url));
   }

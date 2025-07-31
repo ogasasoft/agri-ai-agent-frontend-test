@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'pg';
+import { validateSession } from '@/lib/auth';
 
 // データベース接続
 async function getDbClient(): Promise<Client> {
@@ -15,14 +16,33 @@ async function getDbClient(): Promise<Client> {
 
 export async function GET(request: NextRequest) {
   try {
-    // Get user ID from middleware
-    const userId = request.headers.get('x-user-id');
-    if (!userId) {
-      return NextResponse.json({ 
-        success: false, 
+    // **CRITICAL: Admin cannot access customer orders API**
+    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    
+    if (!sessionToken) {
+      return NextResponse.json({
+        success: false,
         message: '認証が必要です。'
       }, { status: 401 });
     }
+
+    const sessionData = await validateSession(sessionToken);
+    if (!sessionData) {
+      return NextResponse.json({
+        success: false,
+        message: 'セッションが無効です。'
+      }, { status: 401 });
+    }
+
+    // **ENFORCE: Only customers can access this API**
+    if (sessionData.user.is_super_admin) {
+      return NextResponse.json({
+        success: false,
+        message: '管理者アカウントでは顧客向けサービスにアクセスできません。管理者画面をご利用ください。'
+      }, { status: 403 });
+    }
+
+    const userId = sessionData.user.id.toString();
 
     const client = await getDbClient();
     
