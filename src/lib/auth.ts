@@ -103,7 +103,7 @@ export async function authenticateUser(
              failed_login_attempts, locked_until, password_changed_at,
              last_login_at, created_at
       FROM users 
-      WHERE username = $1
+      WHERE username = $1 OR email = $1
     `, [username]);
 
     if (userResult.rows.length === 0) {

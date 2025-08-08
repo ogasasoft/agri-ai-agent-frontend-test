@@ -145,16 +145,24 @@ export async function POST(request: NextRequest) {
 
     const userId = sessionData.user.id.toString();
 
-    // CSRF トークンチェック
-    const csrfToken = request.headers.get('x-csrf-token');
-    if (csrfToken !== sessionData.session.csrf_token) {
+    const formData = await request.formData();
+    
+    // CSRF トークンチェック（ヘッダーまたはFormDataから取得）
+    const csrfTokenFromHeader = request.headers.get('x-csrf-token');
+    const csrfTokenFromForm = formData.get('csrf_token') as string;
+    const csrfToken = csrfTokenFromHeader || csrfTokenFromForm;
+    
+    if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
+      console.log('CSRF検証失敗:', {
+        headerToken: csrfTokenFromHeader,
+        formToken: csrfTokenFromForm,
+        expectedToken: sessionData.session.csrf_token
+      });
       return NextResponse.json({
         success: false,
         message: 'CSRF検証に失敗しました。'
       }, { status: 403 });
     }
-
-    const formData = await request.formData();
     const file = formData.get('file') as File;
     const categoryId = parseInt(formData.get('categoryId') as string);
     

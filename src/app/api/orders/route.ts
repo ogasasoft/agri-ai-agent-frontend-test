@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
           o.price as total_amount,
           o.order_date,
           o.delivery_date,
-          COALESCE(o.status, 'pending') as status,
+          'pending' as status,
           CASE WHEN o.notes IS NOT NULL AND o.notes != '' THEN true ELSE false END as has_memo,
           o.notes as memo,
           o.category_id,

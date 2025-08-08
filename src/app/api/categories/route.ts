@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'pg';
+import { validateSession } from '@/lib/auth';
 
 async function getDbClient(): Promise<Client> {
   const client = new Client({
@@ -14,14 +15,18 @@ async function getDbClient(): Promise<Client> {
 // GET - Get all categories
 export async function GET(request: NextRequest) {
   try {
-    // Get user ID from middleware
-    const userId = request.headers.get('x-user-id');
-    if (!userId) {
-      return NextResponse.json({ 
-        success: false, 
-        message: '認証が必要です。'
-      }, { status: 401 });
+    // セッション検証
+    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ success: false, message: '認証が必要です' }, { status: 401 });
     }
+
+    const sessionData = await validateSession(sessionToken);
+    if (!sessionData || !sessionData.user) {
+      return NextResponse.json({ success: false, message: '無効なセッションです' }, { status: 401 });
+    }
+
+    const userId = sessionData.user.id;
 
     const client = await getDbClient();
     
@@ -66,14 +71,18 @@ export async function GET(request: NextRequest) {
 // POST - Create new category
 export async function POST(request: NextRequest) {
   try {
-    // Get user ID from middleware
-    const userId = request.headers.get('x-user-id');
-    if (!userId) {
-      return NextResponse.json({ 
-        success: false, 
-        message: '認証が必要です。'
-      }, { status: 401 });
+    // セッション検証
+    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ success: false, message: '認証が必要です' }, { status: 401 });
     }
+
+    const sessionData = await validateSession(sessionToken);
+    if (!sessionData || !sessionData.user) {
+      return NextResponse.json({ success: false, message: '無効なセッションです' }, { status: 401 });
+    }
+
+    const userId = sessionData.user.id;
 
     const data = await request.json();
     const { name, description, color, icon } = data;

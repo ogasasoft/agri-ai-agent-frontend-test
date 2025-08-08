@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Upload, ArrowLeft, CheckCircle, AlertCircle, Carrot, Apple, Package } from 'lucide-react';
 import { Suspense } from 'react';
+import { useDropzone } from 'react-dropzone';
 
 type ProductCategory = 'vegetables' | 'fruits' | 'other';
 
@@ -63,6 +64,53 @@ function CSVUploadContent() {
   const categoryData = categoryInfo[category];
   const IconComponent = categoryData.icon;
 
+  // ブラウザのデフォルトのドラッグ&ドロップ動作を防止
+  useEffect(() => {
+    const preventDefaultDrag = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const preventDefaultDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    document.addEventListener('dragenter', preventDefaultDrag, false);
+    document.addEventListener('dragover', preventDefaultDrag, false);
+    document.addEventListener('drop', preventDefaultDrop, false);
+
+    return () => {
+      document.removeEventListener('dragenter', preventDefaultDrag, false);
+      document.removeEventListener('dragover', preventDefaultDrag, false);
+      document.removeEventListener('drop', preventDefaultDrop, false);
+    };
+  }, []);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      const selectedFile = acceptedFiles[0];
+      if (selectedFile && selectedFile.type === 'text/csv') {
+        setFile(selectedFile);
+        setError(null);
+        setResult(null);
+      } else {
+        setError('CSVファイルを選択してください');
+        setFile(null);
+      }
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'text/csv': ['.csv']
+    },
+    multiple: false,
+    preventDropOnDocument: true,
+    noClick: false
+  });
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile && selectedFile.type === 'text/csv') {
@@ -82,12 +130,35 @@ function CSVUploadContent() {
     setError(null);
 
     try {
+      // まずセッション情報を取得してCSRFトークンを確認
+      const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0] || '';
+      
+      // セッション情報を取得
+      const sessionResponse = await fetch('/api/auth/me', {
+        headers: {
+          'x-session-token': sessionToken,
+        },
+      });
+
+      if (!sessionResponse.ok) {
+        setError('セッションの確認に失敗しました。再度ログインしてください。');
+        return;
+      }
+
+      const sessionData = await sessionResponse.json();
+      const csrfToken = sessionData.session?.csrf_token || '';
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('category', category);
+      formData.append('csrf_token', csrfToken); // FormDataにもCSRFトークンを追加
 
       const response = await fetch('/api/upload-with-category', {
         method: 'POST',
+        headers: {
+          'x-session-token': sessionToken,
+          'x-csrf-token': csrfToken,
+        },
         body: formData,
       });
 
@@ -152,27 +223,37 @@ function CSVUploadContent() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">CSVファイルのアップロード</h2>
           
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            
-            {!file ? (
+          {!file ? (
+            <div 
+              {...getRootProps()}
+              className={`
+                border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
+                ${isDragActive 
+                  ? 'border-primary-500 bg-primary-50' 
+                  : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+                }
+              `}
+            >
+              <input {...getInputProps()} />
+              <Upload className={`w-12 h-12 mx-auto mb-4 ${isDragActive ? 'text-primary-500' : 'text-gray-400'}`} />
+              
               <div>
-                <p className="text-gray-600 mb-4">CSVファイルを選択してください</p>
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                  id="csv-file"
-                />
-                <label
-                  htmlFor="csv-file"
-                  className="btn-primary cursor-pointer inline-block"
-                >
-                  ファイルを選択
-                </label>
+                {isDragActive ? (
+                  <p className="text-primary-600 mb-4 font-medium">ファイルをここにドロップしてください</p>
+                ) : (
+                  <>
+                    <p className="text-gray-600 mb-2">CSVファイルをドラッグ&ドロップ</p>
+                    <p className="text-sm text-gray-500 mb-4">または</p>
+                    <span className="btn-primary cursor-pointer inline-block">
+                      ファイルを選択
+                    </span>
+                  </>
+                )}
               </div>
-            ) : (
+            </div>
+          ) : (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <div>
                 <p className="text-green-600 font-medium mb-2">
                   <CheckCircle className="w-5 h-5 inline mr-2" />
@@ -183,13 +264,21 @@ function CSVUploadContent() {
                 </p>
                 <div className="flex justify-center gap-4">
                   <button
-                    onClick={() => setFile(null)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setFile(null);
+                    }}
                     className="btn-secondary"
                   >
                     ファイル変更
                   </button>
                   <button
-                    onClick={handleUpload}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleUpload();
+                    }}
                     disabled={uploading}
                     className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -197,8 +286,8 @@ function CSVUploadContent() {
                   </button>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Error Display */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useRouter } from 'next/navigation';
 import { Upload, FileText, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -19,6 +19,31 @@ export default function UploadPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // ブラウザのデフォルトのドラッグ&ドロップ動作を防止
+  useEffect(() => {
+    const preventDefaultDrag = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const preventDefaultDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // dropzoneエリア外でのドロップは何もしない
+    };
+
+    // document全体でドラッグ&ドロップのデフォルト動作を防止
+    document.addEventListener('dragenter', preventDefaultDrag, false);
+    document.addEventListener('dragover', preventDefaultDrag, false);
+    document.addEventListener('drop', preventDefaultDrop, false);
+
+    return () => {
+      document.removeEventListener('dragenter', preventDefaultDrag, false);
+      document.removeEventListener('dragover', preventDefaultDrag, false);
+      document.removeEventListener('drop', preventDefaultDrop, false);
+    };
+  }, []);
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
@@ -32,7 +57,10 @@ export default function UploadPage() {
       'text/csv': ['.csv'],
       'application/vnd.ms-excel': ['.xls', '.xlsx']
     },
-    multiple: false
+    multiple: false,
+    preventDropOnDocument: true, // ドキュメント全体でのドロップを防止
+    noClick: false,
+    noKeyboard: false
   });
 
   const parseFileForPreview = async (file: File) => {
