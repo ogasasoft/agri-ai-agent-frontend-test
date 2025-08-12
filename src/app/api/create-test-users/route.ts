@@ -13,6 +13,14 @@ async function getDbClient(): Promise<Client> {
 }
 
 export async function POST(request: NextRequest) {
+  // Only allow in development environment
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({
+      success: false,
+      message: 'This API is not available in production'
+    }, { status: 404 });
+  }
+
   let client: Client | null = null;
   
   try {

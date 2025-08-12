@@ -32,7 +32,9 @@ function LoginForm() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('/api/auth/me');
+      const response = await fetch('/api/auth/me', {
+        credentials: 'include'
+      });
       if (response.ok) {
         // User is already logged in, check role and redirect
         await checkUserRoleAndRedirect();
@@ -45,7 +47,9 @@ function LoginForm() {
   const checkUserRoleAndRedirect = async () => {
     try {
       // Check if user has admin privileges
-      const adminResponse = await fetch('/api/admin/me');
+      const adminResponse = await fetch('/api/admin/me', {
+        credentials: 'include'
+      });
       if (adminResponse.ok) {
         // User is admin, redirect to admin page
         router.push('/admin');
@@ -85,6 +89,10 @@ function LoginForm() {
   };
 
   const handleInputChange = (field: keyof typeof formData, value: string | boolean) => {
+    // Trim whitespace from username and password fields
+    if (field === 'username' || field === 'password') {
+      value = typeof value === 'string' ? value.trim() : value;
+    }
     setFormData(prev => ({ ...prev, [field]: value }));
     if (error) setError(null);
   };
@@ -95,13 +103,21 @@ function LoginForm() {
     setError(null);
     setSuccess(null);
 
+    // Ensure username and password are trimmed before sending
+    const trimmedData = {
+      ...formData,
+      username: formData.username.trim(),
+      password: formData.password.trim()
+    };
+
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        credentials: 'include',
+        body: JSON.stringify(trimmedData),
       });
 
       const data = await response.json();

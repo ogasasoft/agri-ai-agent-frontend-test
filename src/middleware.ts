@@ -34,8 +34,8 @@ const PUBLIC_ROUTES = [
   '/api/auth/login',
   '/api/auth/auto-login',
   '/login',
-  '/api/migrate-auth', // Temporary for setup
-  '/api/migrate-security-enhancements' // Temporary for setup
+  '/api/migrate-security-enhancements', // Temporary for setup
+  '/api/migrate-admin-system' // Temporary for setup
 ];
 
 // Routes that need authentication but should be accessible
@@ -103,8 +103,7 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
-    pathname.includes('.') ||
-    pathname === '/api/migrate-auth'
+    pathname.includes('.')
   ) {
     return NextResponse.next();
   }
