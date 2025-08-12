@@ -39,6 +39,15 @@ npm run start        # Start production server
 # Quality & Testing
 npm run lint         # Run ESLint
 npm run typecheck    # Run TypeScript checks
+npm test             # Run all Jest tests
+npm run test:watch   # Run tests in watch mode
+npm run test:coverage # Run tests with coverage report
+
+# Single Test Commands
+npm test -- __tests__/api/auth/login.test.ts                    # Run specific test file
+npm test -- --testNamePattern="should validate required fields" # Run specific test case
+npm test -- --testPathPattern="admin"                           # Run all admin tests
+npm test -- --verbose                                           # Run tests with detailed output
 
 # Database Setup (run after npm run dev starts)
 curl -X POST http://localhost:3000/api/migrate-auth
@@ -250,3 +259,46 @@ if (csrfToken !== sessionData.session.csrf_token) return forbidden();
 - File type validation (CSV only for uploads)
 - Content validation and sanitization
 - User isolation for uploaded data
+
+## TDD Testing Architecture
+
+### Comprehensive Test Suite
+The codebase includes a complete TDD test suite following t_wada's methodology with 140+ test cases covering all functionality:
+
+### Test Structure
+- **Framework**: Jest with Next.js integration, Node.js environment for API tests
+- **Mock Infrastructure**: Complete database mocking via `MockDbClient` in `__tests__/setup/test-utils.ts`
+- **Factory Functions**: `createMockUser`, `createMockOrder`, `createMockCategory`, `createMockSession`
+- **Authentication Testing**: Full session management, CSRF validation, role-based access
+
+### Test Categories by Functionality
+```
+/api/auth/*         → Authentication system (login, logout, session management)
+/api/orders/*       → Order CRUD operations with multi-tenant isolation
+/api/categories/*   → Category management with user ownership
+/api/upload/*       → CSV file processing and validation  
+/api/shipping/*     → Yamato Transport integration and shipping management
+/api/admin/*        → Admin system with role-based access and audit logging
+/api/chat           → AI chat functionality with OpenAI integration
+```
+
+### Testing Patterns
+All API route tests follow this structure:
+1. **Authentication Tests**: Session validation, CSRF token checking, role verification
+2. **Business Logic Tests**: CRUD operations, data validation, constraint checking
+3. **Security Tests**: Multi-tenant isolation, input sanitization, SQL injection prevention
+4. **Error Handling Tests**: Database failures, external API errors, network timeouts
+5. **Edge Case Tests**: Boundary conditions, concurrent operations, large data sets
+
+### Mock Strategy
+- **Database**: Complete PostgreSQL mocking with query simulation and transaction support
+- **External APIs**: OpenAI API mocking for chat functionality, Yamato API mocking for shipping
+- **Authentication**: Session and CSRF token mocking with role-based access simulation
+- **File Operations**: FormData and file upload mocking for CSV processing
+
+### Test Quality Standards
+- **Coverage**: 100% of API routes and core business logic
+- **Security Focus**: Every endpoint tested for authentication, authorization, and input validation
+- **Multi-tenant Testing**: User isolation verified across all data operations
+- **Performance Testing**: Concurrent operations and large dataset handling
+- **Error Recovery**: Graceful handling of all failure scenarios
