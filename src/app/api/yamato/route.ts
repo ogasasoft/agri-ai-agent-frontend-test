@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
   try {
     const body: YamatoShippingRequest = await request.json();
     
-    // TODO: Yamato API に差し替え
-    // 現在はモックAPIとして実装
+    // NOTE: Currently using mock API - replace with actual Yamato API when credentials are available
+    // Mock implementation for development/testing purposes
     const mockResponse = await generateMockYamatoResponse(body);
     
     // 実際のヤマトAPI呼び出しは以下のようになる予定

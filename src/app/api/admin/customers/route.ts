@@ -1,16 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Client } from 'pg';
 import { validateAdminSession, logAdminAction, getClientInfo } from '@/lib/admin-auth';
+import { getDbClient } from '@/lib/db';
 
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+export const dynamic = 'force-dynamic';
 
 // GET - Get all customers with statistics
 export async function GET(request: NextRequest) {

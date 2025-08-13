@@ -1,25 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Client } from 'pg';
-
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
-  console.log('🔐 Starting security enhancements migration...');
+  // Starting security enhancements migration
   
   try {
     const client = await getDbClient();
     
     try {
       // 1. Create remember tokens table for persistent login
-      console.log('🎫 Creating remember tokens table...');
       await client.query(`
         CREATE TABLE IF NOT EXISTS remember_tokens (
           id SERIAL PRIMARY KEY,
@@ -34,7 +23,6 @@ export async function POST(request: NextRequest) {
       `);
 
       // 2. Create rate limiting table for IP-based protection
-      console.log('🚫 Creating rate limiting table...');
       await client.query(`
         CREATE TABLE IF NOT EXISTS rate_limits (
           id SERIAL PRIMARY KEY,
@@ -49,7 +37,6 @@ export async function POST(request: NextRequest) {
       `);
 
       // 3. Enhance users table with progressive lockout
-      console.log('👤 Enhancing users table...');
       await client.query(`
         ALTER TABLE users ADD COLUMN IF NOT EXISTS lockout_level INTEGER DEFAULT 0;
         ALTER TABLE users ADD COLUMN IF NOT EXISTS last_failed_ip INET;
@@ -57,7 +44,6 @@ export async function POST(request: NextRequest) {
       `);
 
       // 4. Create security events table for advanced monitoring
-      console.log('📊 Creating security events table...');
       await client.query(`
         CREATE TABLE IF NOT EXISTS security_events (
           id SERIAL PRIMARY KEY,
@@ -72,7 +58,6 @@ export async function POST(request: NextRequest) {
       `);
 
       // 5. Create indexes for performance and security monitoring
-      console.log('📊 Creating security indexes...');
       await client.query(`
         CREATE INDEX IF NOT EXISTS idx_remember_tokens_selector ON remember_tokens (selector);
         CREATE INDEX IF NOT EXISTS idx_remember_tokens_expires ON remember_tokens (expires_at);
@@ -86,7 +71,6 @@ export async function POST(request: NextRequest) {
       `);
 
       // 6. Create function for progressive lockout calculation
-      console.log('⚙️ Creating progressive lockout function...');
       await client.query(`
         CREATE OR REPLACE FUNCTION calculate_lockout_duration(lockout_level INTEGER)
         RETURNS INTERVAL AS $$
@@ -107,7 +91,6 @@ export async function POST(request: NextRequest) {
       `);
 
       // 7. Create cleanup function for expired tokens and rate limits
-      console.log('🧹 Creating cleanup functions...');
       await client.query(`
         CREATE OR REPLACE FUNCTION cleanup_expired_security_data()
         RETURNS void AS $$
@@ -133,9 +116,7 @@ export async function POST(request: NextRequest) {
       const usersCount = await client.query('SELECT COUNT(*) FROM users');
       const sessionsCount = await client.query('SELECT COUNT(*) FROM sessions WHERE is_active = true');
       
-      console.log('✅ Security enhancements migration completed successfully!');
-      console.log(`📊 Active users: ${usersCount.rows[0].count}`);
-      console.log(`📊 Active sessions: ${sessionsCount.rows[0].count}`);
+      // Security enhancements migration completed successfully
 
       return NextResponse.json({ 
         success: true, 

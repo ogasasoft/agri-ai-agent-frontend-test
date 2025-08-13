@@ -22,7 +22,8 @@ export class MockDbClient {
     return Promise.resolve()
   }
 
-  async query(text: string, params?: any[]) {
+  // Add Jest mock properties
+  query = jest.fn().mockImplementation(async (text: string, params?: any[]) => {
     // Throw error if mock error is set
     if (this.mockError) {
       throw this.mockError
@@ -155,7 +156,7 @@ export class MockDbClient {
     }
     
     return { rows: [] }
-  }
+  })
 
   setMockData(table: string, data: any[]) {
     this.mockData[table] = data
@@ -256,6 +257,33 @@ export const createMockAuthHeaders = (sessionToken = 'mock-session-token', csrfT
   'Content-Type': 'application/json',
 })
 
+// Mock file utilities for testing
+export function createMockCsvFile(content: string, fileName = 'test.csv'): File {
+  const blob = new Blob([content], { type: 'text/csv' })
+  return new File([blob], fileName, { type: 'text/csv' })
+}
+
+export function createFormDataRequest(
+  file: File, 
+  category: string, 
+  sessionToken = 'session-token', 
+  csrfToken = 'csrf-token'
+): NextRequest {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('category', category)
+  formData.append('csrf_token', csrfToken)
+
+  return createMockRequest({
+    method: 'POST',
+    headers: {
+      'x-session-token': sessionToken,
+      'x-csrf-token': csrfToken
+    },
+    body: formData
+  })
+}
+
 // Database test utilities
 export async function resetTestDatabase() {
   const mockClient = MockDbClient.getInstance()
@@ -284,15 +312,21 @@ export async function seedTestData() {
   ])
 }
 
-// Error simulation utilities
+// Error simulation utilities (requires fetch to be mocked separately)
 export const simulateNetworkError = () => {
-  fetch.mockRejectedValueOnce(new Error('Network error'))
+  const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>
+  if (mockFetch && mockFetch.mockRejectedValueOnce) {
+    mockFetch.mockRejectedValueOnce(new Error('Network error'))
+  }
 }
 
 export const simulateServerError = (status = 500) => {
-  fetch.mockResolvedValueOnce({
-    ok: false,
-    status,
-    json: async () => ({ error: 'Server error' })
-  })
+  const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>
+  if (mockFetch && mockFetch.mockResolvedValueOnce) {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status,
+      json: async () => ({ error: 'Server error' })
+    } as Response)
+  }
 }

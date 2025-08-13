@@ -1,15 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'pg';
-
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   let client: Client | null = null;
@@ -36,7 +27,7 @@ export async function POST(request: NextRequest) {
       CREATE INDEX IF NOT EXISTS idx_user_settings_key ON user_settings(user_id, setting_key);
     `);
 
-    console.log('User settings table created successfully');
+    // User settings table created successfully
 
     return NextResponse.json({
       success: true,

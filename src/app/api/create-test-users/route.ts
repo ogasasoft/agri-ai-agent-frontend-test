@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'pg';
 import bcrypt from 'bcryptjs';
-
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   // Only allow in development environment
@@ -96,7 +87,7 @@ export async function POST(request: NextRequest) {
       );
 
       if (existingUser.rows.length > 0) {
-        console.log(`User ${userData.email} already exists, skipping...`);
+        // User already exists, skipping
         continue;
       }
 
@@ -145,7 +136,7 @@ export async function POST(request: NextRequest) {
         created_at: newUser.created_at
       });
 
-      console.log(`Created user: ${userData.email} with password: ${userData.password}`);
+      // User created successfully
     }
 
     return NextResponse.json({

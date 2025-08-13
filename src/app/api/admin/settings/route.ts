@@ -2,16 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'pg';
 import { validateAdminSession } from '@/lib/admin-auth';
 import { createErrorResponse } from '@/lib/security';
+import { getDbClient } from '@/lib/db';
 
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   let client: Client | null = null;
@@ -42,7 +35,7 @@ export async function GET(request: NextRequest) {
       settings = result.rows;
     } catch (error) {
       // If system_settings table doesn't exist, return default settings
-      console.log('System settings table not found, returning default settings');
+      // System settings table not found, returning default settings
       settings = [
         {
           key: 'system_name',
@@ -141,7 +134,7 @@ export async function POST(request: NextRequest) {
         )
       `);
     } catch (error) {
-      console.log('Could not create system_settings table:', error);
+      // Failed to create system_settings table
     }
 
     // Update or insert settings
@@ -186,7 +179,7 @@ export async function POST(request: NextRequest) {
         request.headers.get('user-agent') || 'unknown'
       ]);
     } catch (error) {
-      console.log('Could not log admin action:', error);
+      // Failed to log admin action
     }
 
     return NextResponse.json({

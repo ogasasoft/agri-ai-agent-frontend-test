@@ -1,16 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Client } from 'pg';
 import { validateAdminSession, logAdminAction, getClientInfo } from '@/lib/admin-auth';
+import { getDbClient } from '@/lib/db';
 
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+export const dynamic = 'force-dynamic';
 
 // GET - Get all system prompts
 export async function GET(request: NextRequest) {
@@ -94,6 +86,15 @@ export async function POST(request: NextRequest) {
       }, { status: 403 });
     }
 
+    // CSRF検証
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (!csrfToken) {
+      return NextResponse.json({
+        success: false,
+        message: 'CSRF検証に失敗しました。'
+      }, { status: 403 });
+    }
+
     const { category, key, value, description } = await request.json();
 
     if (!category || !key || !value) {
@@ -174,6 +175,15 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({
         success: false,
         message: '管理者権限が必要です。'
+      }, { status: 403 });
+    }
+
+    // CSRF検証
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (!csrfToken) {
+      return NextResponse.json({
+        success: false,
+        message: 'CSRF検証に失敗しました。'
       }, { status: 403 });
     }
 

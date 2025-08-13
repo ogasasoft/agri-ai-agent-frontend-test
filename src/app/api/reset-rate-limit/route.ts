@@ -14,11 +14,16 @@ export async function POST(_request: NextRequest) {
     }
 
     return NextResponse.json({ 
+      success: true,
       message: 'All rate limits reset successfully',
       cleared: true
     });
   } catch (error) {
     console.error('Error resetting rate limit:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ 
+      success: false,
+      message: 'Internal server error',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }

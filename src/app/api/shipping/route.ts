@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { ShippingRequest, YamatoApiResponse } from '@/types/shipping';
 
-// TODO: Yamato API に差し替え
+// NOTE: Mock Yamato API implementation - replace with actual API integration when ready
 const mockYamatoAPI = async (orders: any[]): Promise<YamatoApiResponse[]> => {
-  // 実際のAPI実装時はここを差し替える
+  // This mock will be replaced with actual Yamato API calls in production
   await new Promise(resolve => setTimeout(resolve, 1000)); // API呼び出しのシミュレート
   
   return orders.map((order, index) => ({
@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // TODO: 実際のヤマトAPI配送状況照会に差し替え
+    // NOTE: Mock delivery status - replace with actual Yamato API delivery tracking
     const mockTrackingInfo = {
       tracking_number,
       status: 'in_transit',

@@ -29,7 +29,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const settings = await request.json();
   
-  console.log('Settings would be saved:', settings);
+  // Settings processing (placeholder for actual save logic)
   
   return NextResponse.json({ 
     success: true,

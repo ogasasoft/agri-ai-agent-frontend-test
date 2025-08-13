@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Package, User, Phone, MapPin, Calendar, FileText, ArrowLeft } from 'lucide-react';
 import type { Order } from '@/types/order';
 
-export default function ShippingConfirmPage() {
+function ShippingConfirmContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -255,5 +255,15 @@ export default function ShippingConfirmPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ShippingConfirmPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+    </div>}>
+      <ShippingConfirmContent />
+    </Suspense>
   );
 }

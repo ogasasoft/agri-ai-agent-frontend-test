@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Client } from 'pg';
 import { validateAdminSession } from '@/lib/admin-auth';
-
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+import { getDbClient } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +51,7 @@ export async function GET(request: NextRequest) {
         totalCustomers: parseInt(customersResult.rows[0].count),
         activeIntegrations: parseInt(integrationsResult.rows[0].count),
         todayOrders: parseInt(todayOrdersResult.rows[0].count),
-        weeklyGrowth: 0, // TODO: Calculate actual growth
+        weeklyGrowth: 0, // NOTE: Weekly growth calculation not yet implemented
         systemHealth: 'healthy',
         lastBackup: new Date().toISOString()
       };

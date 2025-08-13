@@ -14,6 +14,15 @@ jest.mock('@/lib/auth-enhanced', () => ({
   })
 }))
 
+// Mock bcryptjs
+jest.mock('bcryptjs', () => ({
+  compare: jest.fn(),
+  hash: jest.fn(),
+  genSalt: jest.fn()
+}))
+
+const bcrypt = require('bcryptjs')
+
 describe('/api/auth/login', () => {
   let mockClient: MockDbClient
   const { authenticateUserEnhanced } = require('@/lib/auth-enhanced')

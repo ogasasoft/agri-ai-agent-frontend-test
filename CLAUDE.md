@@ -302,3 +302,112 @@ All API route tests follow this structure:
 - **Multi-tenant Testing**: User isolation verified across all data operations
 - **Performance Testing**: Concurrent operations and large dataset handling
 - **Error Recovery**: Graceful handling of all failure scenarios
+
+## Code Quality Assurance
+
+### Quality Checklist Integration
+This project includes a comprehensive quality checklist (`QUALITY_CHECKLIST.md`) with 10 standardized inspection items:
+
+**CRITICAL Level (4 items)**:
+- Build errors/warnings verification
+- TypeScript compilation errors 
+- Security vulnerability scanning
+- Dynamic route configuration validation
+
+**HIGH Level (3 items)**:
+- Debug log cleanup verification
+- Problem comments (TODO/FIXME) detection
+- Function duplication analysis
+
+**MEDIUM/LOW Levels (3 items)**:
+- Environment variable type definitions
+- Test mock contamination
+- TypeScript `any` usage analysis
+
+### Quality Score System
+- **Perfect (30/30)**: Enterprise-grade quality
+- **Excellent (27-29)**: Production deployment ready
+- **Good (24-26)**: Minor improvements recommended
+- **Below 24**: Significant fixes required
+
+### Code Standards Enforcement
+All production code must meet these requirements:
+- Zero TypeScript compilation errors
+- No console.log statements (console.error acceptable for error handling)
+- All API routes using dynamic headers must have `export const dynamic = 'force-dynamic'`
+- Database operations centralized via `src/lib/db.ts` getDbClient function
+- Security-sensitive operations require CSRF validation and audit logging
+
+## Architecture Patterns
+
+### Database Connection Pattern
+All database operations use the centralized connection utility:
+```typescript
+import { getDbClient } from '@/lib/db';
+
+// Standard pattern for database operations
+const client = await getDbClient();
+try {
+  const result = await client.query('SELECT * FROM table WHERE user_id = $1', [userId]);
+  return result.rows;
+} finally {
+  await client.end();
+}
+```
+
+### API Route Dynamic Rendering Pattern
+All API routes accessing request.headers require dynamic configuration:
+```typescript
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest) {
+  const sessionToken = request.headers.get('x-session-token');
+  // ... rest of implementation
+}
+```
+
+### Multi-Tenant Query Pattern
+All user-scoped database queries must include user isolation:
+```typescript
+// Correct: User isolation enforced
+const orders = await client.query(
+  'SELECT * FROM orders WHERE user_id = $1 AND order_date > $2',
+  [userId, dateFilter]
+);
+
+// Admin access pattern (cross-user data access)
+if (adminUser && isSuperAdmin(adminUser)) {
+  const allOrders = await client.query('SELECT * FROM orders WHERE order_date > $1', [dateFilter]);
+}
+```
+
+## Critical Development Practices
+
+### File Creation Policy
+- NEVER create files unless absolutely necessary for achieving the goal
+- ALWAYS prefer editing existing files over creating new ones
+- NEVER proactively create documentation files (*.md) or README files unless explicitly requested
+
+### Quality Gate Requirements
+Before committing or deploying, run the quality verification commands:
+```bash
+# Essential quality checks
+npm run build        # Must complete without errors
+npm run typecheck    # Must pass with zero TypeScript errors
+npm run lint         # Must pass ESLint validation
+
+# Quality checklist verification (see QUALITY_CHECKLIST.md)
+# Run the 10-item inspection for comprehensive quality assurance
+```
+
+### Security-First Development
+- All API routes must implement the security pattern: session validation → CSRF validation → input sanitization → user isolation
+- Never expose sensitive data in logs or error messages
+- All admin operations require audit logging via `logAdminAction()`
+- File uploads must have size limits, type validation, and security scanning
+
+### Database Operation Standards
+- Use `getDbClient` from `@/lib/db.ts` for all database connections
+- All user-scoped queries must include `WHERE user_id = $1` for multi-tenant isolation
+- Use parameterized queries exclusively to prevent SQL injection
+- Admin queries accessing cross-user data require explicit super admin validation

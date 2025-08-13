@@ -1,4 +1,4 @@
-import { GET, POST } from '@/app/api/yamato-settings/route'
+import { GET, PUT } from '@/app/api/yamato-settings/route'
 import { createMockRequest, MockDbClient, createMockUser, createMockSession, resetTestDatabase, createMockAuthHeaders } from '../../setup/test-utils'
 
 // Mock dependencies
@@ -24,7 +24,7 @@ describe('/api/yamato-settings', () => {
     it('should return yamato settings for authenticated user', async () => {
       // Arrange
       const mockUser = createMockUser({ id: 1 })
-      const mockSession = createMockSession({ user_id: 1 })
+      const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
       validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
 
@@ -65,7 +65,7 @@ describe('/api/yamato-settings', () => {
     it('should return default settings when no user settings exist', async () => {
       // Arrange
       const mockUser = createMockUser({ id: 1 })
-      const mockSession = createMockSession({ user_id: 1 })
+      const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
       validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
       mockClient.setMockData('user_settings', []) // No settings
@@ -114,7 +114,7 @@ describe('/api/yamato-settings', () => {
     it('should handle database errors gracefully', async () => {
       // Arrange
       const mockUser = createMockUser({ id: 1 })
-      const mockSession = createMockSession({ user_id: 1 })
+      const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
       validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
       
@@ -137,11 +137,11 @@ describe('/api/yamato-settings', () => {
     })
   })
 
-  describe('POST /api/yamato-settings', () => {
+  describe('PUT /api/yamato-settings', () => {
     it('should save yamato settings successfully', async () => {
       // Arrange
       const mockUser = createMockUser({ id: 1 })
-      const mockSession = createMockSession({ user_id: 1 })
+      const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
       validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
 
@@ -158,13 +158,13 @@ describe('/api/yamato-settings', () => {
       }
 
       const request = createMockRequest({
-        method: 'POST',
+        method: 'PUT',
         body: settingsData,
-        headers: { 'x-session-token': 'session-token', 'Content-Type': 'application/json' }
+        headers: { 'x-session-token': 'session-token', 'x-csrf-token': 'csrf-token', 'Content-Type': 'application/json' }
       })
 
       // Act
-      const response = await POST(request)
+      const response = await PUT(request)
       const data = await response.json()
 
       // Assert
@@ -182,7 +182,7 @@ describe('/api/yamato-settings', () => {
     it('should update existing settings', async () => {
       // Arrange
       const mockUser = createMockUser({ id: 1 })
-      const mockSession = createMockSession({ user_id: 1 })
+      const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
       validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
 
@@ -197,13 +197,13 @@ describe('/api/yamato-settings', () => {
       }
 
       const request = createMockRequest({
-        method: 'POST',
+        method: 'PUT',
         body: settingsData,
-        headers: { 'x-session-token': 'session-token', 'Content-Type': 'application/json' }
+        headers: { 'x-session-token': 'session-token', 'x-csrf-token': 'csrf-token', 'Content-Type': 'application/json' }
       })
 
       // Act
-      const response = await POST(request)
+      const response = await PUT(request)
       const data = await response.json()
 
       // Assert
@@ -215,13 +215,13 @@ describe('/api/yamato-settings', () => {
     it('should validate required authentication', async () => {
       // Arrange
       const request = createMockRequest({
-        method: 'POST',
+        method: 'PUT',
         body: { sender_name: 'テスト会社' }
         // No auth headers
       })
 
       // Act
-      const response = await POST(request)
+      const response = await PUT(request)
       const data = await response.json()
 
       // Assert
@@ -233,18 +233,18 @@ describe('/api/yamato-settings', () => {
     it('should handle empty request body', async () => {
       // Arrange
       const mockUser = createMockUser({ id: 1 })
-      const mockSession = createMockSession({ user_id: 1 })
+      const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
       validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
 
       const request = createMockRequest({
-        method: 'POST',
+        method: 'PUT',
         body: {}, // Empty settings
-        headers: { 'x-session-token': 'session-token', 'Content-Type': 'application/json' }
+        headers: { 'x-session-token': 'session-token', 'x-csrf-token': 'csrf-token', 'Content-Type': 'application/json' }
       })
 
       // Act
-      const response = await POST(request)
+      const response = await PUT(request)
       const data = await response.json()
 
       // Assert
@@ -256,7 +256,7 @@ describe('/api/yamato-settings', () => {
     it('should sanitize input data', async () => {
       // Arrange
       const mockUser = createMockUser({ id: 1 })
-      const mockSession = createMockSession({ user_id: 1 })
+      const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
       validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
 
@@ -267,13 +267,13 @@ describe('/api/yamato-settings', () => {
       }
 
       const request = createMockRequest({
-        method: 'POST',
+        method: 'PUT',
         body: settingsData,
-        headers: { 'x-session-token': 'session-token', 'Content-Type': 'application/json' }
+        headers: { 'x-session-token': 'session-token', 'x-csrf-token': 'csrf-token', 'Content-Type': 'application/json' }
       })
 
       // Act
-      const response = await POST(request)
+      const response = await PUT(request)
       const data = await response.json()
 
       // Assert
@@ -290,7 +290,7 @@ describe('/api/yamato-settings', () => {
     it('should handle database transaction errors', async () => {
       // Arrange
       const mockUser = createMockUser({ id: 1 })
-      const mockSession = createMockSession({ user_id: 1 })
+      const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
       validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
 
@@ -300,13 +300,13 @@ describe('/api/yamato-settings', () => {
         .mockRejectedValue(new Error('Transaction failed'))
 
       const request = createMockRequest({
-        method: 'POST',
+        method: 'PUT',
         body: { sender_name: 'テスト' },
-        headers: { 'x-session-token': 'session-token', 'Content-Type': 'application/json' }
+        headers: { 'x-session-token': 'session-token', 'x-csrf-token': 'csrf-token', 'Content-Type': 'application/json' }
       })
 
       // Act
-      const response = await POST(request)
+      const response = await PUT(request)
       const data = await response.json()
 
       // Assert
@@ -318,7 +318,7 @@ describe('/api/yamato-settings', () => {
     it('should validate setting key format', async () => {
       // Arrange
       const mockUser = createMockUser({ id: 1 })
-      const mockSession = createMockSession({ user_id: 1 })
+      const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
       validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
 
@@ -329,13 +329,13 @@ describe('/api/yamato-settings', () => {
       }
 
       const request = createMockRequest({
-        method: 'POST',
+        method: 'PUT',
         body: settingsData,
-        headers: { 'x-session-token': 'session-token', 'Content-Type': 'application/json' }
+        headers: { 'x-session-token': 'session-token', 'x-csrf-token': 'csrf-token', 'Content-Type': 'application/json' }
       })
 
       // Act
-      const response = await POST(request)
+      const response = await PUT(request)
       const data = await response.json()
 
       // Assert
@@ -356,7 +356,7 @@ describe('/api/yamato-settings', () => {
     it('should handle concurrent settings updates', async () => {
       // Arrange
       const mockUser = createMockUser({ id: 1 })
-      const mockSession = createMockSession({ user_id: 1 })
+      const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
       validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
 
@@ -366,15 +366,15 @@ describe('/api/yamato-settings', () => {
       }
 
       const request = createMockRequest({
-        method: 'POST',
+        method: 'PUT',
         body: settingsData,
-        headers: { 'x-session-token': 'session-token', 'Content-Type': 'application/json' }
+        headers: { 'x-session-token': 'session-token', 'x-csrf-token': 'csrf-token', 'Content-Type': 'application/json' }
       })
 
       // Act - simulate concurrent requests
       const [response1, response2] = await Promise.all([
-        POST(request),
-        POST(request)
+        PUT(request),
+        PUT(request)
       ])
 
       const [data1, data2] = await Promise.all([

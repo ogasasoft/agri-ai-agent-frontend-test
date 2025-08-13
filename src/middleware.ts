@@ -7,6 +7,14 @@ function checkRateLimit(ip: string, limit: number = 100, windowMs: number = 6000
   const now = Date.now();
   const key = ip;
   
+  // Rate limit check for IP
+  
+  // 開発環境でローカルホストの場合はレート制限を緩和
+  if (process.env.NODE_ENV === 'development' && (ip === 'localhost-dev' || ip === 'unknown')) {
+    // Development environment bypass
+    return true;
+  }
+  
   if (!rateLimit.has(key)) {
     rateLimit.set(key, { count: 1, resetTime: now + windowMs });
     return true;
@@ -77,8 +85,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // レート制限チェック（APIエンドポイントのみ）
-  if (pathname.startsWith('/api/')) {
-    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+  // 開発環境では完全に無効化
+  if (pathname.startsWith('/api/') && process.env.NODE_ENV !== 'development') {
+    const ip = request.ip || 
+              request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+              request.headers.get('x-real-ip') ||
+              'localhost-dev';
+    
+    // Rate limit configuration by endpoint
     
     // APIごとに異なるレート制限
     let limit = 100; // デフォルト: 1分間に100リクエスト
@@ -91,7 +105,10 @@ export async function middleware(request: NextRequest) {
       limit = 30; // チャットは1分間に30回まで
     }
     
-    if (!checkRateLimit(ip, limit)) {
+    const rateLimitResult = checkRateLimit(ip, limit);
+    // Rate limit result processed
+    
+    if (!rateLimitResult) {
       return NextResponse.json({
         success: false,
         message: 'レート制限に達しました。しばらく待ってから再試行してください。'

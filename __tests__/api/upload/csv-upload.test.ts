@@ -1,5 +1,5 @@
 import { POST } from '@/app/api/upload-with-category/route'
-import { createMockRequest, MockDbClient, createMockUser, createMockSession, resetTestDatabase, createMockAuthHeaders } from '../../setup/test-utils'
+import { createMockRequest, MockDbClient, createMockUser, createMockSession, resetTestDatabase, createMockAuthHeaders, createMockCsvFile, createFormDataRequest } from '../../setup/test-utils'
 
 // Mock dependencies
 jest.mock('pg', () => ({

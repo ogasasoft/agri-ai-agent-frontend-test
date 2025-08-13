@@ -2,16 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'pg';
 import { validateAdminSession } from '@/lib/admin-auth';
 import { createErrorResponse } from '@/lib/security';
+import { getDbClient } from '@/lib/db';
 
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   let client: Client | null = null;
@@ -48,7 +41,7 @@ export async function GET(request: NextRequest) {
       rateLimits = result.rows;
     } catch (error) {
       // If rate_limits table doesn't exist, return empty array
-      console.log('Rate limits table not found, returning empty array');
+      // Rate limits table not found, returning empty array
     }
 
     return NextResponse.json({

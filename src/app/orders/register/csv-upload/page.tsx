@@ -148,9 +148,70 @@ function CSVUploadContent() {
       const sessionData = await sessionResponse.json();
       const csrfToken = sessionData.session?.csrf_token || '';
 
+      // カテゴリ一覧を取得してIDを確認
+      const categoriesResponse = await fetch('/api/categories', {
+        headers: {
+          'x-session-token': sessionToken,
+        },
+      });
+
+      let categoryId: number | null = null;
+
+      if (categoriesResponse.ok) {
+        const categoriesResponseData = await categoriesResponse.json();
+        const categoriesData = categoriesResponseData.categories || [];
+        
+        // カテゴリ名でマッピング
+        const categoryMap: Record<ProductCategory, string> = {
+          vegetables: '野菜',
+          fruits: '果物', 
+          other: 'その他'
+        };
+        
+        const categoryName = categoryMap[category];
+        const matchedCategory = categoriesData.find((cat: any) => cat.name === categoryName);
+        
+        if (matchedCategory) {
+          categoryId = matchedCategory.id;
+        }
+      }
+
+      // カテゴリが見つからない場合はデフォルトで作成
+      if (!categoryId) {
+        const categoryName = category === 'vegetables' ? '野菜' : 
+                            category === 'fruits' ? '果物' : 'その他';
+        
+        const createCategoryResponse = await fetch('/api/categories', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-session-token': sessionToken,
+            'x-csrf-token': csrfToken,
+          },
+          body: JSON.stringify({
+            name: categoryName,
+            description: categoryInfo[category].description,
+            color: category === 'vegetables' ? 'green' : 
+                   category === 'fruits' ? 'red' : 'gray',
+            icon: category === 'vegetables' ? 'carrot' : 
+                  category === 'fruits' ? 'apple' : 'package'
+          }),
+        });
+
+        if (createCategoryResponse.ok) {
+          const newCategory = await createCategoryResponse.json();
+          categoryId = newCategory.id;
+        }
+      }
+
+      if (!categoryId) {
+        setError('カテゴリの作成に失敗しました。');
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('category', category);
+      formData.append('categoryId', categoryId.toString()); // IDを送信
       formData.append('csrf_token', csrfToken); // FormDataにもCSRFトークンを追加
 
       const response = await fetch('/api/upload-with-category', {

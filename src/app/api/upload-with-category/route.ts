@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Papa from 'papaparse';
-import { Client } from 'pg';
 import { validateSession } from '@/lib/auth';
+import { getDbClient } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 
 // CSV日本語ヘッダーと英語カラム名のマッピング
 const COLUMN_MAPPING: Record<string, string> = {
@@ -41,31 +43,21 @@ function parsePrice(priceStr: string): number | null {
   return isNaN(price) ? null : price;
 }
 
-// データベース接続
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
 
 // カテゴリ別CSVデータをPostgreSQLに保存
 async function saveOrdersToDb(orders: any[], categoryId: number, userId: string): Promise<{ registered: number; skipped: number; skippedCodes: string[] }> {
-  console.log(`🔌 Connecting to database for category ID: ${categoryId}...`);
+  // Connect to database for category processing
   const client = await getDbClient();
   let registered = 0;
   let skipped = 0;
   const skippedCodes: string[] = [];
   
   try {
-    console.log('📊 Processing orders:', orders.length);
+    // Processing orders for database insertion
     
     for (const order of orders) {
       try {
-        console.log('💾 Processing order:', order.order_code);
+        // Processing individual order
         
         // 重複チェック (同じユーザー内で)
         const existingOrder = await client.query(
@@ -74,7 +66,7 @@ async function saveOrdersToDb(orders: any[], categoryId: number, userId: string)
         );
         
         if (existingOrder.rows.length > 0) {
-          console.log('⚠️ Duplicate order code, skipping:', order.order_code);
+          // Duplicate order code found, skipping
           skipped++;
           skippedCodes.push(order.order_code);
           continue;
@@ -104,7 +96,7 @@ async function saveOrdersToDb(orders: any[], categoryId: number, userId: string)
           userId // user_id
         ]);
         
-        console.log('✅ Order saved with ID:', result.rows[0]?.id);
+        // Order successfully saved
         registered++;
       } catch (dbError: any) {
         console.error('❌ DB Error for order', order.order_code, ':', dbError.message);
@@ -115,14 +107,14 @@ async function saveOrdersToDb(orders: any[], categoryId: number, userId: string)
     }
   } finally {
     await client.end();
-    console.log('🔌 Database connection closed');
+    // Database connection closed
   }
   
   return { registered, skipped, skippedCodes };
 }
 
 export async function POST(request: NextRequest) {
-  console.log('📤 Category CSV Upload request received');
+  // Category CSV Upload request received
   
   try {
     // 認証チェック
@@ -152,26 +144,20 @@ export async function POST(request: NextRequest) {
     const csrfTokenFromForm = formData.get('csrf_token') as string;
     const csrfToken = csrfTokenFromHeader || csrfTokenFromForm;
     
+    // CSRF token validation
+
     if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
-      console.log('CSRF検証失敗:', {
-        headerToken: csrfTokenFromHeader,
-        formToken: csrfTokenFromForm,
-        expectedToken: sessionData.session.csrf_token
-      });
+      // CSRF validation failed
       return NextResponse.json({
         success: false,
         message: 'CSRF検証に失敗しました。'
       }, { status: 403 });
     }
     const file = formData.get('file') as File;
-    const categoryId = parseInt(formData.get('categoryId') as string);
+    const categoryIdRaw = formData.get('categoryId') as string;
+    const categoryId = parseInt(categoryIdRaw);
     
-    console.log('📁 File info:', {
-      name: file?.name,
-      size: file?.size,
-      type: file?.type,
-      categoryId: categoryId
-    });
+    // Process file and category information
     
     if (!file) {
       return NextResponse.json({ 
@@ -189,15 +175,18 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
-    if (!categoryId || isNaN(categoryId)) {
+    if (!categoryIdRaw || categoryIdRaw.trim() === '' || isNaN(categoryId) || categoryId <= 0) {
+      // Invalid category ID provided
       return NextResponse.json({ 
-        message: '有効なカテゴリIDを指定してください。' 
+        success: false,
+        message: '有効なカテゴリIDを指定してください。'
       }, { status: 400 });
     }
     
-    const client = await getDbClient();
+    let categoryName: string;
     
     // Verify category exists and belongs to user
+    const client = await getDbClient();
     try {
       const categoryResult = await client.query(
         'SELECT name FROM categories WHERE id = $1 AND is_active = true AND user_id = $2',
@@ -206,11 +195,12 @@ export async function POST(request: NextRequest) {
       
       if (categoryResult.rows.length === 0) {
         return NextResponse.json({ 
+          success: false,
           message: '指定されたカテゴリが見つかりません。' 
         }, { status: 404 });
       }
       
-      var categoryName = categoryResult.rows[0].name;
+      categoryName = categoryResult.rows[0].name;
     } finally {
       await client.end();
     }
@@ -218,13 +208,14 @@ export async function POST(request: NextRequest) {
     // CSVファイルの検証
     if (!file.name.endsWith('.csv')) {
       return NextResponse.json({ 
+        success: false,
         message: 'CSVファイルのみ対応しています。' 
       }, { status: 400 });
     }
     
     // ファイル内容を読み取り
     const text = await file.text();
-    console.log('📄 File content preview:', text.substring(0, 200) + '...');
+    // File content loaded for processing
     
     // CSV解析
     const parseResult = Papa.parse<Record<string, string>>(text, {
@@ -232,14 +223,11 @@ export async function POST(request: NextRequest) {
       skipEmptyLines: true,
     });
     
-    console.log('🔍 Parse result:', {
-      dataLength: parseResult.data.length,
-      errorsLength: parseResult.errors?.length || 0,
-      fields: parseResult.meta?.fields || 'not available'
-    });
+    // CSV parsing completed
     
     if (parseResult.errors && parseResult.errors.length > 0) {
       return NextResponse.json({ 
+        success: false,
         message: 'CSVファイルの解析に失敗しました。',
         errors: parseResult.errors.map((e: Papa.ParseError) => e.message)
       }, { status: 400 });
@@ -249,6 +237,7 @@ export async function POST(request: NextRequest) {
     
     if (csvData.length === 0) {
       return NextResponse.json({ 
+        success: false,
         message: 'CSVファイルにデータが含まれていません。' 
       }, { status: 400 });
     }
@@ -315,19 +304,21 @@ export async function POST(request: NextRequest) {
     
     if (validationErrors.length > 0) {
       return NextResponse.json({ 
+        success: false,
         message: 'データの検証に失敗しました。',
         errors: validationErrors
       }, { status: 400 });
     }
     
-    console.log(`💾 Saving to database (${categoryName}):`, processedOrders.length, 'orders');
+    // Saving processed orders to database
     
     // カテゴリ別にデータベースに保存
     const saveResult = await saveOrdersToDb(processedOrders, categoryId, userId);
     
-    console.log('✅ Save result:', saveResult);
+    // Database save operation completed
     
     return NextResponse.json({ 
+      success: true,
       message: `${categoryName}カテゴリの注文データを処理しました。`,
       registered_count: saveResult.registered,
       skipped_count: saveResult.skipped,
@@ -335,10 +326,13 @@ export async function POST(request: NextRequest) {
     });
     
   } catch (error: any) {
-    console.error('Category CSV upload error:', error);
+    console.error('❌ Category CSV upload error:', error);
+    console.error('❌ Error stack:', error.stack);
     return NextResponse.json({ 
+      success: false,
       message: 'サーバーエラーが発生しました。',
-      error: error.message
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     }, { status: 500 });
   }
 }

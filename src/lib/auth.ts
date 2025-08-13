@@ -2,6 +2,7 @@ import { Client } from 'pg';
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { NextRequest } from 'next/server';
+import { getDbClient } from '@/lib/db';
 
 export interface User {
   id: number;
@@ -38,15 +39,6 @@ const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 const PASSWORD_MIN_LENGTH = 8;
 
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
 
 export async function hashPassword(password: string): Promise<{ hash: string; salt: string }> {
   const salt = randomBytes(32).toString('hex');

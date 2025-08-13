@@ -160,7 +160,11 @@ export function OrderList({ orders, selectedOrders, onSelectionChange, showShipp
                         <span>
                           発送日: {format(new Date(order.shipped_at), 'MM/dd', { locale: ja })}
                         </span>
-                        {/* TODO: tracking_numberフィールドが追加されたら表示 */}
+                        {order.tracking_number && (
+                          <span className="text-xs text-blue-600">
+                            追跡番号: {order.tracking_number}
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>

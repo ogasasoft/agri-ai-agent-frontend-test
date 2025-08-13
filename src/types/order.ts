@@ -16,6 +16,7 @@ export interface Order {
   category_color?: string;
   category_icon?: string;
   shipped_at?: string;
+  tracking_number?: string;
   created_at: string;
   updated_at: string;
 }

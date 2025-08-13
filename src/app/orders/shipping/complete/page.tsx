@@ -100,7 +100,7 @@ function ShippingCompleteContent() {
       const result = await response.json();
       
       if (result.success) {
-        console.log('顧客情報登録完了:', result);
+        // Customer information registration completed successfully
       } else {
         console.error('顧客情報登録エラー:', result.message);
       }

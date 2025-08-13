@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { changePassword, validateSession } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const sessionToken = request.cookies.get('session_token')?.value;
@@ -18,6 +20,15 @@ export async function POST(request: NextRequest) {
         success: false,
         message: 'セッションが無効です。再度ログインしてください。'
       }, { status: 401 });
+    }
+
+    // CSRF検証
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
+      return NextResponse.json({
+        success: false,
+        message: 'CSRF検証に失敗しました。'
+      }, { status: 403 });
     }
 
     const { currentPassword, newPassword, confirmPassword } = await request.json();

@@ -1,16 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Client } from 'pg';
 import { validateSession } from '@/lib/auth';
+import { getDbClient } from '@/lib/db';
 
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+export const dynamic = 'force-dynamic';
 
 // GET - Get all categories
 export async function GET(request: NextRequest) {
@@ -84,6 +76,15 @@ export async function POST(request: NextRequest) {
 
     const userId = sessionData.user.id;
 
+    // CSRF検証
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
+      return NextResponse.json({
+        success: false,
+        message: 'CSRF検証に失敗しました。'
+      }, { status: 403 });
+    }
+
     const data = await request.json();
     const { name, description, color, icon } = data;
     
@@ -156,6 +157,26 @@ export async function POST(request: NextRequest) {
 // PUT - Update category
 export async function PUT(request: NextRequest) {
   try {
+    // セッション検証
+    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ success: false, message: '認証が必要です' }, { status: 401 });
+    }
+
+    const sessionData = await validateSession(sessionToken);
+    if (!sessionData || !sessionData.user) {
+      return NextResponse.json({ success: false, message: '無効なセッションです' }, { status: 401 });
+    }
+
+    // CSRF検証
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
+      return NextResponse.json({
+        success: false,
+        message: 'CSRF検証に失敗しました。'
+      }, { status: 403 });
+    }
+
     const data = await request.json();
     const { id, name, description, color, icon, display_order } = data;
     
@@ -241,6 +262,26 @@ export async function PUT(request: NextRequest) {
 // DELETE - Soft delete category
 export async function DELETE(request: NextRequest) {
   try {
+    // セッション検証
+    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ success: false, message: '認証が必要です' }, { status: 401 });
+    }
+
+    const sessionData = await validateSession(sessionToken);
+    if (!sessionData || !sessionData.user) {
+      return NextResponse.json({ success: false, message: '無効なセッションです' }, { status: 401 });
+    }
+
+    // CSRF検証
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
+      return NextResponse.json({
+        success: false,
+        message: 'CSRF検証に失敗しました。'
+      }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     

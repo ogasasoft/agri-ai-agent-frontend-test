@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // モック: 成功レスポンス
     const insertedCount = processedCustomers.length;
     
-    console.log('顧客情報登録:', processedCustomers);
+    // Customer information processing completed
 
     return NextResponse.json({
       success: true,

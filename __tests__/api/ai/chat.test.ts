@@ -412,7 +412,7 @@ describe('/api/chat', () => {
 
       // Assert
       const openaiCall = mockFetch.mock.calls[0]
-      const requestBody = JSON.parse(openaiCall[1].body as string)
+      const requestBody = JSON.parse(openaiCall?.[1]?.body as string)
 
       expect(requestBody).toEqual({
         model: 'gpt-3.5-turbo',
@@ -522,8 +522,14 @@ describe('/api/chat', () => {
 
     it('should include error details in development environment', async () => {
       // Arrange
-      const originalEnv = process.env.NODE_ENV
-      process.env.NODE_ENV = 'development'
+      const originalNodeEnv = process.env.NODE_ENV
+      const originalProcessEnv = { ...process.env }
+      
+      // Use Object.defineProperty to overcome readonly constraint
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'development',
+        configurable: true
+      })
 
       const mockUser = createMockUser({ id: 1 })
       const mockSession = createMockSession({ 
@@ -553,7 +559,10 @@ describe('/api/chat', () => {
       expect(data.error).toBe('Specific error message')
 
       // Restore environment
-      process.env.NODE_ENV = originalEnv
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: originalNodeEnv,
+        configurable: true
+      })
     })
   })
 })

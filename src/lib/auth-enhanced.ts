@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { NextRequest } from 'next/server';
 import { validateSession, logAuditEvent, User, Session } from './auth';
+import { getDbClient } from '@/lib/db';
 
 export function getClientInfo(request: NextRequest): { ipAddress: string; userAgent: string } {
   const ipAddress = request.ip || 
@@ -33,15 +34,6 @@ const RATE_LIMIT_WINDOW = 15 * 60; // 15 minutes
 const MAX_ATTEMPTS_PER_IP = 20; // Per 15 minutes
 const REMEMBER_TOKEN_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
 
 export interface RememberToken {
   selector: string;

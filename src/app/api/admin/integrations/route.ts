@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Client } from 'pg';
 import { validateAdminSession, logAdminAction, getClientInfo, isSuperAdmin } from '@/lib/admin-auth';
-
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+import { getDbClient } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,6 +85,15 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({
         success: false,
         message: 'スーパー管理者権限が必要です。'
+      }, { status: 403 });
+    }
+
+    // CSRF検証 - adminSessionがある場合はcsrf_tokenも存在するはず
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (!csrfToken) {
+      return NextResponse.json({
+        success: false,
+        message: 'CSRF検証に失敗しました。'
       }, { status: 403 });
     }
 

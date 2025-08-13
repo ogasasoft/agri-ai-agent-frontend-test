@@ -1,17 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Client } from 'pg';
 import { validateSession } from '@/lib/auth';
+import { getDbClient } from '@/lib/db';
 
-// データベース接続
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+export const dynamic = 'force-dynamic';
 
 
 export async function GET(request: NextRequest) {
@@ -173,6 +164,26 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    // セッション検証
+    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ success: false, message: '認証が必要です' }, { status: 401 });
+    }
+
+    const sessionData = await validateSession(sessionToken);
+    if (!sessionData || !sessionData.user) {
+      return NextResponse.json({ success: false, message: '無効なセッションです' }, { status: 401 });
+    }
+
+    // CSRF検証
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
+      return NextResponse.json({
+        success: false,
+        message: 'CSRF検証に失敗しました。'
+      }, { status: 403 });
+    }
+
     const data = await request.json();
     const { id, status, shipped_at, tracking_number } = data;
     
@@ -186,30 +197,7 @@ export async function PUT(request: NextRequest) {
     const client = await getDbClient();
     
     try {
-      // まず既存テーブル構造を確認
-      const tableInfo = await client.query(`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = 'orders'
-      `);
-      
-      const columns = tableInfo.rows.map(row => row.column_name);
-      const hasStatusColumn = columns.includes('status');
-      const hasShippedAtColumn = columns.includes('shipped_at');
-      const hasTrackingColumn = columns.includes('tracking_number');
-      
-      // カラムが存在しない場合は追加
-      if (!hasStatusColumn) {
-        await client.query('ALTER TABLE orders ADD COLUMN status varchar(50) DEFAULT \'pending\'');
-      }
-      if (!hasShippedAtColumn) {
-        await client.query('ALTER TABLE orders ADD COLUMN shipped_at timestamp');
-      }
-      if (!hasTrackingColumn) {
-        await client.query('ALTER TABLE orders ADD COLUMN tracking_number varchar(100)');
-      }
-      
-      // 注文ステータスを更新
+      // 注文ステータスを更新 (テーブル構造は migrate-auth で既に作成済み)
       const updateFields = ['updated_at = NOW()'];
       const values = [id];
       let paramIndex = 2;

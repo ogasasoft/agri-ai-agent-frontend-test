@@ -1,33 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Client } from 'pg';
 import { hashPassword } from '@/lib/auth';
-
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
-  console.log('🔧 Starting admin system migration...');
+  // Starting admin system migration
   
   try {
     const client = await getDbClient();
     
     try {
       // 1. Add admin role to users table
-      console.log('👤 Adding admin role to users table...');
       await client.query(`
         ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user';
         ALTER TABLE users ADD COLUMN IF NOT EXISTS is_super_admin BOOLEAN DEFAULT false;
       `);
 
       // 2. Create system_settings table for various configurations
-      console.log('⚙️ Creating system_settings table...');
       await client.query(`
         CREATE TABLE IF NOT EXISTS system_settings (
           id SERIAL PRIMARY KEY,
@@ -44,7 +32,6 @@ export async function POST(request: NextRequest) {
       `);
 
       // 3. Create api_integrations table for external API configurations
-      console.log('🔌 Creating api_integrations table...');
       await client.query(`
         CREATE TABLE IF NOT EXISTS api_integrations (
           id SERIAL PRIMARY KEY,
@@ -63,7 +50,6 @@ export async function POST(request: NextRequest) {
       `);
 
       // 4. Create admin audit log table
-      console.log('📊 Creating admin_audit_logs table...');
       await client.query(`
         CREATE TABLE IF NOT EXISTS admin_audit_logs (
           id SERIAL PRIMARY KEY,
@@ -79,7 +65,6 @@ export async function POST(request: NextRequest) {
       `);
 
       // 5. Create super admin user
-      console.log('👑 Creating super admin user...');
       
       // Check if admin user already exists
       const existingAdmin = await client.query(
@@ -110,7 +95,7 @@ export async function POST(request: NextRequest) {
         ]);
 
         const adminUser = adminResult.rows[0];
-        console.log('✅ Super admin created:', adminUser);
+        // Super admin created successfully
 
         // Insert default system settings
         await client.query(`
@@ -128,7 +113,7 @@ export async function POST(request: NextRequest) {
           ('tabechoku', '食べチョク', false, '{"sync_interval": 1800, "auto_import": false}')
         `);
       } else {
-        console.log('⚠️ Admin user already exists, updating role...');
+        // Admin user already exists, updating role
         await client.query(`
           UPDATE users 
           SET role = 'super_admin', is_super_admin = true, email = $2
@@ -137,7 +122,6 @@ export async function POST(request: NextRequest) {
       }
 
       // 6. Create indexes for performance
-      console.log('📊 Creating indexes...');
       await client.query(`
         CREATE INDEX IF NOT EXISTS idx_system_settings_category ON system_settings (category);
         CREATE INDEX IF NOT EXISTS idx_api_integrations_name ON api_integrations (name);
@@ -151,7 +135,7 @@ export async function POST(request: NextRequest) {
       const adminCount = await client.query('SELECT COUNT(*) FROM users WHERE is_super_admin = true');
       const settingsCount = await client.query('SELECT COUNT(*) FROM system_settings');
 
-      console.log('✅ Admin system migration completed successfully!');
+      // Admin system migration completed successfully
       
       return NextResponse.json({ 
         success: true, 

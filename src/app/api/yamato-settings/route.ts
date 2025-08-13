@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'pg';
 import { validateSession } from '@/lib/auth';
+import { getDbClient } from '@/lib/db';
 
-async function getDbClient(): Promise<Client> {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  });
-  
-  await client.connect();
-  return client;
-}
+export const dynamic = 'force-dynamic';
 
 interface YamatoSettings {
   // 基本情報
