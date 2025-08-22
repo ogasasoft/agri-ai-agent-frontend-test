@@ -137,6 +137,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'カテゴリを作成しました。',
+        id: newCategory.id,
         category: newCategory
       });
       

@@ -66,7 +66,15 @@ export default function ShippingPendingPage() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/orders');
+      // セッショントークンを取得
+      const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0];
+      
+      const response = await fetch('/api/orders', {
+        credentials: 'include', // クッキーを含める
+        headers: {
+          'x-session-token': sessionToken || ''
+        }
+      });
       const data = await response.json();
       
       // APIレスポンスの構造に応じて配列を設定

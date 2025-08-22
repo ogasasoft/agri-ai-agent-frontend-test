@@ -45,12 +45,12 @@ function parsePrice(priceStr: string): number | null {
 
 
 // カテゴリ別CSVデータをPostgreSQLに保存
-async function saveOrdersToDb(orders: any[], categoryId: number, userId: string): Promise<{ registered: number; skipped: number; skippedCodes: string[] }> {
+async function saveOrdersToDb(orders: any[], categoryId: number, userId: string, categoryName: string): Promise<{ registered: number; skipped: number; skippedDetails: any[] }> {
   // Connect to database for category processing
   const client = await getDbClient();
   let registered = 0;
   let skipped = 0;
-  const skippedCodes: string[] = [];
+  const skippedDetails: any[] = [];
   
   try {
     // Processing orders for database insertion
@@ -61,25 +61,40 @@ async function saveOrdersToDb(orders: any[], categoryId: number, userId: string)
         
         // 重複チェック (同じユーザー内で)
         const existingOrder = await client.query(
-          'SELECT order_code FROM orders WHERE order_code = $1 AND user_id = $2',
+          'SELECT order_code, customer_name, price, order_date FROM orders WHERE order_code = $1 AND user_id = $2',
           [order.order_code, userId]
         );
         
         if (existingOrder.rows.length > 0) {
           // Duplicate order code found, skipping
           skipped++;
-          skippedCodes.push(order.order_code);
+          const existing = existingOrder.rows[0];
+          skippedDetails.push({
+            order_code: order.order_code,
+            customer_name: order.customer_name,
+            price: order.price,
+            order_date: order.order_date,
+            reason: '重複',
+            existing_data: {
+              customer_name: existing.customer_name,
+              price: existing.price,
+              order_date: existing.order_date
+            }
+          });
           continue;
         }
+        
+        // カテゴリ名をproduct_categoryとして使用（既にcategoryNameを取得済み）
+        const productCategory = categoryName || 'その他';
         
         // 新規注文を挿入 (category_idとuser_idを含む)
         const result = await client.query(`
           INSERT INTO orders (
             order_code, customer_name, phone, address, price, 
             order_date, delivery_date, notes, category_id,
-            source, extra_data, user_id
+            product_category, source, extra_data, user_id
           )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
           RETURNING id
         `, [
           order.order_code,
@@ -91,6 +106,7 @@ async function saveOrdersToDb(orders: any[], categoryId: number, userId: string)
           order.delivery_date,
           order.notes,
           categoryId, // category_id
+          productCategory, // product_category
           'csv_upload', // source
           JSON.stringify({ upload_method: 'category_csv', category_id: categoryId }), // extra_data
           userId // user_id
@@ -102,7 +118,14 @@ async function saveOrdersToDb(orders: any[], categoryId: number, userId: string)
         console.error('❌ DB Error for order', order.order_code, ':', dbError.message);
         // エラーの場合はスキップとして処理
         skipped++;
-        skippedCodes.push(order.order_code);
+        skippedDetails.push({
+          order_code: order.order_code,
+          customer_name: order.customer_name,
+          price: order.price,
+          order_date: order.order_date,
+          reason: 'DBエラー',
+          error_message: dbError.message
+        });
       }
     }
   } finally {
@@ -110,7 +133,7 @@ async function saveOrdersToDb(orders: any[], categoryId: number, userId: string)
     // Database connection closed
   }
   
-  return { registered, skipped, skippedCodes };
+  return { registered, skipped, skippedDetails };
 }
 
 export async function POST(request: NextRequest) {
@@ -313,7 +336,7 @@ export async function POST(request: NextRequest) {
     // Saving processed orders to database
     
     // カテゴリ別にデータベースに保存
-    const saveResult = await saveOrdersToDb(processedOrders, categoryId, userId);
+    const saveResult = await saveOrdersToDb(processedOrders, categoryId, userId, categoryName);
     
     // Database save operation completed
     
@@ -322,7 +345,7 @@ export async function POST(request: NextRequest) {
       message: `${categoryName}カテゴリの注文データを処理しました。`,
       registered_count: saveResult.registered,
       skipped_count: saveResult.skipped,
-      skipped_order_codes: saveResult.skippedCodes
+      skipped_details: saveResult.skippedDetails
     });
     
   } catch (error: any) {

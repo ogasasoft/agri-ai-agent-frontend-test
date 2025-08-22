@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Upload, ArrowLeft, CheckCircle, AlertCircle, Carrot, Apple, Package } from 'lucide-react';
+import { Upload, ArrowLeft, CheckCircle, AlertCircle, Carrot, Apple, Package, Eye, FileText } from 'lucide-react';
 import { Suspense } from 'react';
 import { useDropzone } from 'react-dropzone';
+import Papa from 'papaparse';
 
 type ProductCategory = 'vegetables' | 'fruits' | 'other';
 
@@ -47,8 +48,28 @@ const categoryInfo: Record<ProductCategory, CategoryInfo> = {
 interface UploadResult {
   registered_count: number;
   skipped_count: number;
-  skipped_order_codes: string[];
+  skipped_details: {
+    order_code: string;
+    customer_name: string;
+    price: number;
+    order_date: string;
+    reason: string;
+    existing_data?: {
+      customer_name: string;
+      price: number;
+      order_date: string;
+    };
+    error_message?: string;
+  }[];
   message: string;
+}
+
+interface CSVPreviewData {
+  headers: string[];
+  data: string[][];
+  totalRows: number;
+  validRows: number;
+  invalidRows: string[];
 }
 
 function CSVUploadContent() {
@@ -60,6 +81,9 @@ function CSVUploadContent() {
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<UploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [previewData, setPreviewData] = useState<CSVPreviewData | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
 
   const categoryData = categoryInfo[category];
   const IconComponent = categoryData.icon;
@@ -87,13 +111,78 @@ function CSVUploadContent() {
     };
   }, []);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const analyzeCSV = useCallback(async (file: File) => {
+    setAnalyzing(true);
+    setError(null);
+    
+    return new Promise<CSVPreviewData>((resolve, reject) => {
+      Papa.parse(file, {
+        header: false,
+        skipEmptyLines: true,
+        encoding: 'UTF-8',
+        complete: (results) => {
+          const data = results.data as string[][];
+          
+          if (data.length === 0) {
+            reject(new Error('CSVファイルが空です'));
+            return;
+          }
+          
+          const headers = data[0];
+          const rows = data.slice(1);
+          
+          // 必須項目のチェック
+          const requiredColumns = ['注文番号', 'order_code'];
+          const hasRequiredColumn = requiredColumns.some(col => 
+            headers.some(header => header.toLowerCase().includes(col.toLowerCase()) || 
+                                  col.toLowerCase().includes(header.toLowerCase()))
+          );
+          
+          if (!hasRequiredColumn) {
+            reject(new Error('必須列（注文番号/order_code）が見つかりません'));
+            return;
+          }
+          
+          // データの妥当性チェック
+          const invalidRows: string[] = [];
+          let validRows = 0;
+          
+          rows.forEach((row, index) => {
+            // 空行や不正な行をチェック
+            const nonEmptyValues = row.filter(cell => cell && cell.trim());
+            if (nonEmptyValues.length < 2) {
+              invalidRows.push(`行 ${index + 2}: データが不足しています`);
+            } else {
+              validRows++;
+            }
+          });
+          
+          const previewData: CSVPreviewData = {
+            headers,
+            data: rows.slice(0, 5), // 最初の5行のみプレビュー
+            totalRows: rows.length,
+            validRows,
+            invalidRows
+          };
+          
+          resolve(previewData);
+        },
+        error: (error) => {
+          reject(new Error(`CSVファイルの解析に失敗しました: ${error.message}`));
+        }
+      });
+    });
+  }, []);
+  
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       const selectedFile = acceptedFiles[0];
-      if (selectedFile && selectedFile.type === 'text/csv') {
+      if (selectedFile && (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv'))) {
         setFile(selectedFile);
         setError(null);
         setResult(null);
+        setPreviewData(null);
+        setShowPreview(false);
       } else {
         setError('CSVファイルを選択してください');
         setFile(null);
@@ -113,13 +202,30 @@ function CSVUploadContent() {
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
-    if (selectedFile && selectedFile.type === 'text/csv') {
+    if (selectedFile && (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv'))) {
       setFile(selectedFile);
       setError(null);
       setResult(null);
+      setPreviewData(null);
+      setShowPreview(false);
     } else {
       setError('CSVファイルを選択してください');
       setFile(null);
+    }
+  };
+  
+  const handlePreview = async () => {
+    if (!file) return;
+    
+    try {
+      setAnalyzing(true);
+      const preview = await analyzeCSV(file);
+      setPreviewData(preview);
+      setShowPreview(true);
+      setAnalyzing(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'CSVファイルの解析に失敗しました');
+      setAnalyzing(false);
     }
   };
 
@@ -130,30 +236,30 @@ function CSVUploadContent() {
     setError(null);
 
     try {
-      // まずセッション情報を取得してCSRFトークンを確認
-      const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0] || '';
-      
-      // セッション情報を取得
-      const sessionResponse = await fetch('/api/auth/me', {
-        headers: {
-          'x-session-token': sessionToken,
-        },
-      });
+      // セッション情報を取得してCSRFトークンを確認
+      const sessionResponse = await fetch('/api/auth/me');
 
       if (!sessionResponse.ok) {
         setError('セッションの確認に失敗しました。再度ログインしてください。');
+        setTimeout(() => {
+          router.push('/login');
+        }, 1500);
         return;
       }
 
       const sessionData = await sessionResponse.json();
-      const csrfToken = sessionData.session?.csrf_token || '';
+      let csrfToken = sessionData.session?.csrf_token || '';
+      
+      // Fallback: CSRFトークンをクッキーから直接取得
+      if (!csrfToken) {
+        csrfToken = document.cookie.split('csrf_token=')[1]?.split(';')[0] || '';
+      }
+      
+      console.log('Debug - Session data:', sessionData);
+      console.log('Debug - CSRF token:', csrfToken);
 
       // カテゴリ一覧を取得してIDを確認
-      const categoriesResponse = await fetch('/api/categories', {
-        headers: {
-          'x-session-token': sessionToken,
-        },
-      });
+      const categoriesResponse = await fetch('/api/categories');
 
       let categoryId: number | null = null;
 
@@ -174,6 +280,10 @@ function CSVUploadContent() {
         if (matchedCategory) {
           categoryId = matchedCategory.id;
         }
+      } else {
+        const errorData = await categoriesResponse.json();
+        setError(`カテゴリ一覧の取得に失敗しました: ${errorData.message || '不明なエラー'}`);
+        return;
       }
 
       // カテゴリが見つからない場合はデフォルトで作成
@@ -185,7 +295,6 @@ function CSVUploadContent() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-session-token': sessionToken,
             'x-csrf-token': csrfToken,
           },
           body: JSON.stringify({
@@ -200,7 +309,12 @@ function CSVUploadContent() {
 
         if (createCategoryResponse.ok) {
           const newCategory = await createCategoryResponse.json();
-          categoryId = newCategory.id;
+          categoryId = newCategory.id || newCategory.category?.id;
+        } else {
+          const errorData = await createCategoryResponse.json();
+          console.log('Debug - Create category error:', errorData);
+          setError(errorData.message || 'カテゴリの作成に失敗しました。');
+          return;
         }
       }
 
@@ -217,7 +331,6 @@ function CSVUploadContent() {
       const response = await fetch('/api/upload-with-category', {
         method: 'POST',
         headers: {
-          'x-session-token': sessionToken,
           'x-csrf-token': csrfToken,
         },
         body: formData,
@@ -227,10 +340,18 @@ function CSVUploadContent() {
 
       if (response.ok) {
         setResult(data);
-        // 成功時は確認画面にリダイレクト
-        setTimeout(() => {
-          router.push(`/orders/register/confirm?category=${category}&method=csv&count=${data.registered_count}`);
-        }, 2000); // 2秒後にリダイレクト
+        // 成功時の処理（新規登録件数が0でも重複スキップがあれば正常）
+        if (data.registered_count > 0) {
+          setTimeout(() => {
+            router.push(`/orders/register/confirm?category=${category}&method=csv&count=${data.registered_count}`);
+          }, 2000); // 2秒後にリダイレクト
+        } else if (data.skipped_count > 0) {
+          // 新規登録はないが重複スキップがある場合は正常処理
+          // 結果表示のみでエラーなし
+        } else {
+          // 登録も重複もない場合はエラー
+          setError('登録可能なデータがありませんでした。CSVファイルの形式を確認してください。');
+        }
       } else {
         setError(data.message || 'アップロードに失敗しました');
       }
@@ -329,27 +450,156 @@ function CSVUploadContent() {
                       e.preventDefault();
                       e.stopPropagation();
                       setFile(null);
+                      setPreviewData(null);
+                      setShowPreview(false);
                     }}
                     className="btn-secondary"
                   >
                     ファイル変更
                   </button>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleUpload();
-                    }}
-                    disabled={uploading}
-                    className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {uploading ? 'アップロード中...' : 'アップロード開始'}
-                  </button>
+                  {!showPreview ? (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handlePreview();
+                      }}
+                      disabled={analyzing}
+                      className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      {analyzing ? '解析中...' : 'アップロード内容を確認'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleUpload();
+                      }}
+                      disabled={uploading}
+                      className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {uploading ? 'アップロード中...' : 'アップロード実行'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
           )}
         </div>
+
+        {/* CSV Preview Display */}
+        {showPreview && previewData && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="w-6 h-6 text-blue-500" />
+              <h3 className="text-xl font-semibold text-gray-900">CSVファイルのプレビュー</h3>
+            </div>
+            
+            {/* 統計情報 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="bg-blue-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-blue-600">{previewData.totalRows}</div>
+                <div className="text-sm text-gray-600">総データ数</div>
+              </div>
+              <div className="bg-green-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-green-600">{previewData.validRows}</div>
+                <div className="text-sm text-gray-600">有効データ数</div>
+              </div>
+              <div className="bg-orange-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-orange-600">{previewData.invalidRows.length}</div>
+                <div className="text-sm text-gray-600">問題のあるデータ</div>
+              </div>
+            </div>
+            
+            {/* ヘッダー情報 */}
+            <div className="mb-4">
+              <h4 className="font-medium text-gray-900 mb-2">ヘッダー情報</h4>
+              <div className="flex flex-wrap gap-2">
+                {previewData.headers.map((header, index) => (
+                  <span 
+                    key={index}
+                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                  >
+                    {header || `列${index + 1}`}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            {/* データプレビュー */}
+            <div className="mb-4">
+              <h4 className="font-medium text-gray-900 mb-2">データプレビュー（最初の5行）</h4>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border border-gray-200 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      {previewData.headers.map((header, index) => (
+                        <th key={index} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                          {header || `列${index + 1}`}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white">
+                    {previewData.data.map((row, rowIndex) => (
+                      <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        {row.map((cell, cellIndex) => (
+                          <td key={cellIndex} className="px-3 py-2 text-sm text-gray-900 border-b border-gray-200">
+                            {cell || '-'}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {previewData.totalRows > 5 && (
+                <p className="text-sm text-gray-500 mt-2">
+                  ... 他 {previewData.totalRows - 5} 行のデータがあります
+                </p>
+              )}
+            </div>
+            
+            {/* エラー情報 */}
+            {previewData.invalidRows.length > 0 && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                <h4 className="font-medium text-orange-900 mb-2">問題のあるデータ</h4>
+                <ul className="text-sm text-orange-800 space-y-1">
+                  {previewData.invalidRows.slice(0, 5).map((error, index) => (
+                    <li key={index}>• {error}</li>
+                  ))}
+                  {previewData.invalidRows.length > 5 && (
+                    <li>... 他 {previewData.invalidRows.length - 5} 件の問題</li>
+                  )}
+                </ul>
+              </div>
+            )}
+            
+            {/* アクションボタン */}
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => {
+                  setShowPreview(false);
+                  setPreviewData(null);
+                }}
+                className="btn-secondary"
+              >
+                プレビューを閉じる
+              </button>
+              <button
+                onClick={handleUpload}
+                disabled={uploading || previewData.validRows === 0}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                {uploading ? 'アップロード中...' : `${previewData.validRows}件のデータをアップロード`}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Error Display */}
         {error && (
@@ -384,15 +634,60 @@ function CSVUploadContent() {
                   </div>
                 </div>
 
-                {result.skipped_order_codes.length > 0 && (
+                {result.skipped_details && result.skipped_details.length > 0 && (
                   <div className="bg-white rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 mb-2">スキップされた注文番号</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {result.skipped_order_codes.map((code, index) => (
-                        <span key={index} className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm">
-                          {code}
-                        </span>
-                      ))}
+                    <h4 className="font-medium text-gray-900 mb-4">スキップされた注文の詳細</h4>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full border border-gray-200 text-sm">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">注文番号</th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">顧客名</th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">金額</th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">注文日</th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">スキップ理由</th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">既存データ</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white">
+                          {result.skipped_details.map((item, index) => (
+                            <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                              <td className="px-3 py-2 text-sm font-medium text-gray-900 border-b">
+                                {item.order_code}
+                              </td>
+                              <td className="px-3 py-2 text-sm text-gray-900 border-b">
+                                {item.customer_name}
+                              </td>
+                              <td className="px-3 py-2 text-sm text-gray-900 border-b">
+                                ¥{item.price?.toLocaleString()}
+                              </td>
+                              <td className="px-3 py-2 text-sm text-gray-900 border-b">
+                                {item.order_date}
+                              </td>
+                              <td className="px-3 py-2 text-sm border-b">
+                                <span className={`px-2 py-1 rounded-full text-xs ${
+                                  item.reason === '重複' 
+                                    ? 'bg-yellow-100 text-yellow-800' 
+                                    : 'bg-red-100 text-red-800'
+                                }`}>
+                                  {item.reason}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2 text-sm text-gray-600 border-b">
+                                {item.existing_data ? (
+                                  <div className="text-xs">
+                                    <div>顧客: {item.existing_data.customer_name}</div>
+                                    <div>金額: ¥{item.existing_data.price?.toLocaleString()}</div>
+                                    <div>日付: {item.existing_data.order_date}</div>
+                                  </div>
+                                ) : item.error_message ? (
+                                  <div className="text-xs text-red-600">{item.error_message}</div>
+                                ) : '-'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 )}

@@ -25,19 +25,32 @@ export async function GET(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // **ENFORCE: Only customers can access this API**
-    if (sessionData.user.is_super_admin) {
-      return NextResponse.json({
-        success: false,
-        message: '管理者アカウントでは顧客向けサービスにアクセスできません。管理者画面をご利用ください。'
-      }, { status: 403 });
-    }
+    // **NOTE: Allow regular users and admin users to access their orders**
+    // Super admin users (silentogasasoft@gmail.com) should use admin APIs instead
+    // But regular admin users (admin/admin123) can access their own orders
 
     const userId = sessionData.user.id.toString();
+    console.log('🔍 CURRENT USER:', {
+      id: sessionData.user.id,
+      username: sessionData.user.username,
+      email: sessionData.user.email
+    });
 
     const client = await getDbClient();
     
     try {
+      // DEBUG: Check all orders and users
+      const debugUsers = await client.query('SELECT id, username, email FROM users');
+      console.log('🔍 ALL USERS:', debugUsers.rows);
+      
+      const debugAllOrders = await client.query(`
+        SELECT o.id, o.order_code, o.customer_name, o.user_id, u.username, u.email
+        FROM orders o
+        LEFT JOIN users u ON o.user_id::integer = u.id
+        ORDER BY o.created_at DESC LIMIT 10
+      `);
+      console.log('🔍 ALL ORDERS:', debugAllOrders.rows);
+      
       // Only fetch orders belonging to the authenticated user
       const result = await client.query(`
         SELECT 
@@ -56,12 +69,10 @@ export async function GET(request: NextRequest) {
           c.name as category_name,
           c.color as category_color,
           c.icon as category_icon,
-          o.shipped_at,
-          o.tracking_number,
           o.created_at,
           o.updated_at
         FROM orders o
-        LEFT JOIN categories c ON o.category_id = c.id AND c.user_id = $1
+        LEFT JOIN categories c ON o.category_id = c.id AND c.user_id = $1::integer
         WHERE o.user_id = $1
         ORDER BY o.created_at DESC
       `, [userId]);
