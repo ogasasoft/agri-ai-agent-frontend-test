@@ -11,6 +11,7 @@ interface Message {
 
 interface ChatStore {
   messages: Message[];
+  isHydrated: boolean;
   addMessage: (message: Message) => void;
   clearMessages: () => void;
   loadMessages: () => void;
@@ -21,12 +22,13 @@ const STORAGE_KEY = 'agri-ai-chat-messages';
 
 export const useChatStore = create<ChatStore>((set, get) => ({
   messages: [],
+  isHydrated: false,
   
   addMessage: (message) => {
     set((state) => {
       const newMessages = [...state.messages, message];
-      // Save to IndexedDB
-      if (typeof window !== 'undefined') {
+      // Save to IndexedDB only after hydration
+      if (typeof window !== 'undefined' && state.isHydrated) {
         saveToIndexedDB(newMessages);
         // Broadcast to other tabs
         broadcastMessage(message);
@@ -45,15 +47,25 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   loadMessages: () => {
     if (typeof window !== 'undefined') {
       loadFromIndexedDB().then((messages) => {
-        set({ messages });
+        set({ messages, isHydrated: true });
+      }).catch(() => {
+        // If loading fails, just mark as hydrated with empty messages
+        set({ isHydrated: true });
       });
       
       // Listen for broadcasts from other tabs
       setupBroadcastListener((message) => {
-        set((state) => ({
-          messages: [...state.messages, message]
-        }));
+        set((state) => {
+          // Only update if hydrated to avoid conflicts
+          if (state.isHydrated) {
+            return { messages: [...state.messages, message] };
+          }
+          return state;
+        });
       });
+    } else {
+      // Server-side or non-browser environment
+      set({ isHydrated: true });
     }
   },
   

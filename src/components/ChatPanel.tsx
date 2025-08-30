@@ -17,7 +17,7 @@ export function ChatPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { messages, addMessage, loadMessages } = useChatStore();
+  const { messages, isHydrated, addMessage, loadMessages } = useChatStore();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -121,7 +121,7 @@ export function ChatPanel() {
 
       {/* Messages */}
       <div className="flex-1 overflow-auto p-4 space-y-4">
-        {!mounted ? (
+        {!mounted || !isHydrated ? (
           <div className="text-center text-gray-500 mt-8">
             <Bot className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p className="text-sm">読み込み中...</p>
@@ -176,7 +176,7 @@ export function ChatPanel() {
           ))
         )}
         
-        {mounted && isLoading && (
+        {mounted && isHydrated && isLoading && (
           <div className="flex gap-3">
             <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
               <Bot className="w-4 h-4" />
@@ -203,11 +203,11 @@ export function ChatPanel() {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="メッセージを入力..."
             className="flex-1 input-field text-sm"
-            disabled={!mounted || isLoading}
+            disabled={!mounted || !isHydrated || isLoading}
           />
           <button
             type="submit"
-            disabled={!mounted || !message.trim() || isLoading}
+            disabled={!mounted || !isHydrated || !message.trim() || isLoading}
             className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed p-2"
           >
             <Send className="w-4 h-4" />
