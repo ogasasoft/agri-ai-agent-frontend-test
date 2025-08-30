@@ -2,14 +2,15 @@
 const nextConfig = {
   // Remove export mode for development with API routes
   // output: 'export',
-  trailingSlash: true,
-  skipTrailingSlashRedirect: true,
   images: {
     unoptimized: true
   },
   experimental: {
-    serverComponentsExternalPackages: []
+    serverComponentsExternalPackages: ['pg', 'bcryptjs']
   },
+  // Fix React hydration issues
+  reactStrictMode: true,
+  swcMinify: true,
   // セキュリティのため、環境変数をクライアントサイドに露出しない
   // env: {
   //   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
