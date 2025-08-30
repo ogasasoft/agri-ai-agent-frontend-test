@@ -109,17 +109,17 @@ export function Sidebar() {
             <User className="w-4 h-4 text-gray-600" />
           </div>
           <div className="flex-1 min-w-0">
-            {!mounted || loading ? (
+            {loading ? (
               <div className="animate-pulse">
                 <div className="h-3 bg-gray-300 rounded w-20"></div>
               </div>
             ) : (
-              <>
+              <div suppressHydrationWarning>
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {user?.username || 'Unknown'}
                 </p>
                 <p className="text-xs text-gray-500">ログイン中</p>
-              </>
+              </div>
             )}
           </div>
         </div>

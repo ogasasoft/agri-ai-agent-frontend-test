@@ -121,12 +121,7 @@ export function ChatPanel() {
 
       {/* Messages */}
       <div className="flex-1 overflow-auto p-4 space-y-4">
-        {!mounted || !isHydrated ? (
-          <div className="text-center text-gray-500 mt-8">
-            <Bot className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p className="text-sm">読み込み中...</p>
-          </div>
-        ) : messages.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="text-center text-gray-500 mt-8">
             <Bot className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p className="text-sm">
@@ -140,11 +135,12 @@ export function ChatPanel() {
             </div>
           </div>
         ) : (
-          messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
-          >
+          <div suppressHydrationWarning>
+            {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+            >
             <div className={`
               w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
               ${msg.role === 'user' 
@@ -165,7 +161,7 @@ export function ChatPanel() {
               <div className={`
                 text-xs mt-1 opacity-70
                 ${msg.role === 'user' ? 'text-primary-100' : 'text-gray-500'}
-              `}>
+              `} suppressHydrationWarning>
                 {msg.timestamp.toLocaleTimeString('ja-JP', {
                   hour: '2-digit',
                   minute: '2-digit'
@@ -173,10 +169,11 @@ export function ChatPanel() {
               </div>
             </div>
           </div>
-          ))
+            ))}
+          </div>
         )}
         
-        {mounted && isHydrated && isLoading && (
+        {isLoading && (
           <div className="flex gap-3">
             <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
               <Bot className="w-4 h-4" />
@@ -203,11 +200,11 @@ export function ChatPanel() {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="メッセージを入力..."
             className="flex-1 input-field text-sm"
-            disabled={!mounted || !isHydrated || isLoading}
+            disabled={isLoading}
           />
           <button
             type="submit"
-            disabled={!mounted || !isHydrated || !message.trim() || isLoading}
+            disabled={!message.trim() || isLoading}
             className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed p-2"
           >
             <Send className="w-4 h-4" />

@@ -181,7 +181,7 @@ function LoginForm() {
                   name="username"
                   type="text"
                   required
-                  disabled={!mounted}
+                  disabled={loading}
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
                   className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100"
@@ -204,7 +204,7 @@ function LoginForm() {
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   required
-                  disabled={!mounted}
+                  disabled={loading}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100"
@@ -212,7 +212,7 @@ function LoginForm() {
                 />
                 <button
                   type="button"
-                  disabled={!mounted}
+                  disabled={loading}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center disabled:opacity-50"
                   onClick={() => setShowPassword(!showPassword)}
                 >
@@ -271,15 +271,10 @@ function LoginForm() {
           <div>
             <button
               type="submit"
-              disabled={!mounted || loading}
+              disabled={loading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {!mounted ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  読み込み中...
-                </div>
-              ) : loading ? (
+              {loading ? (
                 <div className="flex items-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   ログイン中...
