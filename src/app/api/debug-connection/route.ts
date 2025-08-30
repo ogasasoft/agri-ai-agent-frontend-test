@@ -8,12 +8,25 @@ export async function GET(request: NextRequest) {
     console.log('=== Debug Connection Test Start ===');
     console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
     console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('All env vars:', Object.keys(process.env).filter(key => key.includes('DATABASE')));
     
-    if (!process.env.DATABASE_URL) {
+    // Check all possible DATABASE environment variables
+    const envCheck = {
+      DATABASE_URL: !!process.env.DATABASE_URL,
+      POSTGRES_URL: !!process.env.POSTGRES_URL,
+      POSTGRES_URL_NON_POOLING: !!process.env.POSTGRES_URL_NON_POOLING,
+      NODE_ENV: process.env.NODE_ENV,
+      VERCEL_ENV: process.env.VERCEL_ENV
+    };
+
+    if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL) {
       return NextResponse.json({
         success: false,
-        error: 'DATABASE_URL environment variable is not set',
-        env: process.env.NODE_ENV
+        error: 'No database URL environment variable is set',
+        env_check: envCheck,
+        available_env_vars: Object.keys(process.env).filter(key => 
+          key.includes('DATABASE') || key.includes('POSTGRES') || key.includes('VERCEL')
+        )
       }, { status: 500 });
     }
 

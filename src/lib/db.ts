@@ -1,8 +1,17 @@
 import { Client } from 'pg';
 
 export async function getDbClient(): Promise<Client> {
+  // Try multiple environment variables in order of preference
+  const connectionString = process.env.DATABASE_URL || 
+                           process.env.POSTGRES_URL || 
+                           process.env.POSTGRES_URL_NON_POOLING;
+  
+  if (!connectionString) {
+    throw new Error('No database connection string found in environment variables');
+  }
+  
   const client = new Client({
-    connectionString: process.env.DATABASE_URL,
+    connectionString,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   });
   
