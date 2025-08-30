@@ -45,18 +45,10 @@ export function Sidebar() {
 
   const fetchUserInfo = async () => {
     try {
-      // Get CSRF token from cookie for headers
-      const csrfToken = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('csrf_token='))
-        ?.split('=')[1];
-
       const response = await fetch('/api/auth/me', {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(csrfToken && { 'x-csrf-token': csrfToken })
-        },
-        credentials: 'include'
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-cache'
       });
       
       if (response.ok) {

@@ -15,9 +15,14 @@ interface Message {
 export function ChatPanel() {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { messages, addMessage, loadMessages } = useChatStore();
   const pathname = usePathname();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // ページ情報を取得
   const getPageContext = (): string => {
@@ -41,8 +46,10 @@ export function ChatPanel() {
   };
 
   useEffect(() => {
-    loadMessages();
-  }, [loadMessages]);
+    if (mounted) {
+      loadMessages();
+    }
+  }, [mounted, loadMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -114,7 +121,12 @@ export function ChatPanel() {
 
       {/* Messages */}
       <div className="flex-1 overflow-auto p-4 space-y-4">
-        {messages.length === 0 && (
+        {!mounted ? (
+          <div className="text-center text-gray-500 mt-8">
+            <Bot className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            <p className="text-sm">読み込み中...</p>
+          </div>
+        ) : messages.length === 0 ? (
           <div className="text-center text-gray-500 mt-8">
             <Bot className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p className="text-sm">
@@ -127,9 +139,8 @@ export function ChatPanel() {
               <p>💡 「売上データの見方を教えて」</p>
             </div>
           </div>
-        )}
-        
-        {messages.map((msg) => (
+        ) : (
+          messages.map((msg) => (
           <div
             key={msg.id}
             className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
@@ -162,9 +173,10 @@ export function ChatPanel() {
               </div>
             </div>
           </div>
-        ))}
+          ))
+        )}
         
-        {isLoading && (
+        {mounted && isLoading && (
           <div className="flex gap-3">
             <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">
               <Bot className="w-4 h-4" />
@@ -191,11 +203,11 @@ export function ChatPanel() {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="メッセージを入力..."
             className="flex-1 input-field text-sm"
-            disabled={isLoading}
+            disabled={!mounted || isLoading}
           />
           <button
             type="submit"
-            disabled={!message.trim() || isLoading}
+            disabled={!mounted || !message.trim() || isLoading}
             className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed p-2"
           >
             <Send className="w-4 h-4" />
