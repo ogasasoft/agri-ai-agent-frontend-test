@@ -5,7 +5,9 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const sessionToken = request.cookies.get('session_token')?.value;
+    // Try multiple sources for session token
+    const sessionToken = request.headers.get('x-session-token') || 
+                         request.cookies.get('session_token')?.value;
     
     if (!sessionToken) {
       return NextResponse.json({

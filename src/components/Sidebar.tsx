@@ -31,14 +31,34 @@ export function Sidebar() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    fetchUserInfo();
+    setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      fetchUserInfo();
+    }
+  }, [mounted]);
 
   const fetchUserInfo = async () => {
     try {
-      const response = await fetch('/api/auth/me');
+      // Get CSRF token from cookie for headers
+      const csrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrf_token='))
+        ?.split('=')[1];
+
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrfToken && { 'x-csrf-token': csrfToken })
+        },
+        credentials: 'include'
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
@@ -53,7 +73,20 @@ export function Sidebar() {
   const handleLogout = async () => {
     if (confirm('ログアウトしますか？')) {
       try {
-        await fetch('/api/auth/logout', { method: 'POST' });
+        // Get CSRF token from cookie for logout request
+        const csrfToken = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('csrf_token='))
+          ?.split('=')[1];
+
+        await fetch('/api/auth/logout', { 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(csrfToken && { 'x-csrf-token': csrfToken })
+          },
+          credentials: 'include'
+        });
         router.push('/login');
       } catch (error) {
         console.error('Logout error:', error);
@@ -84,7 +117,7 @@ export function Sidebar() {
             <User className="w-4 h-4 text-gray-600" />
           </div>
           <div className="flex-1 min-w-0">
-            {loading ? (
+            {!mounted || loading ? (
               <div className="animate-pulse">
                 <div className="h-3 bg-gray-300 rounded w-20"></div>
               </div>
