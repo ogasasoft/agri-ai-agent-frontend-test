@@ -16,19 +16,26 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const redirectPath = searchParams.get('redirect') || '/orders';
   const autoLogin = searchParams.get('auto') === 'true';
 
   useEffect(() => {
-    if (autoLogin) {
-      // Try auto-login with remember token
-      attemptAutoLogin();
-    } else {
-      // Check if user is already logged in
-      checkAuthStatus();
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      if (autoLogin) {
+        // Try auto-login with remember token
+        attemptAutoLogin();
+      } else {
+        // Check if user is already logged in
+        checkAuthStatus();
+      }
     }
-  }, [autoLogin]);
+  }, [mounted, autoLogin]);
 
   const checkAuthStatus = async () => {
     try {
@@ -174,9 +181,10 @@ function LoginForm() {
                   name="username"
                   type="text"
                   required
+                  disabled={!mounted}
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="appearance-none relative block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100"
                   placeholder="ユーザー名を入力してください"
                 />
               </div>
@@ -196,14 +204,16 @@ function LoginForm() {
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   required
+                  disabled={!mounted}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="appearance-none relative block w-full pl-10 pr-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100"
                   placeholder="パスワードを入力してください"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  disabled={!mounted}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center disabled:opacity-50"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -221,9 +231,10 @@ function LoginForm() {
                 id="rememberMe"
                 name="rememberMe"
                 type="checkbox"
+                disabled={!mounted}
                 checked={formData.rememberMe}
                 onChange={(e) => handleInputChange('rememberMe', e.target.checked)}
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded disabled:opacity-50"
               />
               <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
                 ログイン状態を保持する（30日間）
@@ -260,10 +271,15 @@ function LoginForm() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={!mounted || loading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? (
+              {!mounted ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  読み込み中...
+                </div>
+              ) : loading ? (
                 <div className="flex items-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   ログイン中...
