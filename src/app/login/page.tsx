@@ -30,26 +30,13 @@ function LoginForm() {
       if (autoLogin) {
         // Try auto-login with remember token
         attemptAutoLogin();
-      } else {
-        // Check if user is already logged in
-        checkAuthStatus();
       }
+      // Note: No need to check auth status on login page
+      // Users are expected to be logged out when accessing login
     }
   }, [mounted, autoLogin]);
 
-  const checkAuthStatus = async () => {
-    try {
-      const response = await fetch('/api/auth/me', {
-        credentials: 'include'
-      });
-      if (response.ok) {
-        // User is already logged in, check role and redirect
-        await checkUserRoleAndRedirect();
-      }
-    } catch (error) {
-      // User not logged in, stay on login page
-    }
-  };
+  // checkAuthStatus removed - not needed on login page
 
   const checkUserRoleAndRedirect = async () => {
     try {
