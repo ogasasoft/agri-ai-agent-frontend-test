@@ -40,19 +40,26 @@ function LoginForm() {
 
   const checkUserRoleAndRedirect = async () => {
     try {
-      // Check if user has admin privileges
-      const adminResponse = await fetch('/api/admin/me', {
+      // First check user info to get admin flag
+      const userResponse = await fetch('/api/auth/me', {
         credentials: 'include'
       });
-      if (adminResponse.ok) {
-        // User is admin, redirect to admin page
-        router.push('/admin');
+      
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        if (userData.success && userData.isAdmin) {
+          // User is admin, redirect to admin page
+          router.push('/admin');
+        } else {
+          // Regular user, redirect to default path
+          router.push(redirectPath);
+        }
       } else {
-        // Regular user, redirect to default path
+        // Auth check failed, redirect to default path
         router.push(redirectPath);
       }
     } catch (error) {
-      // If admin check fails, redirect to default path
+      // If check fails, redirect to default path
       router.push(redirectPath);
     }
   };

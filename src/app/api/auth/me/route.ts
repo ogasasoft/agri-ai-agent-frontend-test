@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       user: sessionData.user,
-      session: sessionData.session
+      session: sessionData.session,
+      isAdmin: sessionData.user.is_super_admin || false
     });
 
   } catch (error: any) {
