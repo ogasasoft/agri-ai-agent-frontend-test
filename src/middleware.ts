@@ -43,7 +43,9 @@ const PUBLIC_ROUTES = [
   '/api/auth/auto-login',
   '/login',
   '/api/migrate-security-enhancements', // Temporary for setup
-  '/api/migrate-admin-system' // Temporary for setup
+  '/api/migrate-admin-system', // Temporary for setup
+  '/api/debug-connection', // Debug endpoint for production troubleshooting
+  '/api/setup-production' // Production user setup
 ];
 
 // Routes that need authentication but should be accessible
