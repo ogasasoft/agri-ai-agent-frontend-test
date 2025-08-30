@@ -4,17 +4,13 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Calendar, TrendingUp, Package, DollarSign, Download, Lightbulb, AlertTriangle, Info, TrendingDown } from 'lucide-react';
 
-// 動的インポートでRechartsをSSRから除外
-const BarChart = dynamic(() => import('recharts').then(mod => ({ default: mod.BarChart })), { ssr: false });
-const Bar = dynamic(() => import('recharts').then(mod => ({ default: mod.Bar })), { ssr: false });
-const XAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.XAxis })), { ssr: false });
-const YAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.YAxis })), { ssr: false });
-const CartesianGrid = dynamic(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })), { ssr: false });
-const Tooltip = dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip })), { ssr: false });
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })), { ssr: false });
-const PieChart = dynamic(() => import('recharts').then(mod => ({ default: mod.PieChart })), { ssr: false });
-const Pie = dynamic(() => import('recharts').then(mod => ({ default: mod.Pie })), { ssr: false });
-const Cell = dynamic(() => import('recharts').then(mod => ({ default: mod.Cell })), { ssr: false });
+// Charts コンポーネントを動的インポートでSSRから除外
+const DashboardCharts = dynamic(() => import('@/components/DashboardCharts'), { 
+  ssr: false,
+  loading: () => <div className="w-full h-64 flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+  </div>
+});
 import type { Order } from '@/types/order';
 
 interface DashboardStats {
@@ -195,6 +191,13 @@ export default function DashboardPage() {
   };
 
   const statusColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
+  
+  // Create status data for charts
+  const statusData = [
+    { name: '処理中', value: stats.pendingOrders },
+    { name: '配送済み', value: stats.deliveredOrders },
+    { name: '合計', value: stats.totalOrders }
+  ];
 
   if (loading) {
     return (
@@ -302,52 +305,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Product Sales Chart */}
-          <div className="card p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">商品別注文件数</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={productStats}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="productName" 
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  fontSize={12}
-                />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="orderCount" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Revenue Chart */}
-          <div className="card p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">商品別売上</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={productStats}
-                  dataKey="revenue"
-                  nameKey="productName"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label={({ productName, revenue }) => 
-                    `${productName}: ${formatCurrency(revenue)}`
-                  }
-                >
-                  {productStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={statusColors[index % statusColors.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => formatCurrency(value as number)} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        <DashboardCharts 
+          productStats={productStats} 
+          statusData={statusData}
+        />
 
         {/* Product Stats Table */}
         <div className="card">
