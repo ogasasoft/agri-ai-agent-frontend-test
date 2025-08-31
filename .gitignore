@@ -30,8 +30,7 @@ src/app/api/migrate-users/
 src/app/api/migrate-super-admin/
 
 # Test admin pages
-src/app/admin/users/
-src/app/api/admin/users/
+# Note: admin/users pages are now production-ready
 
 # Logs
 npm-debug.log*
