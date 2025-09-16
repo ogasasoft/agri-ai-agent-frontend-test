@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateUserEnhanced, getClientInfo } from '@/lib/auth-enhanced';
+import { AuthErrorBuilder, logAuthAttempt, logSecurityEvent } from '@/lib/auth-error-details';
 import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
@@ -25,11 +26,36 @@ export async function POST(request: NextRequest) {
     );
 
     if (!authResult.success) {
-      return NextResponse.json({
-        success: false,
-        message: authResult.message,
-        lockoutInfo: authResult.lockoutInfo
-      }, { status: 401 });
+      // ログイン失敗の詳細分析とログ記録
+      const context = {
+        username,
+        ipAddress,
+        userAgent,
+        attemptCount: authResult.lockoutInfo?.attemptCount,
+        lockoutDuration: authResult.lockoutInfo?.lockoutDuration
+      };
+
+      logAuthAttempt('FAILURE', username, context);
+
+      // 攻撃パターンの検出
+      if (authResult.lockoutInfo?.attemptCount && authResult.lockoutInfo.attemptCount > 5) {
+        logSecurityEvent('BRUTE_FORCE', { authResult }, context);
+      }
+
+      // AI判断型エラーレスポンス生成
+      let reason: 'INVALID_CREDENTIALS' | 'USER_NOT_FOUND' | 'ACCOUNT_LOCKED' | 'RATE_LIMITED' = 'INVALID_CREDENTIALS';
+
+      if (authResult.message?.includes('見つかりません')) {
+        reason = 'USER_NOT_FOUND';
+      } else if (authResult.message?.includes('ロック')) {
+        reason = 'ACCOUNT_LOCKED';
+      } else if (authResult.message?.includes('制限')) {
+        reason = 'RATE_LIMITED';
+      }
+
+      const detailedError = AuthErrorBuilder.loginFailure(username, reason, context);
+
+      return NextResponse.json(detailedError, { status: 401 });
     }
 
     // Set secure HTTP-only cookies
@@ -70,13 +96,22 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // ログイン成功をログ記録
+    logAuthAttempt('SUCCESS', username, { ipAddress, userAgent });
+
     return response;
 
   } catch (error: any) {
-    console.error('Login error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'サーバーエラーが発生しました。'
-    }, { status: 500 });
+    // システムエラーの詳細分析
+    const context = { ipAddress: getClientInfo(request).ipAddress, userAgent: getClientInfo(request).userAgent };
+
+    const systemError = new AuthErrorBuilder('システムエラーが発生しました')
+      .setAuthContext(context)
+      .addProcessingStep('Request Processing', 'failed', { error: error.message })
+      .addSuggestion('一時的なサーバーエラーの可能性があります。しばらく時間をおいてから再試行してください')
+      .addSuggestion('問題が続く場合は、管理者にお問い合わせください')
+      .build();
+
+    return NextResponse.json(systemError, { status: 500 });
   }
 }

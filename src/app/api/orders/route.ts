@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateSession } from '@/lib/auth';
 import { getDbClient } from '@/lib/db';
+import { AuthErrorBuilder } from '@/lib/auth-error-details';
+import { DatabaseErrorBuilder, logDatabaseOperation } from '@/lib/api-error-details';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,18 +13,14 @@ export async function GET(request: NextRequest) {
     const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     
     if (!sessionToken) {
-      return NextResponse.json({
-        success: false,
-        message: '認証が必要です。'
-      }, { status: 401 });
+      const authError = AuthErrorBuilder.sessionError('INVALID_SESSION');
+      return NextResponse.json(authError, { status: 401 });
     }
 
     const sessionData = await validateSession(sessionToken);
     if (!sessionData) {
-      return NextResponse.json({
-        success: false,
-        message: 'セッションが無効です。'
-      }, { status: 401 });
+      const authError = AuthErrorBuilder.sessionError('EXPIRED_SESSION', { token: sessionToken });
+      return NextResponse.json(authError, { status: 401 });
     }
 
     // **NOTE: Allow regular users and admin users to access their orders**
@@ -76,34 +74,79 @@ export async function GET(request: NextRequest) {
         WHERE o.user_id = $1
         ORDER BY o.created_at DESC
       `, [userId]);
-      
+
+      logDatabaseOperation('SELECT', 'orders', true, { count: result.rows.length }, userId);
+
       return NextResponse.json(result.rows);
     } finally {
       await client.end();
     }
-  } catch (error) {
-    console.error('Database error:', error);
-    // フォールバック: 空配列を返す
-    return NextResponse.json([]);
+  } catch (error: any) {
+    logDatabaseOperation('SELECT', 'orders', false, { error: error.message }, userId);
+
+    // データベースエラーの詳細分析
+    const dbError = DatabaseErrorBuilder.queryError(
+      'SELECT orders with categories',
+      error,
+      {
+        table: 'orders',
+        operation: 'SELECT',
+        userId: sessionData?.user.id.toString()
+      }
+    );
+
+    return NextResponse.json(dbError, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Get user ID from middleware
-    const userId = request.headers.get('x-user-id');
-    if (!userId) {
+    // Session validation
+    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    if (!sessionToken) {
       return NextResponse.json({ 
         success: false, 
         message: '認証が必要です。'
       }, { status: 401 });
     }
 
+    const sessionData = await validateSession(sessionToken);
+    if (!sessionData || !sessionData.user) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'セッションが無効です。'
+      }, { status: 401 });
+    }
+
+    // CSRF validation
+    const csrfToken = request.headers.get('x-csrf-token');
+    if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
+      return NextResponse.json({
+        success: false,
+        message: 'CSRF検証に失敗しました。'
+      }, { status: 403 });
+    }
+
+    const userId = sessionData.user.id.toString();
+
     const data = await request.json();
     
     const client = await getDbClient();
     
     try {
+      // Check for duplicate order code within the user's orders
+      const duplicateCheck = await client.query(
+        'SELECT id FROM orders WHERE order_code = $1 AND user_id = $2',
+        [data.order_code || data.order_number, userId]
+      );
+      
+      if (duplicateCheck.rows.length > 0) {
+        return NextResponse.json({ 
+          success: false, 
+          message: `注文番号「${data.order_code || data.order_number}」は既に存在します。別の注文番号をご使用ください。`
+        }, { status: 409 });
+      }
+
       // Verify category belongs to user if specified
       if (data.category_id) {
         const categoryCheck = await client.query(
@@ -122,9 +165,9 @@ export async function POST(request: NextRequest) {
       const result = await client.query(`
         INSERT INTO orders (
           order_code, customer_name, phone, address, price, 
-          order_date, delivery_date, notes, category_id, source, extra_data, user_id
+          order_date, delivery_date, notes, category_id, source, extra_data, user_id, product_category
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING *
       `, [
         data.order_code || data.order_number,
@@ -138,7 +181,8 @@ export async function POST(request: NextRequest) {
         data.category_id || null,
         data.source || 'manual_entry',
         JSON.stringify({ registration_method: data.source || 'manual_entry' }),
-        userId
+        userId,
+        data.product_category || 'other'
       ]);
       
       const newOrder = result.rows[0];
@@ -165,6 +209,24 @@ export async function POST(request: NextRequest) {
     }
   } catch (error: any) {
     console.error('Database error:', error);
+    
+    // Handle specific database errors
+    if (error.code === '23505') {
+      // Unique constraint violation
+      if (error.constraint === 'orders_order_code_key' || error.constraint === 'orders_order_code_user_id_key') {
+        return NextResponse.json({ 
+          success: false, 
+          message: '注文番号が既に存在します。別の注文番号をご使用ください。'
+        }, { status: 409 });
+      }
+    } else if (error.code === '23502') {
+      // Not null constraint violation
+      return NextResponse.json({ 
+        success: false, 
+        message: '必須項目が入力されていません。'
+      }, { status: 400 });
+    }
+    
     return NextResponse.json({ 
       success: false, 
       message: 'データベースエラーが発生しました。',

@@ -76,6 +76,8 @@ function CSVUploadContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const category = (searchParams.get('category') as ProductCategory) || 'other';
+  const categoryId = searchParams.get('categoryId');
+  const dataSource = searchParams.get('dataSource') || 'tabechoku';
   
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -131,15 +133,25 @@ function CSVUploadContent() {
           const headers = data[0];
           const rows = data.slice(1);
           
-          // 必須項目のチェック
-          const requiredColumns = ['注文番号', 'order_code'];
+          // データソースに基づく必須項目のチェック
+          let requiredColumns: string[];
+          let errorMessage: string;
+          
+          if (dataSource === 'colormi') {
+            requiredColumns = ['売上ID'];
+            errorMessage = '必須列（売上ID）が見つかりません';
+          } else {
+            requiredColumns = ['注文番号', 'order_code'];
+            errorMessage = '必須列（注文番号/order_code）が見つかりません';
+          }
+          
           const hasRequiredColumn = requiredColumns.some(col => 
             headers.some(header => header.toLowerCase().includes(col.toLowerCase()) || 
                                   col.toLowerCase().includes(header.toLowerCase()))
           );
           
           if (!hasRequiredColumn) {
-            reject(new Error('必須列（注文番号/order_code）が見つかりません'));
+            reject(new Error(errorMessage));
             return;
           }
           
@@ -255,77 +267,19 @@ function CSVUploadContent() {
         csrfToken = document.cookie.split('csrf_token=')[1]?.split(';')[0] || '';
       }
       
-      console.log('Debug - Session data:', sessionData);
-      console.log('Debug - CSRF token:', csrfToken);
 
-      // カテゴリ一覧を取得してIDを確認
-      const categoriesResponse = await fetch('/api/categories');
-
-      let categoryId: number | null = null;
-
-      if (categoriesResponse.ok) {
-        const categoriesResponseData = await categoriesResponse.json();
-        const categoriesData = categoriesResponseData.categories || [];
-        
-        // カテゴリ名でマッピング
-        const categoryMap: Record<ProductCategory, string> = {
-          vegetables: '野菜',
-          fruits: '果物', 
-          other: 'その他'
-        };
-        
-        const categoryName = categoryMap[category];
-        const matchedCategory = categoriesData.find((cat: any) => cat.name === categoryName);
-        
-        if (matchedCategory) {
-          categoryId = matchedCategory.id;
-        }
-      } else {
-        const errorData = await categoriesResponse.json();
-        setError(`カテゴリ一覧の取得に失敗しました: ${errorData.message || '不明なエラー'}`);
-        return;
-      }
-
-      // カテゴリが見つからない場合はデフォルトで作成
-      if (!categoryId) {
-        const categoryName = category === 'vegetables' ? '野菜' : 
-                            category === 'fruits' ? '果物' : 'その他';
-        
-        const createCategoryResponse = await fetch('/api/categories', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-csrf-token': csrfToken,
-          },
-          body: JSON.stringify({
-            name: categoryName,
-            description: categoryInfo[category].description,
-            color: category === 'vegetables' ? 'green' : 
-                   category === 'fruits' ? 'red' : 'gray',
-            icon: category === 'vegetables' ? 'carrot' : 
-                  category === 'fruits' ? 'apple' : 'package'
-          }),
-        });
-
-        if (createCategoryResponse.ok) {
-          const newCategory = await createCategoryResponse.json();
-          categoryId = newCategory.id || newCategory.category?.id;
-        } else {
-          const errorData = await createCategoryResponse.json();
-          console.log('Debug - Create category error:', errorData);
-          setError(errorData.message || 'カテゴリの作成に失敗しました。');
-          return;
-        }
-      }
-
-      if (!categoryId) {
-        setError('カテゴリの作成に失敗しました。');
+      // categoryIdが直接URLパラメータで渡されているのでそれを使用
+      const categoryIdNum = categoryId ? parseInt(categoryId) : null;
+      
+      if (!categoryIdNum) {
+        setError('カテゴリIDが指定されていません。');
         return;
       }
 
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('categoryId', categoryId.toString()); // IDを送信
+      formData.append('categoryId', categoryIdNum.toString()); // IDを送信
+      formData.append('dataSource', dataSource); // データソースを送信
       formData.append('csrf_token', csrfToken); // FormDataにもCSRFトークンを追加
 
       const response = await fetch('/api/upload-with-category', {
@@ -343,7 +297,7 @@ function CSVUploadContent() {
         // 成功時の処理（新規登録件数が0でも重複スキップがあれば正常）
         if (data.registered_count > 0) {
           setTimeout(() => {
-            router.push(`/orders/register/confirm?category=${category}&method=csv&count=${data.registered_count}`);
+            router.push(`/orders/register/confirm?categoryId=${categoryId}&method=csv&count=${data.registered_count}&dataSource=${dataSource}`);
           }, 2000); // 2秒後にリダイレクト
         } else if (data.skipped_count > 0) {
           // 新規登録はないが重複スキップがある場合は正常処理
@@ -353,7 +307,33 @@ function CSVUploadContent() {
           setError('登録可能なデータがありませんでした。CSVファイルの形式を確認してください。');
         }
       } else {
-        setError(data.message || 'アップロードに失敗しました');
+        // 詳細なエラー情報を表示
+        let errorMessage = data.message || 'アップロードに失敗しました。';
+        
+        // 詳細なデバッグ情報がある場合は表示
+        if (data.debug_info?.data_analysis) {
+          const analysis = data.debug_info.data_analysis;
+          errorMessage += '\n\n📊 詳細情報:';
+          if (analysis.total_rows) {
+            errorMessage += `\n- 総行数: ${analysis.total_rows}`;
+          }
+          if (analysis.validation_errors && analysis.validation_errors.length > 0) {
+            errorMessage += `\n- エラー例: ${analysis.validation_errors.slice(0, 3).join(', ')}`;
+          }
+          if (analysis.headers) {
+            errorMessage += `\n- 検出されたヘッダー: ${analysis.headers.slice(0, 5).join(', ')}${analysis.headers.length > 5 ? '...' : ''}`;
+          }
+        }
+        
+        // 修正提案がある場合は表示
+        if (data.suggestions && data.suggestions.length > 0) {
+          errorMessage += '\n\n💡 修正提案:';
+          data.suggestions.slice(0, 3).forEach((suggestion: string, index: number) => {
+            errorMessage += `\n${index + 1}. ${suggestion}`;
+          });
+        }
+        
+        setError(errorMessage);
       }
     } catch (err) {
       setError('サーバーエラーが発生しました');
@@ -368,11 +348,11 @@ function CSVUploadContent() {
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => router.push('/orders/register/choose')}
+            onClick={() => router.push(`/orders/register/data-source?categoryId=${categoryId}`)}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            カテゴリ選択に戻る
+            データソース選択に戻る
           </button>
           
           <div className="flex items-center gap-4 mb-4">
@@ -382,6 +362,16 @@ function CSVUploadContent() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{categoryData.name}のCSVアップロード</h1>
               <p className="text-gray-600">{categoryData.description}をCSVファイルで一括登録</p>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm text-gray-500">データソース:</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  dataSource === 'colormi' 
+                    ? 'bg-blue-100 text-blue-800' 
+                    : 'bg-green-100 text-green-800'
+                }`}>
+                  {dataSource === 'colormi' ? 'カラーミー' : 'たべちょく'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -717,14 +707,26 @@ function CSVUploadContent() {
 
         {/* CSV Format Help */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium text-blue-900 mb-2">💡 CSVファイルの形式について</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• ヘッダー行: order_code,customer_name,phone,address,price,order_date,delivery_date,notes</li>
-            <li>• 注文番号（order_code）は必須で、重複チェックに使用されます</li>
-            <li>• 顧客名（customer_name）と価格（price）は必須項目です</li>
-            <li>• 日付形式: YYYY-MM-DD または YYYY/MM/DD</li>
-            <li>• 文字エンコーディング: UTF-8 または Shift_JIS</li>
-          </ul>
+          <h4 className="font-medium text-blue-900 mb-2">💡 {dataSource === 'colormi' ? 'カラーミー' : 'たべちょく'}CSVファイルの形式について</h4>
+          {dataSource === 'colormi' ? (
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• 必須ヘッダー: 売上ID, 購入者 名前, 購入者 住所, 購入単価</li>
+              <li>• オプション: 受注日, 購入者 電話番号, 購入者 都道府県, 備考</li>
+              <li>• 売上ID（注文番号）は必須で、重複チェックに使用されます</li>
+              <li>• 住所は「購入者 都道府県」と「購入者 住所」が自動統合されます</li>
+              <li>• 日付形式: YYYY-MM-DD または YYYY/MM/DD</li>
+              <li>• 文字エンコーディング: UTF-8 または Shift_JIS</li>
+            </ul>
+          ) : (
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• 必須ヘッダー: 注文番号, 顧客名, 住所, 金額</li>
+              <li>• オプション: 電話番号, 注文日, 希望配達日, 備考</li>
+              <li>• 注文番号は必須で、重複チェックに使用されます</li>
+              <li>• 顧客名と金額は必須項目です</li>
+              <li>• 日付形式: YYYY-MM-DD または YYYY/MM/DD</li>
+              <li>• 文字エンコーディング: UTF-8 または Shift_JIS</li>
+            </ul>
+          )}
         </div>
       </div>
     </div>

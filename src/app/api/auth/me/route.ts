@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateSession } from '@/lib/auth';
+import { AuthErrorBuilder } from '@/lib/auth-error-details';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,18 +11,14 @@ export async function GET(request: NextRequest) {
                          request.cookies.get('session_token')?.value;
     
     if (!sessionToken) {
-      return NextResponse.json({
-        success: false,
-        message: '認証が必要です。'
-      }, { status: 401 });
+      const authError = AuthErrorBuilder.sessionError('INVALID_SESSION');
+      return NextResponse.json(authError, { status: 401 });
     }
 
     const sessionData = await validateSession(sessionToken);
     if (!sessionData) {
-      return NextResponse.json({
-        success: false,
-        message: 'セッションが無効です。'
-      }, { status: 401 });
+      const authError = AuthErrorBuilder.sessionError('EXPIRED_SESSION', { token: sessionToken });
+      return NextResponse.json(authError, { status: 401 });
     }
 
     return NextResponse.json({
@@ -32,10 +29,12 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Get user info error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'サーバーエラーが発生しました。'
-    }, { status: 500 });
+    const systemError = new AuthErrorBuilder('ユーザー情報取得中にエラーが発生しました')
+      .addProcessingStep('Session Validation', 'failed', { error: error.message })
+      .addSuggestion('セッションが破損している可能性があります。再ログインしてください')
+      .addSuggestion('問題が続く場合は、管理者にお問い合わせください')
+      .build();
+
+    return NextResponse.json(systemError, { status: 500 });
   }
 }

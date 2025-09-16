@@ -1,6 +1,11 @@
 import { Client } from 'pg'
 import { NextRequest } from 'next/server'
 
+// Factory function to create mock DB client
+export function createMockDbClient(): MockDbClient {
+  return MockDbClient.getInstance()
+}
+
 // Mock database client
 export class MockDbClient {
   private static instance: MockDbClient
@@ -207,14 +212,16 @@ export const createMockUser = (overrides = {}) => ({
   ...overrides
 })
 
-export const createMockSession = (overrides = {}) => ({
-  id: 1,
-  user_id: 1,
-  session_token: 'mock-session-token',
-  csrf_token: 'mock-csrf-token',
-  expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-  is_active: true,
-  ...overrides
+export const createMockSession = (user: any = null) => ({
+  user: user || createMockUser(),
+  session: {
+    id: 1,
+    user_id: user?.id || 1,
+    session_token: 'mock-session-token',
+    csrf_token: 'mock-csrf-token',
+    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    is_active: true
+  }
 })
 
 export const createMockOrder = (overrides = {}) => ({

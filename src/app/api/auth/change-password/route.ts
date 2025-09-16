@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { changePassword, validateSession } from '@/lib/auth';
+import { AuthErrorBuilder, logAuthAttempt } from '@/lib/auth-error-details';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,27 +9,24 @@ export async function POST(request: NextRequest) {
     const sessionToken = request.cookies.get('session_token')?.value;
     
     if (!sessionToken) {
-      return NextResponse.json({
-        success: false,
-        message: '認証が必要です。'
-      }, { status: 401 });
+      const authError = AuthErrorBuilder.sessionError('INVALID_SESSION');
+      return NextResponse.json(authError, { status: 401 });
     }
 
     const sessionData = await validateSession(sessionToken);
     if (!sessionData) {
-      return NextResponse.json({
-        success: false,
-        message: 'セッションが無効です。再度ログインしてください。'
-      }, { status: 401 });
+      const authError = AuthErrorBuilder.sessionError('EXPIRED_SESSION', { token: sessionToken });
+      return NextResponse.json(authError, { status: 401 });
     }
 
     // CSRF検証
     const csrfToken = request.headers.get('x-csrf-token');
     if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
-      return NextResponse.json({
-        success: false,
-        message: 'CSRF検証に失敗しました。'
-      }, { status: 403 });
+      const authError = AuthErrorBuilder.sessionError('CSRF_MISMATCH', {
+        token: sessionToken,
+        userId: sessionData.user.id.toString()
+      });
+      return NextResponse.json(authError, { status: 403 });
     }
 
     const { currentPassword, newPassword, confirmPassword } = await request.json();
@@ -58,11 +56,18 @@ export async function POST(request: NextRequest) {
     );
 
     if (!result.success) {
-      return NextResponse.json({
-        success: false,
-        message: result.message
-      }, { status: 400 });
+      const passwordError = new AuthErrorBuilder('パスワード変更に失敗しました')
+        .setAuthContext({ username: sessionData.user.username })
+        .addProcessingStep('Current Password Validation', 'failed', { reason: result.message })
+        .addSuggestion('現在のパスワードを正しく入力してください')
+        .addSuggestion('パスワードを忘れた場合は、管理者にお問い合わせください')
+        .build();
+
+      logAuthAttempt('FAILURE', sessionData.user.username, { operation: 'password_change' });
+      return NextResponse.json(passwordError, { status: 400 });
     }
+
+    logAuthAttempt('SUCCESS', sessionData.user.username, { operation: 'password_change' });
 
     return NextResponse.json({
       success: true,
@@ -70,10 +75,12 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Change password error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'サーバーエラーが発生しました。'
-    }, { status: 500 });
+    const systemError = new AuthErrorBuilder('パスワード変更処理中にエラーが発生しました')
+      .addProcessingStep('Password Change Operation', 'failed', { error: error.message })
+      .addSuggestion('一時的なサーバーエラーの可能性があります。しばらく時間をおいてから再試行してください')
+      .addSuggestion('問題が続く場合は、管理者にお問い合わせください')
+      .build();
+
+    return NextResponse.json(systemError, { status: 500 });
   }
 }

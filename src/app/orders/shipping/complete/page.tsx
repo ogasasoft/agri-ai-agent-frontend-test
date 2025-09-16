@@ -12,6 +12,9 @@ interface ShippingResult {
   message: string;
   orders: Array<Order & { tracking_number?: string; label_url?: string }>;
   errors: string[];
+  csv_content?: string;
+  filename?: string;
+  download_ready?: boolean;
 }
 
 function ShippingCompleteContent() {
@@ -36,10 +39,16 @@ function ShippingCompleteContent() {
     try {
       setLoading(true);
       
+      // Get authentication tokens from cookies
+      const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0] || '';
+      const csrfToken = document.cookie.split('csrf_token=')[1]?.split(';')[0] || '';
+      
       const response = await fetch('/api/shipping', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-session-token': sessionToken,
+          'x-csrf-token': csrfToken,
         },
         body: JSON.stringify({
           order_ids: orderIds,
@@ -114,10 +123,34 @@ function ShippingCompleteContent() {
     }
   };
 
+  const downloadYamatoB2CSV = () => {
+    if (!shippingResult?.csv_content || !shippingResult?.filename) {
+      alert('CSV データが利用できません');
+      return;
+    }
+
+    // Create a Blob with the CSV content
+    const blob = new Blob([shippingResult.csv_content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    // Create a temporary URL for the blob
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', shippingResult.filename);
+    link.style.visibility = 'hidden';
+    
+    // Add to DOM, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the temporary URL
+    URL.revokeObjectURL(url);
+  };
+
   const downloadLabel = (labelUrl: string, orderNumber: string) => {
-    // 発送ラベルのダウンロード（モック）
-    alert(`発送ラベルをダウンロードします: ${orderNumber}`);
-    window.open(labelUrl, '_blank');
+    // For individual order labels, we'll use the CSV download for now
+    downloadYamatoB2CSV();
   };
 
   if (loading) {
@@ -128,7 +161,7 @@ function ShippingCompleteContent() {
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
               <h2 className="text-lg font-medium text-gray-900">発送書類を作成中...</h2>
-              <p className="text-gray-600 mt-2">ヤマト運輸APIと連携しています</p>
+              <p className="text-gray-600 mt-2">ヤマトB2クラウド用CSVファイルを生成しています</p>
             </div>
           </div>
         </div>
@@ -190,10 +223,23 @@ function ShippingCompleteContent() {
           {shippingResult.success && shippingResult.orders.length > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">発送完了注文一覧</h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  {shippingResult.orders.length}件の注文が正常に発送処理されました
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">発送完了注文一覧</h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {shippingResult.orders.length}件の注文が正常に発送処理されました
+                    </p>
+                  </div>
+                  {shippingResult.download_ready && (
+                    <button
+                      onClick={downloadYamatoB2CSV}
+                      className="btn-primary flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      ヤマトB2 CSV ダウンロード
+                    </button>
+                  )}
+                </div>
               </div>
               
               <div className="divide-y divide-gray-200">
@@ -243,7 +289,7 @@ function ShippingCompleteContent() {
                           className="btn-secondary flex items-center gap-2"
                         >
                           <Download className="w-4 h-4" />
-                          伝票印刷
+                          CSV取得
                         </button>
                       </div>
                     </div>

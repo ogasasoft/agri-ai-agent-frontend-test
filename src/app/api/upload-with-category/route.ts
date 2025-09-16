@@ -2,20 +2,79 @@ import { NextRequest, NextResponse } from 'next/server';
 import Papa from 'papaparse';
 import { validateSession } from '@/lib/auth';
 import { getDbClient } from '@/lib/db';
+import { debugLogger } from '@/lib/debug-logger';
+import { analyzeAndLogCSV, validateAndLogMapping } from '@/lib/csv-debug';
+import { CSVErrorBuilder, ErrorDetailBuilder } from '@/lib/error-details';
 
 export const dynamic = 'force-dynamic';
 
-// CSV日本語ヘッダーと英語カラム名のマッピング
-const COLUMN_MAPPING: Record<string, string> = {
-  '注文番号': 'order_code',
-  '顧客名': 'customer_name',
-  '電話番号': 'phone',
-  '住所': 'address',
-  '金額': 'price',
-  '注文日': 'order_date',
-  '希望配達日': 'delivery_date',
-  '備考': 'notes',
+// データソース別のCSVヘッダーマッピング
+const DATA_SOURCE_MAPPINGS = {
+  tabechoku: {
+    '注文番号': 'order_code',
+    '顧客名': 'customer_name',
+    '電話番号': 'phone',
+    '住所': 'address',
+    '金額': 'price',
+    '注文日': 'order_date',
+    '希望配達日': 'delivery_date',
+    '備考': 'notes',
+  },
+  colormi: {
+    '売上ID': 'order_code',
+    '購入者 名前': 'customer_name',
+    '購入者 電話番号': 'phone', 
+    '購入者 住所': 'address',
+    '購入商品 販売価格(消費税込)': 'price', // 実際のCSVヘッダーに変更
+    '受注日': 'order_date',
+    // カラーミーには希望配達日はないので空文字列をマップ
+    '': 'delivery_date',
+    '備考': 'notes',
+  }
 };
+
+// 後方互換性のための旧マッピング（デフォルトはたべちょく）
+const COLUMN_MAPPING: Record<string, string> = DATA_SOURCE_MAPPINGS.tabechoku;
+
+// データソースに基づいて適切なカラムマッピングを取得
+function getColumnMapping(dataSource: string): Record<string, string> {
+  return DATA_SOURCE_MAPPINGS[dataSource as keyof typeof DATA_SOURCE_MAPPINGS] || DATA_SOURCE_MAPPINGS.tabechoku;
+}
+
+// データソースに基づいてCSVの行からフィールドを抽出
+function extractFieldFromRow(row: Record<string, string>, dataSource: string, fieldName: string): string {
+  // データソース固有の処理を直接実行
+  if (dataSource === 'colormi') {
+    // カラーミー固有のフォールバック
+    switch (fieldName) {
+      case 'order_code': return row['売上ID'] || '';
+      case 'customer_name': return row['購入者 名前'] || '';
+      case 'phone': return row['購入者 電話番号'] || '';
+      case 'address': 
+        // カラーミーは住所が分割されている場合があるので統合
+        const prefecture = row['購入者 都道府県'] || '';
+        const address = row['購入者 住所'] || '';
+        return prefecture && address ? `${prefecture}${address}` : (prefecture || address);
+      case 'price': return row['購入商品 販売価格(消費税込)'] || row['総合計金額'] || '';
+      case 'order_date': return row['受注日'] || '';
+      case 'notes': return row['備考'] || '';
+      default: return '';
+    }
+  } else {
+    // たべちょく固有のフォールバック
+    switch (fieldName) {
+      case 'order_code': return row['注文番号'] || '';
+      case 'customer_name': return row['顧客名'] || '';
+      case 'phone': return row['電話番号'] || '';
+      case 'address': return row['住所'] || '';
+      case 'price': return row['金額'] || '';
+      case 'order_date': return row['注文日'] || '';
+      case 'delivery_date': return row['希望配達日'] || '';
+      case 'notes': return row['備考'] || '';
+      default: return '';
+    }
+  }
+}
 
 
 // 日付フォーマット変換 (YYYY-MM-DD形式に統一)
@@ -137,21 +196,45 @@ async function saveOrdersToDb(orders: any[], categoryId: number, userId: string,
 }
 
 export async function POST(request: NextRequest) {
-  // Category CSV Upload request received
+  const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const context = { apiRoute: '/api/upload-with-category', requestId, operation: 'CSV_UPLOAD' };
+  
+  debugLogger.info('CSV Upload API Called', {
+    url: request.url,
+    method: request.method,
+    headers: Object.fromEntries(
+      Array.from(request.headers.entries()).filter(([key]) => 
+        key.toLowerCase().includes('token') || key.toLowerCase().includes('auth')
+      )
+    )
+  }, context);
+  
+  const timer = debugLogger.startTimer(`CSV Upload ${requestId}`);
   
   try {
+    
     // 認証チェック
     const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     
+    debugLogger.debug('Authentication Check', {
+      hasSessionToken: !!sessionToken,
+      tokenPrefix: sessionToken?.substring(0, 20) + '...'
+    }, context);
+    
     if (!sessionToken) {
+      debugLogger.warn('Authentication Failed - No Session Token', {}, context);
+      timer();
       return NextResponse.json({
         success: false,
         message: '認証が必要です。'
       }, { status: 401 });
     }
 
+    debugLogger.debug('Validating session...', {}, context);
     const sessionData = await validateSession(sessionToken);
     if (!sessionData) {
+      debugLogger.warn('Authentication Failed - Invalid Session', {}, context);
+      timer();
       return NextResponse.json({
         success: false,
         message: 'セッションが無効です。'
@@ -159,28 +242,56 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = sessionData.user.id.toString();
+    context.userId = userId;
+    debugLogger.info('Authentication Success', { userId }, context);
 
     const formData = await request.formData();
     
-    // CSRF トークンチェック（ヘッダーまたはFormDataから取得）
+    debugLogger.debug('FormData Processing', {
+      entries: Array.from(formData.entries()).map(([key, value]) => ({
+        key,
+        value: value instanceof File ? 
+          `File(${value.name}, ${value.size} bytes, ${value.type})` :
+          value
+      }))
+    }, context);
+    
+    // CSRF トークンチェック
     const csrfTokenFromHeader = request.headers.get('x-csrf-token');
     const csrfTokenFromForm = formData.get('csrf_token') as string;
     const csrfToken = csrfTokenFromHeader || csrfTokenFromForm;
     
-    // CSRF token validation
+    debugLogger.debug('CSRF Token Validation', {
+      hasHeaderToken: !!csrfTokenFromHeader,
+      hasFormToken: !!csrfTokenFromForm,
+      tokensMatch: csrfToken === sessionData.session.csrf_token
+    }, context);
 
     if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
-      // CSRF validation failed
+      debugLogger.warn('CSRF Validation Failed', {}, context);
+      timer();
       return NextResponse.json({
         success: false,
         message: 'CSRF検証に失敗しました。'
       }, { status: 403 });
     }
+    
+    debugLogger.info('CSRF Validation Success', {}, context);
     const file = formData.get('file') as File;
     const categoryIdRaw = formData.get('categoryId') as string;
     const categoryId = parseInt(categoryIdRaw);
+    const dataSource = (formData.get('dataSource') as string) || 'tabechoku';
     
-    // Process file and category information
+    const processingData = {
+      categoryId,
+      categoryIdRaw,
+      dataSource,
+      fileName: file?.name,
+      fileSize: file?.size,
+      fileType: file?.type
+    };
+    
+    debugLogger.info('Processing Parameters', processingData, context);
     
     if (!file) {
       return NextResponse.json({ 
@@ -241,12 +352,22 @@ export async function POST(request: NextRequest) {
     // File content loaded for processing
     
     // CSV解析
+    debugLogger.info('Starting CSV Parsing', { dataSource }, context);
     const parseResult = Papa.parse<Record<string, string>>(text, {
       header: true,
       skipEmptyLines: true,
     });
     
-    // CSV parsing completed
+    debugLogger.info('CSV Parsing Completed', {
+      rowCount: parseResult.data.length,
+      errorCount: parseResult.errors?.length || 0
+    }, context);
+    
+    // CSV分析と詳細ログ
+    if (parseResult.data.length > 0) {
+      const analysis = analyzeAndLogCSV(parseResult.data, dataSource);
+      debugLogger.csvDebug('analysis', analysis, context);
+    }
     
     if (parseResult.errors && parseResult.errors.length > 0) {
       return NextResponse.json({ 
@@ -274,10 +395,22 @@ export async function POST(request: NextRequest) {
       const lineNo = i + 2; // ヘッダー行を考慮
       
       try {
-        // 必須項目の確認
-        const orderCode = row[Object.keys(COLUMN_MAPPING)[0]] || row['注文番号'];
-        const customerName = row[Object.keys(COLUMN_MAPPING)[1]] || row['顧客名'];
-        const priceStr = row[Object.keys(COLUMN_MAPPING)[4]] || row['金額'];
+        // データソースに基づいてフィールドを抽出
+        const mappingResult = {
+          order_code: extractFieldFromRow(row, dataSource, 'order_code'),
+          customer_name: extractFieldFromRow(row, dataSource, 'customer_name'),
+          price: extractFieldFromRow(row, dataSource, 'price'),
+          phone: extractFieldFromRow(row, dataSource, 'phone'),
+          address: extractFieldFromRow(row, dataSource, 'address')
+        };
+        
+        // 初回のみマッピング結果をログ出力
+        if (i === 0) {
+          const missingFields = validateAndLogMapping(row, dataSource, mappingResult);
+          debugLogger.csvDebug('mapping', mappingResult, context);
+        }
+        
+        const { order_code: orderCode, customer_name: customerName, price: priceStr } = mappingResult;
         
         if (!orderCode) {
           validationErrors.push(`行${lineNo}: 注文番号が必須です。`);
@@ -302,22 +435,22 @@ export async function POST(request: NextRequest) {
         }
         
         // 注文日の処理 (オプショナル、デフォルトは今日)
-        const orderDateStr = row[Object.keys(COLUMN_MAPPING)[5]] || row['注文日'] || '';
+        const orderDateStr = extractFieldFromRow(row, dataSource, 'order_date') || '';
         const orderDate = orderDateStr ? formatDate(orderDateStr) : new Date().toISOString().split('T')[0];
         
-        // 希望配達日は任意
-        const deliveryDateStr = row[Object.keys(COLUMN_MAPPING)[6]] || row['希望配達日'] || '';
+        // 希望配達日は任意（カラーミーの場合は通常なし）
+        const deliveryDateStr = extractFieldFromRow(row, dataSource, 'delivery_date') || '';
         const deliveryDate = deliveryDateStr ? formatDate(deliveryDateStr) : null;
         
         processedOrders.push({
           order_code: orderCode.trim(),
           customer_name: customerName,
-          phone: (row[Object.keys(COLUMN_MAPPING)[2]] || row['電話番号'] || '').trim(),
-          address: (row[Object.keys(COLUMN_MAPPING)[3]] || row['住所'] || '').trim(),
+          phone: extractFieldFromRow(row, dataSource, 'phone').trim(),
+          address: extractFieldFromRow(row, dataSource, 'address').trim(),
           price,
           order_date: orderDate,
           delivery_date: deliveryDate,
-          notes: (row[Object.keys(COLUMN_MAPPING)[7]] || row['備考'] || '').trim()
+          notes: extractFieldFromRow(row, dataSource, 'notes').trim()
         });
         
       } catch (error: any) {
@@ -326,19 +459,40 @@ export async function POST(request: NextRequest) {
     }
     
     if (validationErrors.length > 0) {
-      return NextResponse.json({ 
-        success: false,
-        message: 'データの検証に失敗しました。',
-        errors: validationErrors
-      }, { status: 400 });
+      debugLogger.error('Validation Failed', {
+        errorCount: validationErrors.length,
+        totalRows: csvData.length,
+        processedRows: processedOrders.length,
+        sampleErrors: validationErrors.slice(0, 5)
+      }, context);
+      
+      const detailedError = CSVErrorBuilder.validationError(
+        validationErrors,
+        csvData.length,
+        processedOrders.length
+      );
+      
+      timer();
+      return NextResponse.json(detailedError, { status: 400 });
     }
     
     // Saving processed orders to database
     
     // カテゴリ別にデータベースに保存
+    debugLogger.info('Starting Database Save', {
+      orderCount: processedOrders.length,
+      categoryId,
+      categoryName
+    }, context);
+    
     const saveResult = await saveOrdersToDb(processedOrders, categoryId, userId, categoryName);
     
-    // Database save operation completed
+    debugLogger.info('Database Save Completed', {
+      registered: saveResult.registered,
+      skipped: saveResult.skipped
+    }, context);
+    
+    timer(); // タイマー終了
     
     return NextResponse.json({ 
       success: true,
@@ -349,13 +503,22 @@ export async function POST(request: NextRequest) {
     });
     
   } catch (error: any) {
-    console.error('❌ Category CSV upload error:', error);
-    console.error('❌ Error stack:', error.stack);
-    return NextResponse.json({ 
-      success: false,
-      message: 'サーバーエラーが発生しました。',
-      error: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    }, { status: 500 });
+    debugLogger.error('CSV Upload Failed', error, context);
+    timer(); // タイマー終了
+    
+    const errorBuilder = new ErrorDetailBuilder(
+      'サーバーエラーが発生しました。',
+      'INTERNAL_SERVER_ERROR'
+    )
+    .setUser(context.userId || 'unknown')
+    .setOperation('CSV_UPLOAD')
+    .setRequestId(requestId)
+    .setDetails({
+      errorName: error.name,
+      errorMessage: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+    
+    return NextResponse.json(errorBuilder.build(), { status: 500 });
   }
 }

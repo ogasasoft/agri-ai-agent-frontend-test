@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateSession } from '@/lib/auth';
+import { AuthErrorBuilder } from '@/lib/auth-error-details';
+import { ExternalAPIErrorBuilder, logExternalAPICall } from '@/lib/api-error-details';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,27 +11,24 @@ export async function POST(request: NextRequest) {
     const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     
     if (!sessionToken) {
-      return NextResponse.json({
-        success: false,
-        response: '認証が必要です。'
-      }, { status: 401 });
+      const authError = AuthErrorBuilder.sessionError('INVALID_SESSION');
+      return NextResponse.json(authError, { status: 401 });
     }
 
     const sessionData = await validateSession(sessionToken);
     if (!sessionData) {
-      return NextResponse.json({
-        success: false,
-        response: 'セッションが無効です。'
-      }, { status: 401 });
+      const authError = AuthErrorBuilder.sessionError('EXPIRED_SESSION', { token: sessionToken });
+      return NextResponse.json(authError, { status: 401 });
     }
 
     // CSRF トークンチェック
     const csrfToken = request.headers.get('x-csrf-token');
     if (csrfToken !== sessionData.session.csrf_token) {
-      return NextResponse.json({
-        success: false,
-        response: 'CSRF検証に失敗しました。'
-      }, { status: 403 });
+      const authError = AuthErrorBuilder.sessionError('CSRF_MISMATCH', {
+        token: sessionToken,
+        userId: sessionData.user.id.toString()
+      });
+      return NextResponse.json(authError, { status: 403 });
     }
 
     const { message } = await request.json();
@@ -58,6 +57,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const startTime = Date.now();
+
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -73,21 +74,38 @@ export async function POST(request: NextRequest) {
         temperature: 0.7
       })
     });
-    
+
+    const responseTime = Date.now() - startTime;
+
     if (openaiResponse.ok) {
       const data = await openaiResponse.json();
       const aiResponse = data.choices[0]?.message?.content;
-      
+
+      logExternalAPICall('OpenAI', '/v1/chat/completions', 'POST', true, responseTime, openaiResponse.status);
+
       if (aiResponse) {
-        return NextResponse.json({ 
+        return NextResponse.json({
           response: aiResponse.trim()
         });
       }
     }
-    
-    return NextResponse.json({ 
-      response: 'AI機能が使用できません。'
-    });
+
+    // OpenAI APIエラーの詳細分析
+    const errorData = await openaiResponse.json().catch(() => ({}));
+
+    logExternalAPICall('OpenAI', '/v1/chat/completions', 'POST', false, responseTime, openaiResponse.status);
+
+    const apiError = ExternalAPIErrorBuilder.openAIError(
+      errorData.error || { message: 'Unknown OpenAI API error', code: 'unknown' },
+      {
+        endpoint: '/v1/chat/completions',
+        method: 'POST',
+        statusCode: openaiResponse.status,
+        responseTime
+      }
+    );
+
+    return NextResponse.json(apiError, { status: 503 });
     
   } catch (error: any) {
     console.error('Chat API error:', error);

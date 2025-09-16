@@ -73,7 +73,7 @@ export default function OrderRegisterChoosePage() {
     if (!selectedCategory) return;
     
     if (type === 'csv') {
-      router.push(`/orders/register/csv-upload?categoryId=${selectedCategory}`);
+      router.push(`/orders/register/data-source?categoryId=${selectedCategory}`);
     } else {
       router.push(`/orders/register/manual?categoryId=${selectedCategory}`);
     }

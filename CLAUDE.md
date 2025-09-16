@@ -388,6 +388,68 @@ if (adminUser && isSuperAdmin(adminUser)) {
 - ALWAYS prefer editing existing files over creating new ones
 - NEVER proactively create documentation files (*.md) or README files unless explicitly requested
 
+### AI判断型エラー検知システム（必須ルール）
+すべての新規実装で「構造化エラー診断システム」の適用が必須です。これはログを見なくてもAIが自動的に問題を判断し、具体的な解決策を提示するシステムです。
+
+#### API Route必須実装
+```typescript
+// ✅ 必須インポート
+import { AuthErrorBuilder } from '@/lib/auth-error-details';
+import { DatabaseErrorBuilder, logDatabaseOperation } from '@/lib/api-error-details';
+import { ExternalAPIErrorBuilder } from '@/lib/api-error-details';
+
+// ✅ 認証エラーの構造化
+if (!sessionToken) {
+  const authError = AuthErrorBuilder.sessionError('INVALID_SESSION');
+  return NextResponse.json(authError, { status: 401 });
+}
+
+// ✅ データベースエラーの詳細分析（成功・失敗ログも必須）
+} catch (error: any) {
+  logDatabaseOperation('SELECT', 'table_name', false, { error: error.message }, userId);
+  const dbError = DatabaseErrorBuilder.queryError(query, error, {
+    table: 'table_name',
+    operation: 'SELECT',
+    userId
+  });
+  return NextResponse.json(dbError, { status: 500 });
+}
+```
+
+#### React Component必須実装
+```typescript
+// ✅ エラーハンドリングフック
+import { useFormErrorHandler } from '@/hooks/useErrorHandler';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+
+const { handleSubmissionError, errorDetails, isError } =
+  useFormErrorHandler('form-name', { componentName: 'ComponentName' });
+
+// ✅ Error Boundaryでコンポーネントを包む
+<ErrorBoundary>
+  <YourComponent />
+</ErrorBoundary>
+```
+
+#### 禁止パターン
+```typescript
+// ❌ シンプルエラーレスポンス（禁止）
+return NextResponse.json({ success: false, message: 'エラー' }, { status: 500 });
+
+// ❌ console.errorのみ（不十分）
+} catch (error) {
+  console.error(error);
+  return NextResponse.json({ error: 'Error' }, { status: 500 });
+}
+```
+
+#### エラー検知システムの主要機能
+- **段階的処理追跡**: 各ステップでの成功/失敗を記録
+- **インテリジェント提案**: エラー原因に基づく具体的解決策
+- **攻撃パターン検出**: ブルートフォース、CSRF攻撃等の自動識別
+- **パフォーマンス測定**: API応答時間・成功率の追跡
+- **VSCodeスニペット**: `api-error-handler`, `react-error-handler`等で自動生成可能
+
 ### Quality Gate Requirements
 Before committing or deploying, run the quality verification commands:
 ```bash
@@ -395,6 +457,9 @@ Before committing or deploying, run the quality verification commands:
 npm run build        # Must complete without errors
 npm run typecheck    # Must pass with zero TypeScript errors
 npm run lint         # Must pass ESLint validation
+
+# エラーハンドリング実装チェック（必須）
+./scripts/check-error-handling.sh    # AI error detection compliance check
 
 # Quality checklist verification (see QUALITY_CHECKLIST.md)
 # Run the 10-item inspection for comprehensive quality assurance

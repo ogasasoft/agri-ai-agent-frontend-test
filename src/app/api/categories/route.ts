@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateSession } from '@/lib/auth';
 import { getDbClient } from '@/lib/db';
+import { AuthErrorBuilder } from '@/lib/auth-error-details';
+import { DatabaseErrorBuilder, logDatabaseOperation } from '@/lib/api-error-details';
 
 export const dynamic = 'force-dynamic';
 

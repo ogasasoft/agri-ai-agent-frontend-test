@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Save, Carrot, Apple, Package, Calendar, User, Phone, MapPin, DollarSign, FileText } from 'lucide-react';
 import { Suspense } from 'react';
+import { useFormErrorHandler } from '@/hooks/useErrorHandler';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 type ProductCategory = 'vegetables' | 'fruits' | 'other';
 
@@ -147,10 +149,16 @@ function ManualRegistrationContent() {
     setIsSubmitting(true);
     
     try {
+      // Get authentication tokens from cookies
+      const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0] || '';
+      const csrfToken = document.cookie.split('csrf_token=')[1]?.split(';')[0] || '';
+      
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-session-token': sessionToken,
+          'x-csrf-token': csrfToken,
         },
         body: JSON.stringify({
           order_code: formData.orderCode.trim(),
@@ -172,10 +180,25 @@ function ManualRegistrationContent() {
         // 成功時は確認画面に遷移
         router.push(`/orders/register/confirm?category=${category}&orderCode=${formData.orderCode}&method=manual`);
       } else {
-        setErrors({ submit: result.message || '登録に失敗しました' });
+        // Handle different error types
+        if (response.status === 409) {
+          // Duplicate order code
+          setErrors({ orderCode: result.message || '注文番号が重複しています' });
+        } else if (response.status === 400) {
+          // Validation error
+          setErrors({ submit: result.message || '入力データに問題があります' });
+        } else {
+          // Other errors
+          setErrors({ submit: result.message || '登録に失敗しました' });
+        }
       }
     } catch (error) {
-      setErrors({ submit: 'サーバーエラーが発生しました' });
+      // AI判断型エラーハンドリング
+      const errorDetails = handleSubmissionError(error, formData);
+      setErrors({
+        submit: errorDetails.message,
+        details: errorDetails.suggestions?.join(' ') || ''
+      });
     } finally {
       setIsSubmitting(false);
     }
