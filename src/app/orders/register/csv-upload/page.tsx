@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Upload, ArrowLeft, CheckCircle, AlertCircle, Carrot, Apple, Package, Eye, FileText } from 'lucide-react';
+import { detectAndConvertEncoding } from '@/lib/csv-encoding';
 import { Suspense } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Papa from 'papaparse';
@@ -45,24 +46,6 @@ const categoryInfo: Record<ProductCategory, CategoryInfo> = {
   }
 };
 
-interface UploadResult {
-  registered_count: number;
-  skipped_count: number;
-  skipped_details: {
-    order_code: string;
-    customer_name: string;
-    price: number;
-    order_date: string;
-    reason: string;
-    existing_data?: {
-      customer_name: string;
-      price: number;
-      order_date: string;
-    };
-    error_message?: string;
-  }[];
-  message: string;
-}
 
 interface CSVPreviewData {
   headers: string[];
@@ -81,7 +64,6 @@ function CSVUploadContent() {
   
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [result, setResult] = useState<UploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<CSVPreviewData | null>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -116,13 +98,25 @@ function CSVUploadContent() {
   const analyzeCSV = useCallback(async (file: File) => {
     setAnalyzing(true);
     setError(null);
-    
-    return new Promise<CSVPreviewData>((resolve, reject) => {
-      Papa.parse(file, {
-        header: false,
-        skipEmptyLines: true,
-        encoding: 'UTF-8',
-        complete: (results) => {
+
+    try {
+      // エンコーディング自動検出・変換
+      const buffer = await file.arrayBuffer();
+      const encodingResult = detectAndConvertEncoding(buffer);
+
+      if (encodingResult.hasGarbledText || encodingResult.confidence < 0.3) {
+        setError(`文字エンコーディングの問題が検出されました。検出されたエンコーディング: ${encodingResult.detectedEncoding} (信頼度: ${Math.round(encodingResult.confidence * 100)}%)`);
+        setAnalyzing(false);
+        return Promise.reject(new Error('Encoding error'));
+      }
+
+      const text = encodingResult.text;
+
+      return new Promise<CSVPreviewData>((resolve, reject) => {
+        Papa.parse(text, {
+          header: false,
+          skipEmptyLines: true,
+          complete: (results) => {
           const data = results.data as string[][];
           
           if (data.length === 0) {
@@ -179,12 +173,16 @@ function CSVUploadContent() {
           
           resolve(previewData);
         },
-        error: (error) => {
+        error: (error: any) => {
           reject(new Error(`CSVファイルの解析に失敗しました: ${error.message}`));
         }
       });
     });
-  }, []);
+    } catch (error) {
+      setAnalyzing(false);
+      return Promise.reject(error);
+    }
+  }, [dataSource]);
   
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -192,7 +190,6 @@ function CSVUploadContent() {
       if (selectedFile && (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv'))) {
         setFile(selectedFile);
         setError(null);
-        setResult(null);
         setPreviewData(null);
         setShowPreview(false);
       } else {
@@ -217,7 +214,6 @@ function CSVUploadContent() {
     if (selectedFile && (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv'))) {
       setFile(selectedFile);
       setError(null);
-      setResult(null);
       setPreviewData(null);
       setShowPreview(false);
     } else {
@@ -293,19 +289,14 @@ function CSVUploadContent() {
       const data = await response.json();
 
       if (response.ok) {
-        setResult(data);
-        // 成功時の処理（新規登録件数が0でも重複スキップがあれば正常）
-        if (data.registered_count > 0) {
-          setTimeout(() => {
-            router.push(`/orders/register/confirm?categoryId=${categoryId}&method=csv&count=${data.registered_count}&dataSource=${dataSource}`);
-          }, 2000); // 2秒後にリダイレクト
-        } else if (data.skipped_count > 0) {
-          // 新規登録はないが重複スキップがある場合は正常処理
-          // 結果表示のみでエラーなし
-        } else {
-          // 登録も重複もない場合はエラー
-          setError('登録可能なデータがありませんでした。CSVファイルの形式を確認してください。');
-        }
+        // 詳細な結果データをセッションストレージに保存
+        sessionStorage.setItem('uploadResult', JSON.stringify(data));
+
+        // 結果表示画面にリダイレクト
+        const categoryName = categoryData?.name || 'カテゴリ';
+        const redirectUrl = `/orders/register/result?categoryId=${categoryId}&categoryName=${encodeURIComponent(categoryName)}&method=csv&registered=${data.registered_count}&skipped=${data.skipped_count}&dataSource=${dataSource}`;
+
+        router.push(redirectUrl);
       } else {
         // 詳細なエラー情報を表示
         let errorMessage = data.message || 'アップロードに失敗しました。';
@@ -373,6 +364,37 @@ function CSVUploadContent() {
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Progress Indicator */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full text-sm font-medium">
+              <CheckCircle className="w-4 h-4" />
+            </div>
+            <span className="ml-2 text-sm text-gray-600">カテゴリ選択</span>
+          </div>
+          <div className="w-16 h-0.5 bg-green-500 mx-4"></div>
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full text-sm font-medium">
+              <CheckCircle className="w-4 h-4" />
+            </div>
+            <span className="ml-2 text-sm text-gray-600">登録方法選択</span>
+          </div>
+          <div className="w-16 h-0.5 bg-green-500 mx-4"></div>
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full text-sm font-medium">
+              <CheckCircle className="w-4 h-4" />
+            </div>
+            <span className="ml-2 text-sm text-gray-600">データソース選択</span>
+          </div>
+          <div className="w-16 h-0.5 bg-blue-500 mx-4"></div>
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-blue-500 text-white rounded-full text-sm font-medium">
+              4
+            </div>
+            <span className="ml-2 text-sm font-medium text-blue-600">CSVアップロード</span>
           </div>
         </div>
 
@@ -604,106 +626,6 @@ function CSVUploadContent() {
           </div>
         )}
 
-        {/* Result Display */}
-        {result && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
-            <div className="flex items-start gap-3">
-              <CheckCircle className="w-6 h-6 text-green-500 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="font-medium text-green-900 mb-2">アップロード完了</h3>
-                <p className="text-green-800 mb-4">{result.message}</p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div className="bg-white rounded-lg p-4">
-                    <div className="text-2xl font-bold text-green-600">{result.registered_count}</div>
-                    <div className="text-sm text-gray-600">新規登録件数</div>
-                  </div>
-                  <div className="bg-white rounded-lg p-4">
-                    <div className="text-2xl font-bold text-yellow-600">{result.skipped_count}</div>
-                    <div className="text-sm text-gray-600">重複スキップ件数</div>
-                  </div>
-                </div>
-
-                {result.skipped_details && result.skipped_details.length > 0 && (
-                  <div className="bg-white rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 mb-4">スキップされた注文の詳細</h4>
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full border border-gray-200 text-sm">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">注文番号</th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">顧客名</th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">金額</th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">注文日</th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">スキップ理由</th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase border-b">既存データ</th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white">
-                          {result.skipped_details.map((item, index) => (
-                            <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                              <td className="px-3 py-2 text-sm font-medium text-gray-900 border-b">
-                                {item.order_code}
-                              </td>
-                              <td className="px-3 py-2 text-sm text-gray-900 border-b">
-                                {item.customer_name}
-                              </td>
-                              <td className="px-3 py-2 text-sm text-gray-900 border-b">
-                                ¥{item.price?.toLocaleString()}
-                              </td>
-                              <td className="px-3 py-2 text-sm text-gray-900 border-b">
-                                {item.order_date}
-                              </td>
-                              <td className="px-3 py-2 text-sm border-b">
-                                <span className={`px-2 py-1 rounded-full text-xs ${
-                                  item.reason === '重複' 
-                                    ? 'bg-yellow-100 text-yellow-800' 
-                                    : 'bg-red-100 text-red-800'
-                                }`}>
-                                  {item.reason}
-                                </span>
-                              </td>
-                              <td className="px-3 py-2 text-sm text-gray-600 border-b">
-                                {item.existing_data ? (
-                                  <div className="text-xs">
-                                    <div>顧客: {item.existing_data.customer_name}</div>
-                                    <div>金額: ¥{item.existing_data.price?.toLocaleString()}</div>
-                                    <div>日付: {item.existing_data.order_date}</div>
-                                  </div>
-                                ) : item.error_message ? (
-                                  <div className="text-xs text-red-600">{item.error_message}</div>
-                                ) : '-'}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-4 flex gap-3">
-                  <button
-                    onClick={() => router.push('/orders/shipping/pending')}
-                    className="btn-primary"
-                  >
-                    注文一覧を確認
-                  </button>
-                  <button
-                    onClick={() => {
-                      setFile(null);
-                      setResult(null);
-                      setError(null);
-                    }}
-                    className="btn-secondary"
-                  >
-                    続けてアップロード
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* CSV Format Help */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

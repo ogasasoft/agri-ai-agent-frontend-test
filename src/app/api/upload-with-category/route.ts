@@ -5,6 +5,19 @@ import { getDbClient } from '@/lib/db';
 import { debugLogger } from '@/lib/debug-logger';
 import { analyzeAndLogCSV, validateAndLogMapping } from '@/lib/csv-debug';
 import { CSVErrorBuilder, ErrorDetailBuilder } from '@/lib/error-details';
+import {
+  detectAndConvertEncoding,
+  analyzeCSVHeaders,
+  generateEncodingDebugInfo
+} from '@/lib/csv-encoding';
+import {
+  diagnoseEncodingError,
+  diagnoseMissingFieldsError,
+  diagnoseFileFormatError,
+  diagnoseDataValidationError,
+  diagnoseUnknownError,
+  formatDiagnosticsForUser
+} from '@/lib/csv-error-diagnostics';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,12 +36,11 @@ const DATA_SOURCE_MAPPINGS = {
   colormi: {
     '売上ID': 'order_code',
     '購入者 名前': 'customer_name',
-    '購入者 電話番号': 'phone', 
+    '購入者 電話番号': 'phone',
     '購入者 住所': 'address',
-    '購入商品 販売価格(消費税込)': 'price', // 実際のCSVヘッダーに変更
+    '購入商品 販売価格(消費税込)': 'price',
     '受注日': 'order_date',
-    // カラーミーには希望配達日はないので空文字列をマップ
-    '': 'delivery_date',
+    '配送希望日': 'delivery_date', // カラーミーの配送希望日
     '備考': 'notes',
   }
 };
@@ -50,13 +62,14 @@ function extractFieldFromRow(row: Record<string, string>, dataSource: string, fi
       case 'order_code': return row['売上ID'] || '';
       case 'customer_name': return row['購入者 名前'] || '';
       case 'phone': return row['購入者 電話番号'] || '';
-      case 'address': 
-        // カラーミーは住所が分割されている場合があるので統合
+      case 'address':
+        // カラーミーは住所が分割されているので統合
         const prefecture = row['購入者 都道府県'] || '';
         const address = row['購入者 住所'] || '';
         return prefecture && address ? `${prefecture}${address}` : (prefecture || address);
       case 'price': return row['購入商品 販売価格(消費税込)'] || row['総合計金額'] || '';
       case 'order_date': return row['受注日'] || '';
+      case 'delivery_date': return row['配送希望日'] || '';
       case 'notes': return row['備考'] || '';
       default: return '';
     }
@@ -198,6 +211,7 @@ async function saveOrdersToDb(orders: any[], categoryId: number, userId: string,
 export async function POST(request: NextRequest) {
   const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const context = { apiRoute: '/api/upload-with-category', requestId, operation: 'CSV_UPLOAD' };
+  let file: File | null = null;
   
   debugLogger.info('CSV Upload API Called', {
     url: request.url,
@@ -242,7 +256,7 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = sessionData.user.id.toString();
-    context.userId = userId;
+    (context as any).userId = userId;
     debugLogger.info('Authentication Success', { userId }, context);
 
     const formData = await request.formData();
@@ -277,7 +291,7 @@ export async function POST(request: NextRequest) {
     }
     
     debugLogger.info('CSRF Validation Success', {}, context);
-    const file = formData.get('file') as File;
+    file = formData.get('file') as File;
     const categoryIdRaw = formData.get('categoryId') as string;
     const categoryId = parseInt(categoryIdRaw);
     const dataSource = (formData.get('dataSource') as string) || 'tabechoku';
@@ -294,19 +308,18 @@ export async function POST(request: NextRequest) {
     debugLogger.info('Processing Parameters', processingData, context);
     
     if (!file) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         success: false,
-        message: 'ファイルが選択されていません。' 
+        message: 'ファイルが選択されていません。'
       }, { status: 400 });
     }
 
-    // ファイルサイズ制限（10MB）
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({
-        success: false,
-        message: 'ファイルサイズが大きすぎます。10MB以下のファイルをアップロードしてください。'
-      }, { status: 400 });
+    // ファイル形式とサイズの事前診断
+    const fileFormatDiagnostics = diagnoseFileFormatError(file.name, file.size);
+    if (fileFormatDiagnostics.severity === 'critical') {
+      const userMessage = formatDiagnosticsForUser(fileFormatDiagnostics);
+      debugLogger.warn('File format validation failed', fileFormatDiagnostics, context);
+      return NextResponse.json(userMessage, { status: 400 });
     }
     
     if (!categoryIdRaw || categoryIdRaw.trim() === '' || isNaN(categoryId) || categoryId <= 0) {
@@ -347,9 +360,42 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
-    // ファイル内容を読み取り
-    const text = await file.text();
-    // File content loaded for processing
+    // ファイル内容を読み取り（自動エンコーディング検出・変換）
+    const buffer = await file.arrayBuffer();
+
+    debugLogger.info('Starting encoding detection', { fileSize: buffer.byteLength }, context);
+    const encodingResult = detectAndConvertEncoding(buffer);
+
+    debugLogger.info('Encoding detection completed', {
+      detectedEncoding: encodingResult.detectedEncoding,
+      confidence: encodingResult.confidence,
+      isJapanese: encodingResult.isJapanese,
+      hasGarbledText: encodingResult.hasGarbledText
+    }, context);
+
+    // CSVヘッダー分析
+    const headerAnalysis = analyzeCSVHeaders(encodingResult.text);
+    const debugInfo = generateEncodingDebugInfo(encodingResult, headerAnalysis);
+    debugLogger.csvDebug('encoding_analysis', debugInfo, context);
+
+    // 自動検出されたデータソースを優先使用
+    const detectedDataSource = headerAnalysis.dataSource !== 'unknown' ? headerAnalysis.dataSource : dataSource;
+    debugLogger.info('Data source determination', {
+      formDataSource: dataSource,
+      detectedDataSource: headerAnalysis.dataSource,
+      finalDataSource: detectedDataSource
+    }, context);
+
+    // エンコーディングエラーの診断
+    const encodingDiagnostics = diagnoseEncodingError(encodingResult, headerAnalysis);
+    if (encodingDiagnostics.severity === 'critical') {
+      const userMessage = formatDiagnosticsForUser(encodingDiagnostics);
+      debugLogger.error('Encoding validation failed', encodingDiagnostics, context);
+      return NextResponse.json(userMessage, { status: 400 });
+    }
+
+    const text = encodingResult.text;
+    // File content loaded for processing with encoding: ${encodingResult.detectedEncoding}
     
     // CSV解析
     debugLogger.info('Starting CSV Parsing', { dataSource }, context);
@@ -395,18 +441,18 @@ export async function POST(request: NextRequest) {
       const lineNo = i + 2; // ヘッダー行を考慮
       
       try {
-        // データソースに基づいてフィールドを抽出
+        // データソースに基づいてフィールドを抽出（検出されたデータソースを使用）
         const mappingResult = {
-          order_code: extractFieldFromRow(row, dataSource, 'order_code'),
-          customer_name: extractFieldFromRow(row, dataSource, 'customer_name'),
-          price: extractFieldFromRow(row, dataSource, 'price'),
-          phone: extractFieldFromRow(row, dataSource, 'phone'),
-          address: extractFieldFromRow(row, dataSource, 'address')
+          order_code: extractFieldFromRow(row, detectedDataSource, 'order_code'),
+          customer_name: extractFieldFromRow(row, detectedDataSource, 'customer_name'),
+          price: extractFieldFromRow(row, detectedDataSource, 'price'),
+          phone: extractFieldFromRow(row, detectedDataSource, 'phone'),
+          address: extractFieldFromRow(row, detectedDataSource, 'address')
         };
         
         // 初回のみマッピング結果をログ出力
         if (i === 0) {
-          const missingFields = validateAndLogMapping(row, dataSource, mappingResult);
+          const missingFields = validateAndLogMapping(row, detectedDataSource, mappingResult);
           debugLogger.csvDebug('mapping', mappingResult, context);
         }
         
@@ -435,22 +481,22 @@ export async function POST(request: NextRequest) {
         }
         
         // 注文日の処理 (オプショナル、デフォルトは今日)
-        const orderDateStr = extractFieldFromRow(row, dataSource, 'order_date') || '';
+        const orderDateStr = extractFieldFromRow(row, detectedDataSource, 'order_date') || '';
         const orderDate = orderDateStr ? formatDate(orderDateStr) : new Date().toISOString().split('T')[0];
-        
+
         // 希望配達日は任意（カラーミーの場合は通常なし）
-        const deliveryDateStr = extractFieldFromRow(row, dataSource, 'delivery_date') || '';
+        const deliveryDateStr = extractFieldFromRow(row, detectedDataSource, 'delivery_date') || '';
         const deliveryDate = deliveryDateStr ? formatDate(deliveryDateStr) : null;
-        
+
         processedOrders.push({
           order_code: orderCode.trim(),
           customer_name: customerName,
-          phone: extractFieldFromRow(row, dataSource, 'phone').trim(),
-          address: extractFieldFromRow(row, dataSource, 'address').trim(),
+          phone: extractFieldFromRow(row, detectedDataSource, 'phone').trim(),
+          address: extractFieldFromRow(row, detectedDataSource, 'address').trim(),
           price,
           order_date: orderDate,
           delivery_date: deliveryDate,
-          notes: extractFieldFromRow(row, dataSource, 'notes').trim()
+          notes: extractFieldFromRow(row, detectedDataSource, 'notes').trim()
         });
         
       } catch (error: any) {
@@ -458,6 +504,15 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    // 必須フィールド不足の事前チェック
+    if (!headerAnalysis.hasRequiredFields) {
+      const missingFieldsDiagnostics = diagnoseMissingFieldsError(headerAnalysis, headerAnalysis.missingFields);
+      const userMessage = formatDiagnosticsForUser(missingFieldsDiagnostics);
+      debugLogger.error('Required fields missing', missingFieldsDiagnostics, context);
+      timer();
+      return NextResponse.json(userMessage, { status: 400 });
+    }
+
     if (validationErrors.length > 0) {
       debugLogger.error('Validation Failed', {
         errorCount: validationErrors.length,
@@ -465,15 +520,17 @@ export async function POST(request: NextRequest) {
         processedRows: processedOrders.length,
         sampleErrors: validationErrors.slice(0, 5)
       }, context);
-      
-      const detailedError = CSVErrorBuilder.validationError(
+
+      // 詳細なデータ検証エラー診断
+      const validationDiagnostics = diagnoseDataValidationError(
         validationErrors,
         csvData.length,
         processedOrders.length
       );
-      
+      const userMessage = formatDiagnosticsForUser(validationDiagnostics);
+
       timer();
-      return NextResponse.json(detailedError, { status: 400 });
+      return NextResponse.json(userMessage, { status: 400 });
     }
     
     // Saving processed orders to database
@@ -505,20 +562,16 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     debugLogger.error('CSV Upload Failed', error, context);
     timer(); // タイマー終了
-    
-    const errorBuilder = new ErrorDetailBuilder(
-      'サーバーエラーが発生しました。',
-      'INTERNAL_SERVER_ERROR'
-    )
-    .setUser(context.userId || 'unknown')
-    .setOperation('CSV_UPLOAD')
-    .setRequestId(requestId)
-    .setDetails({
-      errorName: error.name,
-      errorMessage: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+
+    // 詳細なエラー診断
+    const unknownErrorDiagnostics = diagnoseUnknownError(error, {
+      requestId,
+      userId: (context as any).userId,
+      fileName: file?.name || 'unknown',
+      fileSize: file?.size || 0
     });
-    
-    return NextResponse.json(errorBuilder.build(), { status: 500 });
+    const userMessage = formatDiagnosticsForUser(unknownErrorDiagnostics);
+
+    return NextResponse.json(userMessage, { status: 500 });
   }
 }

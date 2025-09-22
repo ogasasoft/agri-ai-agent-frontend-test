@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import { useRouter } from 'next/navigation';
 import { Upload, FileText, ArrowLeft, ArrowRight } from 'lucide-react';
 import Papa from 'papaparse';
+import { detectAndConvertEncoding } from '@/lib/csv-encoding';
 
 interface ParsedCSVData {
   file: File;
@@ -65,10 +66,20 @@ export default function UploadPage() {
 
   const parseFileForPreview = async (file: File) => {
     setIsProcessing(true);
-    
+
     try {
-      const text = await file.text();
-      
+      // エンコーディング自動検出・変換
+      const buffer = await file.arrayBuffer();
+      const encodingResult = detectAndConvertEncoding(buffer);
+
+      if (encodingResult.hasGarbledText || encodingResult.confidence < 0.3) {
+        alert(`文字エンコーディングの問題が検出されました。\n検出されたエンコーディング: ${encodingResult.detectedEncoding}\n信頼度: ${Math.round(encodingResult.confidence * 100)}%\n\nCSVファイルをUTF-8で保存し直すか、正しいエンコーディングで保存してください。`);
+        setIsProcessing(false);
+        return;
+      }
+
+      const text = encodingResult.text;
+
       const parseResult = Papa.parse<Record<string, string>>(text, {
         header: true,
         skipEmptyLines: true,

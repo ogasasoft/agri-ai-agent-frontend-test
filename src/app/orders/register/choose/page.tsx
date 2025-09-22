@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, Edit, ArrowLeft, Package, Carrot, Apple, Coffee, ShoppingBag, Heart, Star, Leaf, Zap } from 'lucide-react';
+import { Upload, Edit, ArrowLeft, Package, Carrot, Apple, Coffee, ShoppingBag, Heart, Star, Leaf, Zap, CheckCircle } from 'lucide-react';
 
 type RegistrationType = 'csv' | 'manual';
 
@@ -101,6 +101,45 @@ export default function OrderRegisterChoosePage() {
           </button>
           <h1 className="text-3xl font-bold text-gray-900">注文登録</h1>
           <p className="text-gray-600 mt-2">商品カテゴリと登録方法を選択してください</p>
+        </div>
+
+        {/* Progress Indicator */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full text-sm font-medium">
+              <CheckCircle className="w-4 h-4" />
+            </div>
+            <span className="ml-2 text-sm text-gray-600">カテゴリ選択</span>
+          </div>
+          <div className={`w-16 h-0.5 mx-4 ${selectedCategory ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+          <div className="flex items-center">
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
+              selectedCategory
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-300 text-gray-500'
+            }`}>
+              2
+            </div>
+            <span className={`ml-2 text-sm ${
+              selectedCategory
+                ? 'font-medium text-blue-600'
+                : 'text-gray-500'
+            }`}>登録方法選択</span>
+          </div>
+          <div className="w-16 h-0.5 bg-gray-300 mx-4"></div>
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-gray-300 text-gray-500 rounded-full text-sm font-medium">
+              3
+            </div>
+            <span className="ml-2 text-sm text-gray-500">データソース選択</span>
+          </div>
+          <div className="w-16 h-0.5 bg-gray-300 mx-4"></div>
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-gray-300 text-gray-500 rounded-full text-sm font-medium">
+              4
+            </div>
+            <span className="ml-2 text-sm text-gray-500">CSVアップロード</span>
+          </div>
         </div>
 
         {/* Step 1: Category Selection */}

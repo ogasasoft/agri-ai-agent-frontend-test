@@ -20,29 +20,33 @@ interface ShippingResult {
 function ShippingCompleteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const orderIds = searchParams.get('orderIds')?.split(',').map(id => parseInt(id)) || [];
-  
+
   const [loading, setLoading] = useState(true);
   const [shippingResult, setShippingResult] = useState<ShippingResult | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [registering, setRegistering] = useState(false);
+  const [orderIds, setOrderIds] = useState<number[]>([]);
 
   useEffect(() => {
-    if (orderIds.length > 0) {
-      processShipping();
+    const orderIdsParam = searchParams.get('orderIds');
+    const ids = orderIdsParam?.split(',').map(id => parseInt(id)) || [];
+    setOrderIds(ids);
+
+    if (ids.length > 0) {
+      processShipping(ids);
     } else {
       router.push('/orders/shipping/pending');
     }
-  }, [orderIds]);
+  }, [searchParams, router]);
 
-  const processShipping = async () => {
+  const processShipping = async (ids: number[]) => {
     try {
       setLoading(true);
-      
+
       // Get authentication tokens from cookies
       const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0] || '';
       const csrfToken = document.cookie.split('csrf_token=')[1]?.split(';')[0] || '';
-      
+
       const response = await fetch('/api/shipping', {
         method: 'POST',
         headers: {
@@ -51,7 +55,7 @@ function ShippingCompleteContent() {
           'x-csrf-token': csrfToken,
         },
         body: JSON.stringify({
-          order_ids: orderIds,
+          order_ids: ids,
           delivery_type: 'normal',
           notes: '通常配送'
         }),
@@ -263,7 +267,7 @@ function ShippingCompleteContent() {
                           </div>
                           <div>
                             <span className="text-gray-500">金額</span>
-                            <p className="font-medium">¥{order.total_amount.toLocaleString()}</p>
+                            <p className="font-medium">¥{(order.total_amount || 0).toLocaleString()}</p>
                           </div>
                           <div>
                             <span className="text-gray-500">配達予定日</span>
