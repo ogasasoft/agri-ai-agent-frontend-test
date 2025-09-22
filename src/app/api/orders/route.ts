@@ -8,10 +8,12 @@ export const dynamic = 'force-dynamic';
 
 
 export async function GET(request: NextRequest) {
+  let userId = 'unknown';
+
   try {
     // **CRITICAL: Admin cannot access customer orders API**
     const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
-    
+
     if (!sessionToken) {
       const authError = AuthErrorBuilder.sessionError('INVALID_SESSION');
       return NextResponse.json(authError, { status: 401 });
@@ -27,7 +29,7 @@ export async function GET(request: NextRequest) {
     // Super admin users (silentogasasoft@gmail.com) should use admin APIs instead
     // But regular admin users (admin/admin123) can access their own orders
 
-    const userId = sessionData.user.id.toString();
+    userId = sessionData.user.id.toString();
     console.log('🔍 CURRENT USER:', {
       id: sessionData.user.id,
       username: sessionData.user.username,
@@ -91,7 +93,7 @@ export async function GET(request: NextRequest) {
       {
         table: 'orders',
         operation: 'SELECT',
-        userId: sessionData?.user.id.toString()
+        userId: userId
       }
     );
 

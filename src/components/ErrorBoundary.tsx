@@ -60,6 +60,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private getComponentName(errorInfo: ErrorInfo): string {
     const componentStack = errorInfo.componentStack;
+    if (!componentStack) return 'UnknownComponent';
     const match = componentStack.match(/in (\w+)/);
     return match ? match[1] : 'UnknownComponent';
   }
@@ -72,7 +73,7 @@ export class ErrorBoundary extends Component<Props, State> {
       .addProcessingStep('Component Rendering', 'failed', {
         error_name: error.name,
         error_message: error.message,
-        component_stack: errorInfo.componentStack.split('\n').slice(0, 5) // 最初の5行のみ
+        component_stack: errorInfo.componentStack?.split('\n').slice(0, 5) || ['No stack available'] // 最初の5行のみ
       });
 
     // エラーの種類に応じた分析と提案
@@ -94,7 +95,7 @@ export class ErrorBoundary extends Component<Props, State> {
   private generateErrorSuggestions(error: Error, errorInfo: ErrorInfo): string[] {
     const suggestions: string[] = [];
     const errorMessage = error.message.toLowerCase();
-    const componentStack = errorInfo.componentStack.toLowerCase();
+    const componentStack = errorInfo.componentStack?.toLowerCase() || '';
 
     // 一般的なReactエラーパターンの分析
     if (errorMessage.includes('cannot read property') || errorMessage.includes('cannot read properties')) {
@@ -133,7 +134,8 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     // メモリ不足の可能性
-    if (performance.memory && (performance.memory as any).usedJSHeapSize > 50000000) { // 50MB
+    const performanceMemory = (performance as any).memory;
+    if (performanceMemory && performanceMemory.usedJSHeapSize > 50000000) { // 50MB
       suggestions.push('ブラウザのメモリ使用量が多くなっています。他のタブを閉じてください');
     }
 

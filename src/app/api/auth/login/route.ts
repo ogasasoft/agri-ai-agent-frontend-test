@@ -31,14 +31,14 @@ export async function POST(request: NextRequest) {
         username,
         ipAddress,
         userAgent,
-        attemptCount: authResult.lockoutInfo?.attemptCount,
-        lockoutDuration: authResult.lockoutInfo?.lockoutDuration
+        attemptCount: authResult.lockoutInfo?.level,
+        lockoutDuration: undefined
       };
 
       logAuthAttempt('FAILURE', username, context);
 
       // 攻撃パターンの検出
-      if (authResult.lockoutInfo?.attemptCount && authResult.lockoutInfo.attemptCount > 5) {
+      if (authResult.lockoutInfo?.level && authResult.lockoutInfo.level > 5) {
         logSecurityEvent('BRUTE_FORCE', { authResult }, context);
       }
 

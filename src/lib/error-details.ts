@@ -28,7 +28,7 @@ export interface DetailedErrorResponse {
 }
 
 export class ErrorDetailBuilder {
-  private errorResponse: DetailedErrorResponse;
+  protected errorResponse: DetailedErrorResponse;
 
   constructor(message: string, errorCode: string) {
     this.errorResponse = {

@@ -103,6 +103,10 @@ function ManualRegistrationContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const { handleSubmissionError } = useFormErrorHandler('manual-order-form', {
+    componentName: 'ManualRegistrationContent'
+  });
+
   const categoryData = categoryInfo[category];
   const IconComponent = categoryData.icon;
 
