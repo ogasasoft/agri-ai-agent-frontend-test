@@ -6,7 +6,6 @@ import { Calendar, Package, AlertCircle, Carrot, Apple, Coffee, ShoppingBag, Hea
 import { OrderList } from '@/components/OrderList';
 import { OrderFilters } from '@/components/OrderFilters';
 import ShippingLabelButton from '@/components/ShippingLabelButton';
-import YamatoCsvButton from '@/components/YamatoCsvButton';
 import type { Order, OrderFilters as FilterType } from '@/types/order';
 import type { YamatoApiResponse } from '@/types/yamato';
 
@@ -139,10 +138,6 @@ export default function ShippingPendingPage() {
     }
   };
 
-  const handleCsvGenerated = (orderIds: number[]) => {
-    // CSV生成後、発送確認画面に遷移
-    router.push(`/orders/shipping/confirm?orderIds=${orderIds.join(',')}`);
-  };
 
   if (loading) {
     return (
@@ -171,12 +166,6 @@ export default function ShippingPendingPage() {
               <Package className="w-4 h-4" />
               発送済み注文を見る
             </button>
-            <YamatoCsvButton
-              selectedOrders={filteredOrders.filter(order => 
-                selectedOrders.includes(order.id.toString())
-              )}
-              onCsvGenerated={handleCsvGenerated}
-            />
             <ShippingLabelButton
               selectedOrders={filteredOrders.filter(order => 
                 selectedOrders.includes(order.id.toString())
