@@ -63,11 +63,11 @@ export async function POST(request: NextRequest) {
         .addSuggestion('パスワードを忘れた場合は、管理者にお問い合わせください')
         .build();
 
-      logAuthAttempt('FAILURE', sessionData.user.username, { operation: 'password_change' });
+      logAuthAttempt('FAILURE', sessionData.user.username, {});
       return NextResponse.json(passwordError, { status: 400 });
     }
 
-    logAuthAttempt('SUCCESS', sessionData.user.username, { operation: 'password_change' });
+    logAuthAttempt('SUCCESS', sessionData.user.username, {});
 
     return NextResponse.json({
       success: true,
