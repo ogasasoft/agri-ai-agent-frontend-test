@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Calendar, ArrowLeft, Search } from 'lucide-react';
+import { Package, ArrowLeft, Undo2 } from 'lucide-react';
 import { OrderList } from '@/components/OrderList';
 import { OrderFilters } from '@/components/OrderFilters';
 import type { Order, OrderFilters as FilterType } from '@/types/order';
@@ -19,6 +19,7 @@ export default function ShippingCompletedPage() {
     hasMemo: 'all'
   });
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  const [canceling, setCanceling] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -26,9 +27,16 @@ export default function ShippingCompletedPage() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/orders');
+      const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0];
+
+      const response = await fetch('/api/orders', {
+        credentials: 'include',
+        headers: {
+          'x-session-token': sessionToken || ''
+        }
+      });
       const data = await response.json();
-      
+
       // APIレスポンスの構造に応じて配列を設定
       if (data.success && Array.isArray(data.orders)) {
         setOrders(data.orders);
@@ -46,22 +54,63 @@ export default function ShippingCompletedPage() {
     }
   };
 
+  const handleCancelShipping = async () => {
+    if (selectedOrders.length === 0) {
+      alert('発送を取り消す注文を選択してください');
+      return;
+    }
+
+    if (!confirm(`選択した${selectedOrders.length}件の注文を発送待ちに戻しますか？`)) {
+      return;
+    }
+
+    setCanceling(true);
+
+    try {
+      const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0] || '';
+      const csrfToken = document.cookie.split('csrf_token=')[1]?.split(';')[0] || '';
+
+      const response = await fetch('/api/shipping/cancel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-session-token': sessionToken,
+          'x-csrf-token': csrfToken,
+        },
+        body: JSON.stringify({
+          order_ids: selectedOrders.map(id => parseInt(id))
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(`${result.orders.length}件の注文を発送待ちに戻しました`);
+        setSelectedOrders([]);
+        await fetchOrders(); // Refresh the list
+      } else {
+        alert(`エラー: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('発送取り消しエラー:', error);
+      alert('発送取り消し処理に失敗しました。もう一度お試しください。');
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   const filteredOrders = Array.isArray(orders) ? orders.filter(order => {
-    // 発送済みまたは配達完了のみ表示
-    if (order.status !== 'shipped' && order.status !== 'delivered') return false;
-    
+    // 発送済みのみ表示
+    if (order.status !== 'shipped') return false;
+
     if (filters.dateFrom && order.order_date < filters.dateFrom) return false;
     if (filters.dateTo && order.order_date > filters.dateTo) return false;
-    if (filters.status !== 'all' && filters.status !== 'shipped' && order.status !== filters.status) return false;
     if (filters.hasDeliveryDate === 'yes' && !order.delivery_date) return false;
     if (filters.hasDeliveryDate === 'no' && order.delivery_date) return false;
     if (filters.hasMemo === 'yes' && !order.has_memo) return false;
     if (filters.hasMemo === 'no' && order.has_memo) return false;
     return true;
   }) : [];
-
-  const shippedOrders = filteredOrders.filter(order => order.status === 'shipped');
-  const deliveredOrders = filteredOrders.filter(order => order.status === 'delivered');
 
   if (loading) {
     return (
@@ -93,11 +142,21 @@ export default function ShippingCompletedPage() {
           </div>
           <div className="flex gap-3">
             <button
+              onClick={handleCancelShipping}
+              disabled={selectedOrders.length === 0 || canceling}
               className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              disabled={selectedOrders.length === 0}
             >
-              <Search className="w-4 h-4" />
-              配送状況確認 ({selectedOrders.length})
+              {canceling ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+                  処理中...
+                </>
+              ) : (
+                <>
+                  <Undo2 className="w-4 h-4" />
+                  発送取り消し ({selectedOrders.length})
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -125,44 +184,15 @@ export default function ShippingCompletedPage() {
         </div>
       )}
 
-      {/* Two-pane order list */}
+      {/* Shipped orders list */}
       {filteredOrders.length > 0 && (
-        <div className="flex-1 flex overflow-hidden">
-          {/* Shipped orders */}
-          <div className="flex-1 flex flex-col border-r border-gray-200">
-            <div className="bg-blue-50 px-4 py-3 border-b border-blue-200">
-              <div className="flex items-center gap-2 text-blue-800">
-                <Package className="w-4 h-4" />
-                <span className="font-medium">発送済み ({shippedOrders.length}件)</span>
-              </div>
-            </div>
-            <div className="flex-1 overflow-auto">
-              <OrderList
-                orders={shippedOrders}
-                selectedOrders={selectedOrders}
-                onSelectionChange={setSelectedOrders}
-                showShippingInfo={true}
-              />
-            </div>
-          </div>
-
-          {/* Delivered orders */}
-          <div className="flex-1 flex flex-col">
-            <div className="bg-green-50 px-4 py-3 border-b border-green-200">
-              <div className="flex items-center gap-2 text-green-800">
-                <Calendar className="w-4 h-4" />
-                <span className="font-medium">配達完了 ({deliveredOrders.length}件)</span>
-              </div>
-            </div>
-            <div className="flex-1 overflow-auto">
-              <OrderList
-                orders={deliveredOrders}
-                selectedOrders={selectedOrders}
-                onSelectionChange={setSelectedOrders}
-                showShippingInfo={true}
-              />
-            </div>
-          </div>
+        <div className="flex-1 overflow-auto">
+          <OrderList
+            orders={filteredOrders}
+            selectedOrders={selectedOrders}
+            onSelectionChange={setSelectedOrders}
+            showShippingInfo={true}
+          />
         </div>
       )}
     </div>

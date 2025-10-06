@@ -87,10 +87,13 @@ function ShippingCompleteContent() {
 
   const handleConfirmClose = async () => {
     if (!shippingResult?.orders) return;
-    
+
     setRegistering(true);
-    
+
     try {
+      // Get authentication tokens from cookies
+      const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0] || '';
+
       // 顧客情報をDB登録用の形式に変換
       const customerData: CustomerRegistration[] = shippingResult.orders.map(order => ({
         order_code: order.order_number,
@@ -106,12 +109,13 @@ function ShippingCompleteContent() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-session-token': sessionToken,
         },
         body: JSON.stringify({ customers: customerData }),
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
         // Customer information registration completed successfully
       } else {

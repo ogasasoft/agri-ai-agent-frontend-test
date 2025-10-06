@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       
       // Only fetch orders belonging to the authenticated user
       const result = await client.query(`
-        SELECT 
+        SELECT
           o.id,
           o.order_code as order_number,
           o.customer_name,
@@ -62,7 +62,9 @@ export async function GET(request: NextRequest) {
           o.price as total_amount,
           o.order_date,
           o.delivery_date,
-          'pending' as status,
+          COALESCE(o.status, 'pending') as status,
+          o.shipped_at,
+          o.tracking_number,
           CASE WHEN o.notes IS NOT NULL AND o.notes != '' THEN true ELSE false END as has_memo,
           o.notes as memo,
           o.category_id,

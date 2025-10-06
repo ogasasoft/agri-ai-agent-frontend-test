@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { CustomerRegistration } from '@/types/shipping';
+import { validateSession } from '@/lib/auth';
 
 
 export async function POST(request: NextRequest) {
   try {
+    // Session validation
+    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    if (!sessionToken) {
+      return NextResponse.json(
+        { success: false, message: '認証が必要です' },
+        { status: 401 }
+      );
+    }
+
+    const sessionData = await validateSession(sessionToken);
+    if (!sessionData || !sessionData.user) {
+      return NextResponse.json(
+        { success: false, message: 'セッションが無効です' },
+        { status: 401 }
+      );
+    }
+
     const body: { customers: CustomerRegistration[] } = await request.json();
     const { customers } = body;
 
@@ -14,23 +32,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 顧客データを処理してDBに保存
+    // Customer data is already saved in orders table with 'shipped' status
+    // This endpoint just confirms the registration completion
     const processedCustomers = customers.map(customer => ({
       ...customer,
       registered_at: new Date().toISOString()
     }));
 
-    // 実際の実装では、ここでデータベースに保存する
-    // 今回は既存の注文データと同じ形式なので、orders APIを使用することも可能
-    
-    // モック: 成功レスポンス
     const insertedCount = processedCustomers.length;
-    
-    // Customer information processing completed
 
     return NextResponse.json({
       success: true,
-      message: `${insertedCount}件の顧客情報を登録しました`,
+      message: `${insertedCount}件の顧客情報を確認しました`,
       inserted: insertedCount,
       customers: processedCustomers
     });
@@ -38,9 +51,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Customer registration error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        message: error instanceof Error ? error.message : '顧客情報の登録中にエラーが発生しました' 
+      {
+        success: false,
+        message: error instanceof Error ? error.message : '顧客情報の登録中にエラーが発生しました'
       },
       { status: 500 }
     );

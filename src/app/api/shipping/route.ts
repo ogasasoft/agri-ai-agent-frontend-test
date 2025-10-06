@@ -198,18 +198,34 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Generate tracking numbers for CSV (no database update needed)
+      // Generate tracking numbers and update orders to 'shipped' status
       const successfulOrders: any[] = [];
+      const trackingNumbers: string[] = [];
+      const shippedAt = new Date().toISOString();
 
       for (let i = 0; i < selectedOrders.length; i++) {
         const order = selectedOrders[i];
         const trackingNumber = `AG${Date.now()}${String(i + 1).padStart(3, '0')}`;
+        trackingNumbers.push(trackingNumber);
 
         successfulOrders.push({
           ...order,
           tracking_number: trackingNumber,
-          status: 'shipped'
+          status: 'shipped',
+          shipped_at: shippedAt
         });
+      }
+
+      // Update orders status to 'shipped' in database
+      for (let i = 0; i < order_ids.length; i++) {
+        await client.query(`
+          UPDATE orders
+          SET status = 'shipped',
+              shipped_at = $1,
+              tracking_number = $2,
+              updated_at = NOW()
+          WHERE id = $3 AND user_id = $4
+        `, [shippedAt, trackingNumbers[i], order_ids[i], userId]);
       }
 
       // Generate Yamato B2 Cloud CSV with tracking numbers

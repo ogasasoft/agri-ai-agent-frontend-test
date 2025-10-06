@@ -159,15 +159,8 @@ export default function ShippingPendingPage() {
             </p>
           </div>
           <div className="flex gap-3">
-            <button
-              onClick={() => router.push('/orders/shipping/completed')}
-              className="btn-secondary flex items-center gap-2"
-            >
-              <Package className="w-4 h-4" />
-              発送済み注文を見る
-            </button>
             <ShippingLabelButton
-              selectedOrders={filteredOrders.filter(order => 
+              selectedOrders={filteredOrders.filter(order =>
                 selectedOrders.includes(order.id.toString())
               )}
               onShippingComplete={handleShippingComplete}
