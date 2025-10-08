@@ -11,7 +11,8 @@ import {
   TrendingDown,
   ShoppingBag,
   BarChart3,
-  PieChart
+  PieChart,
+  RefreshCw
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -68,22 +69,80 @@ interface DashboardData {
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [dateRange, setDateRange] = useState({
-    from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    to: new Date().toISOString().split('T')[0]
+    from: '',
+    to: ''
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [dateRange]);
+    initializeDateRange();
+  }, []);
 
-  const fetchDashboardData = async () => {
+  const initializeDateRange = async () => {
+    try {
+      const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0];
+
+      const response = await fetch('/api/dashboard/latest-date', {
+        credentials: 'include',
+        headers: {
+          'x-session-token': sessionToken || ''
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const latestDate = new Date(result.latestDate);
+        const oneMonthAgo = new Date(latestDate);
+        oneMonthAgo.setMonth(latestDate.getMonth() - 1);
+
+        const newDateRange = {
+          from: oneMonthAgo.toISOString().split('T')[0],
+          to: latestDate.toISOString().split('T')[0]
+        };
+
+        setDateRange(newDateRange);
+
+        // 日付範囲が設定された後にダッシュボードデータを取得
+        await fetchDashboardDataWithRange(newDateRange);
+      } else {
+        // エラーの場合は今日から1ヶ月前をデフォルトとする
+        const today = new Date();
+        const oneMonthAgo = new Date(today);
+        oneMonthAgo.setMonth(today.getMonth() - 1);
+
+        const fallbackRange = {
+          from: oneMonthAgo.toISOString().split('T')[0],
+          to: today.toISOString().split('T')[0]
+        };
+
+        setDateRange(fallbackRange);
+        await fetchDashboardDataWithRange(fallbackRange);
+      }
+    } catch (error) {
+      console.error('最新日付の取得エラー:', error);
+
+      // エラーの場合は今日から1ヶ月前をデフォルトとする
+      const today = new Date();
+      const oneMonthAgo = new Date(today);
+      oneMonthAgo.setMonth(today.getMonth() - 1);
+
+      const fallbackRange = {
+        from: oneMonthAgo.toISOString().split('T')[0],
+        to: today.toISOString().split('T')[0]
+      };
+
+      setDateRange(fallbackRange);
+      await fetchDashboardDataWithRange(fallbackRange);
+    }
+  };
+
+  const fetchDashboardDataWithRange = async (range: { from: string; to: string }) => {
     setLoading(true);
     try {
       const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0];
 
       const response = await fetch(
-        `/api/dashboard/stats?from=${dateRange.from}&to=${dateRange.to}`,
+        `/api/dashboard/stats?from=${range.from}&to=${range.to}`,
         {
           credentials: 'include',
           headers: {
@@ -103,6 +162,10 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchDashboardData = async () => {
+    await fetchDashboardDataWithRange(dateRange);
   };
 
   const exportToCsv = () => {
@@ -196,6 +259,15 @@ export default function DashboardPage() {
                 className="input-field text-sm"
               />
             </div>
+
+            <button
+              onClick={fetchDashboardData}
+              disabled={loading}
+              className="btn-secondary flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              更新
+            </button>
 
             <button
               onClick={exportToCsv}

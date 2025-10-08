@@ -147,18 +147,18 @@ export function OrderList({ orders, selectedOrders, onSelectionChange, showShipp
                   <div className="text-sm text-gray-500">
                     <div className="flex justify-between">
                       <span>
-                        注文日: {format(new Date(order.order_date), 'MM/dd', { locale: ja })}
+                        注文日: {format(new Date(order.order_date), 'yyyy/MM/dd', { locale: ja })}
                       </span>
                       {order.delivery_date && (
                         <span>
-                          希望日: {format(new Date(order.delivery_date), 'MM/dd', { locale: ja })}
+                          希望日: {format(new Date(order.delivery_date), 'yyyy/MM/dd', { locale: ja })}
                         </span>
                       )}
                     </div>
                     {showShippingInfo && order.shipped_at && (
                       <div className="flex justify-between mt-1">
                         <span>
-                          発送日: {format(new Date(order.shipped_at), 'MM/dd', { locale: ja })}
+                          発送日: {format(new Date(order.shipped_at), 'yyyy/MM/dd', { locale: ja })}
                         </span>
                         {order.tracking_number && (
                           <span className="text-xs text-blue-600">
