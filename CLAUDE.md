@@ -115,6 +115,11 @@ vercel --prod        # Deploy to production
 - `/api/admin/integrations` - External API integration settings
 - `/api/admin/dashboard/*` - System statistics and activity monitoring
 
+### Dashboard API (`src/app/api/dashboard/`)
+- `/api/dashboard/stats` - Analytics data with date range filtering (shipped orders only)
+- `/api/dashboard/latest-date` - Get latest shipped order date for default date range
+- **Date range logic**: Defaults to latest shipped date minus 1 month (not today)
+
 ## Core Architecture Patterns
 
 ### Multi-Tenant Data Isolation
@@ -146,6 +151,13 @@ vercel --prod        # Deploy to production
 - BroadcastChannel API for real-time updates across browser tabs
 - Graceful fallback when browser APIs are unavailable
 - Admin-configurable system prompts with category-based organization
+
+### Dashboard Analytics
+- **Data source**: Only shipped orders (status = 'shipped')
+- **Default range**: Latest shipped order date minus 1 month (not current date)
+- **Manual refresh**: Date picker changes don't auto-reload; requires "更新" button
+- **Metrics tracked**: Revenue growth, order growth, customer segmentation, weekday patterns
+- **Date format**: All dates display with year (yyyy/MM/dd) for clarity
 
 ## Admin System Architecture
 
@@ -180,9 +192,15 @@ vercel --prod        # Deploy to production
 ### External API Integration Framework
 - **ColorMi Shop**: E-commerce platform integration (planned)
 - **Tabechoku**: Direct-from-farm marketplace (planned)
-- **Yamato Transport**: Shipping label generation (mock implementation)
+- **Yamato Transport**: Shipping label generation with CSV export
 - Configurable API settings with connection testing
 - Automatic sync scheduling with error handling
+
+### Shipping Workflow
+- **Three-step process**: Settings → Confirmation → Completion
+- **Auto-download**: CSV files automatically download on completion page
+- **Status tracking**: Orders progress from pending → shipped with tracking numbers
+- **Bulk operations**: Multi-select orders for batch shipping label creation
 
 ## Important Notes
 
@@ -191,6 +209,7 @@ vercel --prod        # Deploy to production
 - **Main Entry**: `/orders` redirects to `/orders/shipping/pending`
 - **Admin Panel**: `/admin` requires super admin authentication
 - **Order Registration Flow**: choose method → confirm → complete
+- **Shipping Flow**: pending → settings modal → confirmation screen → completion (with auto-download)
 
 ### Critical Security Considerations
 - All API routes must have authentication, CSRF protection, and input validation
