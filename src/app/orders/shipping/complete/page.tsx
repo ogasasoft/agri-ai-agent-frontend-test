@@ -26,6 +26,7 @@ function ShippingCompleteContent() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [orderIds, setOrderIds] = useState<number[]>([]);
+  const [autoDownloaded, setAutoDownloaded] = useState(false);
 
   useEffect(() => {
     const orderIdsParam = searchParams.get('orderIds');
@@ -38,6 +39,17 @@ function ShippingCompleteContent() {
       router.push('/orders/shipping/pending');
     }
   }, [searchParams, router]);
+
+  // Auto-download CSV when shipping result is ready
+  useEffect(() => {
+    if (shippingResult?.download_ready &&
+        shippingResult?.csv_content &&
+        shippingResult?.filename &&
+        !autoDownloaded) {
+      setAutoDownloaded(true);
+      downloadYamatoB2CSV();
+    }
+  }, [shippingResult, autoDownloaded]);
 
   const processShipping = async (ids: number[]) => {
     try {
@@ -140,25 +152,20 @@ function ShippingCompleteContent() {
     // Create a Blob with the CSV content
     const blob = new Blob([shippingResult.csv_content], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
-    
+
     // Create a temporary URL for the blob
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
     link.setAttribute('download', shippingResult.filename);
     link.style.visibility = 'hidden';
-    
+
     // Add to DOM, click, and remove
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     // Clean up the temporary URL
     URL.revokeObjectURL(url);
-  };
-
-  const downloadLabel = (labelUrl: string, orderNumber: string) => {
-    // For individual order labels, we'll use the CSV download for now
-    downloadYamatoB2CSV();
   };
 
   if (loading) {
@@ -238,67 +245,59 @@ function ShippingCompleteContent() {
                       {shippingResult.orders.length}件の注文が正常に発送処理されました
                     </p>
                   </div>
-                  {shippingResult.download_ready && (
+                  <div className="flex gap-3">
+                    {shippingResult.download_ready && (
+                      <button
+                        onClick={downloadYamatoB2CSV}
+                        className="btn-secondary flex items-center gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        ヤマトB2 CSV ダウンロード
+                      </button>
+                    )}
                     <button
-                      onClick={downloadYamatoB2CSV}
+                      onClick={handleClose}
                       className="btn-primary flex items-center gap-2"
                     >
-                      <Download className="w-4 h-4" />
-                      ヤマトB2 CSV ダウンロード
+                      <CheckCircle className="w-4 h-4" />
+                      完了
                     </button>
-                  )}
+                  </div>
                 </div>
               </div>
               
               <div className="divide-y divide-gray-200">
                 {shippingResult.orders.map((order, index) => (
                   <div key={order.id} className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            発送済み
-                          </span>
-                          <span className="text-lg font-semibold text-gray-900">
-                            {order.order_number}
-                          </span>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <span className="text-gray-500">顧客名</span>
-                            <p className="font-medium">{order.customer_name}</p>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">金額</span>
-                            <p className="font-medium">¥{(order.total_amount || 0).toLocaleString()}</p>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">配達予定日</span>
-                            <p className="font-medium">
-                              {order.delivery_date || '指定なし'}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">追跡番号</span>
-                            <p className="font-medium text-blue-600">
-                              {order.tracking_number || 'YM000000000'}
-                            </p>
-                          </div>
-                        </div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        発送済み
+                      </span>
+                      <span className="text-lg font-semibold text-gray-900">
+                        {order.order_number}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">顧客名</span>
+                        <p className="font-medium">{order.customer_name}</p>
                       </div>
-                      
-                      <div className="ml-4">
-                        <button
-                          onClick={() => downloadLabel(
-                            order.label_url || '#', 
-                            order.order_number
-                          )}
-                          className="btn-secondary flex items-center gap-2"
-                        >
-                          <Download className="w-4 h-4" />
-                          CSV取得
-                        </button>
+                      <div>
+                        <span className="text-gray-500">金額</span>
+                        <p className="font-medium">¥{(order.total_amount || 0).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">配達予定日</span>
+                        <p className="font-medium">
+                          {order.delivery_date || '指定なし'}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">追跡番号</span>
+                        <p className="font-medium text-blue-600">
+                          {order.tracking_number || 'YM000000000'}
+                        </p>
                       </div>
                     </div>
                   </div>
