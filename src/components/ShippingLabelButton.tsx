@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Truck, AlertCircle, CheckCircle } from 'lucide-react';
 import { YamatoShippingRequest, YamatoApiResponse } from '@/types/yamato';
 
@@ -18,66 +19,24 @@ interface ShippingLabelButtonProps {
   buttonText?: string;
 }
 
-export default function ShippingLabelButton({ 
-  selectedOrders, 
-  onShippingComplete, 
+export default function ShippingLabelButton({
+  selectedOrders,
+  onShippingComplete,
   disabled = false,
   buttonText = "発送書類作成"
 }: ShippingLabelButtonProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
+  const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [deliveryType, setDeliveryType] = useState<'normal' | 'cool' | 'frozen'>('normal');
   const [notes, setNotes] = useState('');
 
-  const handleCreateShippingLabels = async () => {
+  const handleCreateShippingLabels = () => {
     if (selectedOrders.length === 0) return;
-    
-    setIsProcessing(true);
-    
-    try {
-      const request: YamatoShippingRequest = {
-        order_ids: selectedOrders.map(order => order.id),
-        sender: {
-          name: '農業協同組合',
-          address: '〒100-0001 東京都千代田区千代田1-1',
-          phone: '03-1234-5678',
-        },
-        recipients: selectedOrders.map(order => ({
-          order_id: order.id,
-          name: order.customer_name,
-          address: order.customer_address || '',
-          phone: order.customer_phone,
-          delivery_date: order.delivery_date,
-        })),
-        delivery_type: deliveryType,
-        payment_type: 'sender',
-        notes,
-      };
 
-      const response = await fetch('/api/yamato', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
-
-      if (!response.ok) {
-        throw new Error('発送伝票作成に失敗しました');
-      }
-
-      const result: YamatoApiResponse = await response.json();
-      
-      onShippingComplete(result);
-      setShowModal(false);
-      setNotes('');
-      
-    } catch (error) {
-      console.error('Shipping label creation error:', error);
-      alert('発送伝票の作成に失敗しました。もう一度お試しください。');
-    } finally {
-      setIsProcessing(false);
-    }
+    // 確認画面に遷移
+    const orderIds = selectedOrders.map(order => order.id).join(',');
+    const encodedNotes = encodeURIComponent(notes);
+    router.push(`/orders/shipping/confirm?orderIds=${orderIds}&deliveryType=${deliveryType}&notes=${encodedNotes}`);
   };
 
   return (
@@ -135,27 +94,16 @@ export default function ShippingLabelButton({
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowModal(false)}
-                disabled={isProcessing}
                 className="btn-secondary"
               >
                 キャンセル
               </button>
               <button
                 onClick={handleCreateShippingLabels}
-                disabled={isProcessing}
-                className="btn-primary disabled:opacity-50 flex items-center gap-2"
+                className="btn-primary flex items-center gap-2"
               >
-                {isProcessing ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    作成中...
-                  </>
-                ) : (
-                  <>
-                    <Truck className="w-4 h-4" />
-                    作成開始
-                  </>
-                )}
+                <Truck className="w-4 h-4" />
+                確認画面へ
               </button>
             </div>
           </div>

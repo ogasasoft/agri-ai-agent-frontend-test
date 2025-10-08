@@ -11,9 +11,17 @@ function ShippingConfirmContent() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
+  const [deliveryType, setDeliveryType] = useState<'normal' | 'cool' | 'frozen'>('normal');
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     const orderIdsParam = searchParams.get('orderIds');
+    const deliveryTypeParam = searchParams.get('deliveryType') as 'normal' | 'cool' | 'frozen';
+    const notesParam = searchParams.get('notes');
+
+    if (deliveryTypeParam) setDeliveryType(deliveryTypeParam);
+    if (notesParam) setNotes(decodeURIComponent(notesParam));
+
     if (orderIdsParam) {
       const orderIds = orderIdsParam.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
       if (orderIds.length > 0) {
@@ -54,36 +62,57 @@ function ShippingConfirmContent() {
 
   const handleConfirmShipping = async () => {
     if (orders.length === 0) return;
-    
+
     setConfirming(true);
-    
+
     try {
-      // 各注文のステータスを発送済みに更新
-      const updatePromises = orders.map(order => 
-        fetch(`/api/orders/${order.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-session-token': document.cookie.split('session_token=')[1]?.split(';')[0] || '',
-            'x-csrf-token': document.cookie.split('csrf_token=')[1]?.split(';')[0] || '',
-          },
-          body: JSON.stringify({
-            status: 'shipped',
-            shipped_at: new Date().toISOString()
-          })
-        })
-      );
+      // Get authentication tokens from cookies
+      const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0] || '';
+      const csrfToken = document.cookie.split('csrf_token=')[1]?.split(';')[0] || '';
 
-      await Promise.all(updatePromises);
+      const response = await fetch('/api/shipping', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-session-token': sessionToken,
+          'x-csrf-token': csrfToken,
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          order_ids: orders.map(o => o.id),
+          delivery_type: deliveryType,
+          notes
+        }),
+      });
 
-      // 発送完了画面に遷移
-      router.push('/orders/shipping/completed?from=confirm');
-      
+      if (!response.ok) {
+        throw new Error('発送処理に失敗しました');
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        // 成功した注文IDを取得して完了画面に遷移
+        const successOrderIds = orders.map(o => o.id).join(',');
+        router.push(`/orders/shipping/complete?orderIds=${successOrderIds}`);
+      } else {
+        alert('発送処理に失敗しました: ' + (result.message || '不明なエラー'));
+      }
+
     } catch (error) {
       console.error('発送確認の処理に失敗しました:', error);
       alert('発送確認の処理に失敗しました。もう一度お試しください。');
     } finally {
       setConfirming(false);
+    }
+  };
+
+  const getDeliveryTypeText = (type: string) => {
+    switch (type) {
+      case 'normal': return '常温';
+      case 'cool': return '冷蔵';
+      case 'frozen': return '冷凍';
+      default: return type;
     }
   };
 
@@ -164,13 +193,13 @@ function ShippingConfirmContent() {
             >
               {confirming ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-green-300 border-t-transparent rounded-full animate-spin" />
-                  <span>確認中...</span>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>処理中...</span>
                 </>
               ) : (
                 <>
                   <CheckCircle className="w-4 h-4" />
-                  <span>発送完了</span>
+                  <span>発送処理を実行</span>
                 </>
               )}
             </button>
@@ -180,14 +209,47 @@ function ShippingConfirmContent() {
 
       {/* Orders List */}
       <div className="flex-1 overflow-auto p-6">
+        {/* 配送設定 */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">配送設定</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                配送タイプ
+              </label>
+              <div className="bg-gray-50 px-4 py-2 rounded-lg">
+                <span className="text-gray-900">{getDeliveryTypeText(deliveryType)}</span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                注文件数
+              </label>
+              <div className="bg-gray-50 px-4 py-2 rounded-lg">
+                <span className="text-gray-900">{orders.length}件</span>
+              </div>
+            </div>
+          </div>
+          {notes && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                備考
+              </label>
+              <div className="bg-gray-50 px-4 py-2 rounded-lg">
+                <span className="text-gray-900">{notes}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex items-center gap-2 text-blue-700 mb-2">
             <Package className="w-5 h-5" />
             <span className="font-medium">発送前の最終確認</span>
           </div>
           <p className="text-sm text-blue-600">
-            ヤマトB2クラウドでの伝票作成が完了し、実際に商品を発送した後に「発送完了」ボタンを押してください。<br />
-            発送完了後は、お客様に発送通知が送信され、注文ステータスが「発送済み」に変更されます。
+            以下の内容で発送処理を実行します。内容をご確認の上、「発送処理を実行」ボタンを押してください。<br />
+            処理後は注文ステータスが「発送済み」に変更されます。
           </p>
         </div>
 
