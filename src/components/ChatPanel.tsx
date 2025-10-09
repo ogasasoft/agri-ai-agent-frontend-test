@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, Settings } from 'lucide-react';
+import { Send, Bot, User } from 'lucide-react';
 import { useChatStore } from '@/stores/chatStore';
 import { usePathname } from 'next/navigation';
 
@@ -17,7 +17,7 @@ export function ChatPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { messages, isHydrated, addMessage, loadMessages } = useChatStore();
+  const { messages, isHydrated, addMessage, loadMessages, clearMessages } = useChatStore();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -72,11 +72,18 @@ export function ChatPanel() {
     });
 
     try {
+      // Get authentication tokens from cookies
+      const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0] || '';
+      const csrfToken = document.cookie.split('csrf_token=')[1]?.split(';')[0] || '';
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-session-token': sessionToken,
+          'x-csrf-token': csrfToken,
         },
+        credentials: 'include',
         body: JSON.stringify({
           message: userMessage,
           customerId: 'default',
@@ -85,11 +92,23 @@ export function ChatPanel() {
       });
 
       const data = await response.json();
-      
+
+      if (!response.ok) {
+        // Handle API errors
+        const errorMessage = data.response || data.message || 'エラーが発生しました。もう一度お試しください。';
+        addMessage({
+          id: (Date.now() + 1).toString(),
+          content: errorMessage,
+          role: 'assistant',
+          timestamp: new Date()
+        });
+        return;
+      }
+
       // Add AI response
       addMessage({
         id: (Date.now() + 1).toString(),
-        content: data.response,
+        content: data.response || 'AIからの応答がありません。',
         role: 'assistant',
         timestamp: new Date()
       });
@@ -106,6 +125,12 @@ export function ChatPanel() {
     }
   };
 
+  const handleClearChat = () => {
+    if (confirm('会話履歴をすべて削除しますか？')) {
+      clearMessages();
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -114,8 +139,11 @@ export function ChatPanel() {
           <Bot className="w-5 h-5 text-primary-600" />
           <span className="font-medium text-gray-900">AI アシスタント</span>
         </div>
-        <button className="p-1 hover:bg-gray-100 rounded">
-          <Settings className="w-4 h-4 text-gray-500" />
+        <button
+          onClick={handleClearChat}
+          className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors"
+        >
+          会話をクリア
         </button>
       </div>
 
@@ -139,7 +167,7 @@ export function ChatPanel() {
             {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+              className={`flex gap-3 mb-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
             >
             <div className={`
               w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
