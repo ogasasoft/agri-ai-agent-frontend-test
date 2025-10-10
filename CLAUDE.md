@@ -22,11 +22,9 @@ This is a comprehensive agricultural AI agent frontend application built with Ne
 - **Security Framework**: Comprehensive security utility functions (`src/lib/security.ts`)
 
 ### AI Integration
-- **Primary**: OpenAI ChatGPT API (gpt-3.5-turbo)
-- **Dynamic System Context**: Real-time database statistics and system settings
-- **Page-Aware Responses**: Context injection based on current user page location
+- **Primary**: OpenAI ChatGPT API (gpt-4o-mini)
+- **Simple Chat Interface**: Direct OpenAI API integration for user questions
 - **Fallback System**: System-based responses when OpenAI API is unavailable
-- **Configurable Prompts**: Admin-managed system prompts in database
 
 ## Common Commands
 
@@ -111,7 +109,6 @@ vercel --prod        # Deploy to production
 ### Admin API (`src/app/api/admin/`)
 - `/api/admin/me` - Admin role validation
 - `/api/admin/customers` - Cross-user customer data management
-- `/api/admin/prompts` - System prompt configuration
 - `/api/admin/integrations` - External API integration settings
 - `/api/admin/dashboard/*` - System statistics and activity monitoring
 
@@ -150,7 +147,6 @@ vercel --prod        # Deploy to production
 - IndexedDB for local storage with cross-tab synchronization
 - BroadcastChannel API for real-time updates across browser tabs
 - Graceful fallback when browser APIs are unavailable
-- Admin-configurable system prompts with category-based organization
 
 ### Dashboard Analytics
 - **Data source**: Only shipped orders (status = 'shipped')
@@ -171,7 +167,6 @@ vercel --prod        # Deploy to production
 - **System Statistics**: Users, orders, customers, integrations
 - **Activity Monitoring**: Real-time admin action logging
 - **Customer Management**: Cross-user customer data with search/filter
-- **Prompt Configuration**: AI behavior customization by category
 - **API Integration Setup**: External service configuration (ColorMi, Tabechoku)
 
 ### Audit Logging

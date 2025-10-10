@@ -3,17 +3,17 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { 
-  Package, 
-  BarChart3, 
-  Plus, 
-  Settings,
-  MessageSquare,
+import {
+  Package,
+  BarChart3,
+  Plus,
   FileText,
   Tags,
   LogOut,
   User,
-  Shield
+  Shield,
+  MessageSquare,
+  X
 } from 'lucide-react';
 
 const navigation = [
@@ -22,11 +22,14 @@ const navigation = [
   { name: '発送済の注文一覧', href: '/orders/shipping/completed', icon: Package },
   { name: 'ダッシュボード', href: '/dashboard', icon: BarChart3 },
   { name: 'カテゴリ管理', href: '/categories', icon: Tags },
-  { name: 'システムプロンプト', href: '/prompts', icon: MessageSquare },
-  { name: '設定', href: '/settings', icon: Settings },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isChatOpen?: boolean;
+  setIsChatOpen?: (open: boolean) => void;
+}
+
+export function Sidebar({ isChatOpen = true, setIsChatOpen }: SidebarProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -146,6 +149,27 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {/* AI Chat Toggle */}
+        {setIsChatOpen && (
+          <button
+            onClick={() => setIsChatOpen(!isChatOpen)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors mt-2"
+            title={isChatOpen ? 'AIアシスタントを閉じる' : 'AIアシスタントを開く'}
+          >
+            {isChatOpen ? (
+              <>
+                <X className="w-5 h-5" />
+                AIアシスタントを閉じる
+              </>
+            ) : (
+              <>
+                <MessageSquare className="w-5 h-5" />
+                AIアシスタントを開く
+              </>
+            )}
+          </button>
+        )}
       </nav>
 
       {/* Footer Actions */}

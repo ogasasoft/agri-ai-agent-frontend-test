@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { 
-  Users, Settings, Database, Shield, BarChart3, 
-  LogOut, Menu, X, Home, MessageSquare, Plug
+import {
+  Users, Settings, Database, Shield, BarChart3,
+  LogOut, Menu, X, Home, Plug
 } from 'lucide-react';
 
 interface AdminUser {

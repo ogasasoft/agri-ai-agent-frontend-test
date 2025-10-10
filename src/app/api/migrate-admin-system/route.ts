@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       await client.query(`
         CREATE TABLE IF NOT EXISTS system_settings (
           id SERIAL PRIMARY KEY,
-          category VARCHAR(100) NOT NULL, -- 'system_prompt', 'api_config', 'general'
+          category VARCHAR(100) NOT NULL, -- 'api_config', 'general'
           key VARCHAR(100) NOT NULL,
           value TEXT,
           description TEXT,
@@ -100,8 +100,6 @@ export async function POST(request: NextRequest) {
         // Insert default system settings
         await client.query(`
           INSERT INTO system_settings (category, key, value, description, created_by) VALUES
-          ('system_prompt', 'chat_default', 'あなたは農業ECサイトの専門アシスタントです。注文管理、顧客対応、商品情報について親切にサポートします。', 'デフォルトのチャットシステムプロンプト', $1),
-          ('system_prompt', 'order_analysis', '注文データを分析し、売上傾向、人気商品、顧客動向について洞察を提供してください。', '注文分析用プロンプト', $1),
           ('general', 'site_name', 'Agri AI 管理システム', 'サイト名', $1),
           ('general', 'max_orders_per_day', '1000', '1日あたりの最大注文数', $1)
         `, [adminUser.id]);
@@ -145,8 +143,7 @@ export async function POST(request: NextRequest) {
           'Role-based access control',
           'System settings management',
           'API integrations framework',
-          'Admin audit logging',
-          'Default system prompts configured'
+          'Admin audit logging'
         ],
         stats: {
           total_users: usersCount.rows[0].count,
