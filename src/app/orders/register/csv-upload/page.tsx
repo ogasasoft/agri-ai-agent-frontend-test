@@ -398,21 +398,6 @@ function CSVUploadContent() {
           </div>
         </div>
 
-        {/* Category Examples */}
-        <div className="mb-8 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-          <h3 className="font-semibold text-gray-900 mb-2">この カテゴリの商品例</h3>
-          <div className="flex flex-wrap gap-2">
-            {categoryData.examples.map((example, index) => (
-              <span 
-                key={index}
-                className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-              >
-                {example}
-              </span>
-            ))}
-          </div>
-        </div>
-
         {/* Upload Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">CSVファイルのアップロード</h2>
@@ -525,22 +510,7 @@ function CSVUploadContent() {
                 <div className="text-sm text-gray-600">問題のあるデータ</div>
               </div>
             </div>
-            
-            {/* ヘッダー情報 */}
-            <div className="mb-4">
-              <h4 className="font-medium text-gray-900 mb-2">ヘッダー情報</h4>
-              <div className="flex flex-wrap gap-2">
-                {previewData.headers.map((header, index) => (
-                  <span 
-                    key={index}
-                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                  >
-                    {header || `列${index + 1}`}
-                  </span>
-                ))}
-              </div>
-            </div>
-            
+
             {/* データプレビュー */}
             <div className="mb-4">
               <h4 className="font-medium text-gray-900 mb-2">データプレビュー（最初の5行）</h4>

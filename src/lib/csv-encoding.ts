@@ -265,8 +265,8 @@ function getRequiredFieldsForDataSource(dataSource: string) {
     ],
     tabechoku: [
       { name: '注文番号', patterns: ['注文番号', '番号'] },
-      { name: '顧客名', patterns: ['顧客名', '名前'] },
-      { name: '金額', patterns: ['金額', '価格'] },
+      { name: '顧客名', patterns: ['お届け先名', '注文者名', '顧客名', '名前'] },
+      { name: '金額', patterns: ['商品代金', 'お支払い額', '生産者へのお支払い額', '金額', '価格'] },
     ],
     unknown: [
       { name: '注文ID', patterns: ['ID', '番号', 'コード'] },

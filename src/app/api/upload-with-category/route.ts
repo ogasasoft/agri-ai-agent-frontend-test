@@ -77,13 +77,13 @@ function extractFieldFromRow(row: Record<string, string>, dataSource: string, fi
     // たべちょく固有のフォールバック
     switch (fieldName) {
       case 'order_code': return row['注文番号'] || '';
-      case 'customer_name': return row['顧客名'] || '';
-      case 'phone': return row['電話番号'] || '';
-      case 'address': return row['住所'] || '';
-      case 'price': return row['金額'] || '';
-      case 'order_date': return row['注文日'] || '';
-      case 'delivery_date': return row['希望配達日'] || '';
-      case 'notes': return row['備考'] || '';
+      case 'customer_name': return row['お届け先名'] || row['注文者名'] || row['顧客名'] || '';
+      case 'phone': return row['お届け先電話番号'] || row['注文者電話番号'] || row['電話番号'] || '';
+      case 'address': return row['お届け先住所'] || row['注文者住所'] || row['住所'] || '';
+      case 'price': return row['商品代金(お客様に提示した額)'] || row['生産者へのお支払い額'] || row['金額'] || '';
+      case 'order_date': return row['注文日'] || row['注文日時'] || '';
+      case 'delivery_date': return row['お届け日'] || row['希望配達日'] || '';
+      case 'notes': return row['特記事項'] || row['お客様メモ'] || row['備考'] || '';
       default: return '';
     }
   }
@@ -93,11 +93,27 @@ function extractFieldFromRow(row: Record<string, string>, dataSource: string, fi
 // 日付フォーマット変換 (YYYY-MM-DD形式に統一)
 function formatDate(dateStr: string): string | null {
   if (!dateStr || dateStr.trim() === '') return null;
-  
+
   try {
-    const date = new Date(dateStr);
+    const cleaned = dateStr.trim();
+
+    // YYYYMMDD形式（8桁）の処理（たべちょくCSV: 20250725）
+    if (/^\d{8}$/.test(cleaned)) {
+      const year = cleaned.substring(0, 4);
+      const month = cleaned.substring(4, 6);
+      const day = cleaned.substring(6, 8);
+      return `${year}-${month}-${day}`;
+    }
+
+    // YYYY-MM-DD HH:MM:SS形式の処理（たべちょくCSV: 2025-07-25 08:56:12）
+    if (cleaned.includes(' ')) {
+      return cleaned.split(' ')[0];
+    }
+
+    // その他の形式は Date でパース
+    const date = new Date(cleaned);
     if (isNaN(date.getTime())) return null;
-    
+
     return date.toISOString().split('T')[0]; // YYYY-MM-DD
   } catch (error) {
     return null;
