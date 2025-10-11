@@ -17,7 +17,7 @@ export function getClientInfo(request: NextRequest): { ipAddress: string; userAg
 }
 
 // Enhanced security constants
-const MAX_LOGIN_ATTEMPTS = 5;
+const MAX_LOGIN_ATTEMPTS = 10;
 const PROGRESSIVE_LOCKOUT_LEVELS = [
   0,           // No lockout
   5 * 60,      // 5 minutes

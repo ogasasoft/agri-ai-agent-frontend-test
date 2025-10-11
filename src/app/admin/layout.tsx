@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
-  Users, Settings, Database, Shield, BarChart3,
+  Users, Database, Shield, BarChart3,
   LogOut, Menu, X, Home, Plug
 } from 'lucide-react';
 
@@ -72,7 +72,6 @@ export default function AdminLayout({
     { name: '管理ダッシュボード', href: '/admin', icon: Home },
     { name: 'ユーザーID発行', href: '/admin/users', icon: Users, superAdminOnly: true },
     { name: '顧客データ管理', href: '/admin/customers', icon: Database },
-    { name: 'システム設定', href: '/admin/settings', icon: Settings, superAdminOnly: true },
     { name: 'API 連携設定', href: '/admin/integrations', icon: Plug, superAdminOnly: true },
     { name: 'セキュリティ監視', href: '/admin/security', icon: Shield, superAdminOnly: true },
   ];
