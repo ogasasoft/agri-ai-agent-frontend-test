@@ -514,12 +514,12 @@ function CSVUploadContent() {
             {/* データプレビュー */}
             <div className="mb-4">
               <h4 className="font-medium text-gray-900 mb-2">データプレビュー（最初の5行）</h4>
-              <div className="overflow-x-auto">
-                <table className="min-w-full border border-gray-200 text-sm">
+              <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                <table className="min-w-full text-sm">
                   <thead className="bg-gray-50">
                     <tr>
                       {previewData.headers.map((header, index) => (
-                        <th key={index} className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                        <th key={index} className="px-4 py-2 text-left text-xs font-medium text-gray-700 border-b border-gray-200 whitespace-nowrap">
                           {header || `列${index + 1}`}
                         </th>
                       ))}
@@ -529,7 +529,7 @@ function CSVUploadContent() {
                     {previewData.data.map((row, rowIndex) => (
                       <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         {row.map((cell, cellIndex) => (
-                          <td key={cellIndex} className="px-3 py-2 text-sm text-gray-900 border-b border-gray-200">
+                          <td key={cellIndex} className="px-4 py-2 text-sm text-gray-900 border-b border-gray-200 whitespace-nowrap">
                             {cell || '-'}
                           </td>
                         ))}

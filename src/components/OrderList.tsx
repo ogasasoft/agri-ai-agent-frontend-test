@@ -141,6 +141,11 @@ export function OrderList({ orders, selectedOrders, onSelectionChange, showShipp
                       <span>{order.customer_name}</span>
                       <span className="font-medium">{formatCurrency(order.total_amount)}</span>
                     </div>
+                    {showShippingInfo && order.customer_address && (
+                      <div className="mt-1 text-gray-500">
+                        <span>住所: {order.customer_address}</span>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Dates */}
