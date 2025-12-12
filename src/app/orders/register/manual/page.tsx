@@ -1,77 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Save, Carrot, Apple, Package, Calendar, User, Phone, MapPin, DollarSign, FileText } from 'lucide-react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Save, Package, Calendar, User, Phone, MapPin, DollarSign, FileText } from 'lucide-react';
 import { Suspense } from 'react';
 import { useFormErrorHandler } from '@/hooks/useErrorHandler';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-
-type ProductCategory = 'vegetables' | 'fruits' | 'other';
-
-interface CategoryInfo {
-  id: ProductCategory;
-  name: string;
-  description: string;
-  icon: React.ComponentType<any>;
-  color: string;
-  placeholders: {
-    orderCode: string;
-    customerName: string;
-    phone: string;
-    address: string;
-    price: string;
-    notes: string;
-  };
-}
-
-const categoryInfo: Record<ProductCategory, CategoryInfo> = {
-  vegetables: {
-    id: 'vegetables',
-    name: '野菜',
-    description: '新鮮な野菜の注文登録',
-    icon: Carrot,
-    color: 'text-green-600',
-    placeholders: {
-      orderCode: 'VEG-001',
-      customerName: '田中太郎',
-      phone: '090-1234-5678',
-      address: '東京都渋谷区...',
-      price: '1500',
-      notes: 'キャベツ 2玉、にんじん 1袋'
-    }
-  },
-  fruits: {
-    id: 'fruits',
-    name: '果物',
-    description: '新鮮な果物の注文登録',
-    icon: Apple,
-    color: 'text-red-600',
-    placeholders: {
-      orderCode: 'FRT-001',
-      customerName: '佐藤花子',
-      phone: '080-9876-5432',
-      address: '神奈川県横浜市...',
-      price: '2800',
-      notes: 'りんご 5個、みかん 1箱'
-    }
-  },
-  other: {
-    id: 'other',
-    name: 'その他',
-    description: '加工品・その他商品の注文登録',
-    icon: Package,
-    color: 'text-gray-600',
-    placeholders: {
-      orderCode: 'OTH-001',
-      customerName: '山田次郎',
-      phone: '070-1111-2222',
-      address: '大阪府大阪市...',
-      price: '800',
-      notes: '手作り味噌 1kg'
-    }
-  }
-};
 
 interface FormData {
   orderCode: string;
@@ -86,9 +20,7 @@ interface FormData {
 
 function ManualRegistrationContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const category = (searchParams.get('category') as ProductCategory) || 'other';
-  
+
   const [formData, setFormData] = useState<FormData>({
     orderCode: '',
     customerName: '',
@@ -99,7 +31,7 @@ function ManualRegistrationContent() {
     deliveryDate: '',
     notes: ''
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -107,30 +39,27 @@ function ManualRegistrationContent() {
     componentName: 'ManualRegistrationContent'
   });
 
-  const categoryData = categoryInfo[category];
-  const IconComponent = categoryData.icon;
-
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.orderCode.trim()) {
       newErrors.orderCode = '注文番号は必須です';
     }
-    
+
     if (!formData.customerName.trim()) {
       newErrors.customerName = '顧客名は必須です';
     }
-    
+
     if (!formData.price.trim()) {
       newErrors.price = '金額は必須です';
     } else if (isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
       newErrors.price = '有効な金額を入力してください';
     }
-    
+
     if (!formData.orderDate) {
       newErrors.orderDate = '注文日は必須です';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -145,18 +74,18 @@ function ManualRegistrationContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Get authentication tokens from cookies
       const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0] || '';
       const csrfToken = document.cookie.split('csrf_token=')[1]?.split(';')[0] || '';
-      
+
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: {
@@ -173,16 +102,15 @@ function ManualRegistrationContent() {
           order_date: formData.orderDate,
           delivery_date: formData.deliveryDate || null,
           notes: formData.notes.trim(),
-          product_category: category,
           source: 'manual_entry'
         }),
       });
-      
+
       const result = await response.json();
-      
+
       if (response.ok) {
         // 成功時は確認画面に遷移
-        router.push(`/orders/register/confirm?category=${category}&orderCode=${formData.orderCode}&method=manual`);
+        router.push(`/orders/register/confirm?orderCode=${formData.orderCode}&method=manual`);
       } else {
         // Handle different error types
         if (response.status === 409) {
@@ -214,20 +142,20 @@ function ManualRegistrationContent() {
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => router.push('/orders/register/choose')}
+            onClick={() => router.push('/orders/register/data-source')}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            カテゴリ選択に戻る
+            登録方法選択に戻る
           </button>
-          
+
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-              <IconComponent className={`w-6 h-6 ${categoryData.color}`} />
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <Package className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{categoryData.name}の手動登録</h1>
-              <p className="text-gray-600">{categoryData.description}をフォームで個別登録</p>
+              <h1 className="text-3xl font-bold text-gray-900">手動登録</h1>
+              <p className="text-gray-600">注文データをフォームで個別登録</p>
             </div>
           </div>
         </div>
@@ -239,7 +167,7 @@ function ManualRegistrationContent() {
               <User className="w-5 h-5" />
               基本情報
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -249,14 +177,14 @@ function ManualRegistrationContent() {
                   type="text"
                   value={formData.orderCode}
                   onChange={(e) => handleInputChange('orderCode', e.target.value)}
-                  placeholder={categoryData.placeholders.orderCode}
+                  placeholder="ORD-001"
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.orderCode ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
                 {errors.orderCode && <p className="text-red-500 text-sm mt-1">{errors.orderCode}</p>}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   顧客名 <span className="text-red-500">*</span>
@@ -265,7 +193,7 @@ function ManualRegistrationContent() {
                   type="text"
                   value={formData.customerName}
                   onChange={(e) => handleInputChange('customerName', e.target.value)}
-                  placeholder={categoryData.placeholders.customerName}
+                  placeholder="田中太郎"
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.customerName ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -281,7 +209,7 @@ function ManualRegistrationContent() {
               <Phone className="w-5 h-5" />
               連絡先情報
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">電話番号</label>
@@ -289,18 +217,18 @@ function ManualRegistrationContent() {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  placeholder={categoryData.placeholders.phone}
+                  placeholder="090-1234-5678"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">住所</label>
                 <input
                   type="text"
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder={categoryData.placeholders.address}
+                  placeholder="東京都渋谷区..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -313,7 +241,7 @@ function ManualRegistrationContent() {
               <DollarSign className="w-5 h-5" />
               注文詳細
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -324,14 +252,14 @@ function ManualRegistrationContent() {
                   min="0"
                   value={formData.price}
                   onChange={(e) => handleInputChange('price', e.target.value)}
-                  placeholder={categoryData.placeholders.price}
+                  placeholder="1500"
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.price ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
                 {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   注文日 <span className="text-red-500">*</span>
@@ -346,7 +274,7 @@ function ManualRegistrationContent() {
                 />
                 {errors.orderDate && <p className="text-red-500 text-sm mt-1">{errors.orderDate}</p>}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">希望配達日</label>
                 <input
@@ -365,11 +293,11 @@ function ManualRegistrationContent() {
               <FileText className="w-5 h-5" />
               備考
             </h2>
-            
+
             <textarea
               value={formData.notes}
               onChange={(e) => handleInputChange('notes', e.target.value)}
-              placeholder={categoryData.placeholders.notes}
+              placeholder="商品の詳細や配送希望など"
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -379,6 +307,7 @@ function ManualRegistrationContent() {
           {errors.submit && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <p className="text-red-800">{errors.submit}</p>
+              {errors.details && <p className="text-red-600 text-sm mt-1">{errors.details}</p>}
             </div>
           )}
 
@@ -386,7 +315,7 @@ function ManualRegistrationContent() {
           <div className="flex justify-end gap-4">
             <button
               type="button"
-              onClick={() => router.push('/orders/register/choose')}
+              onClick={() => router.push('/orders/register/data-source')}
               className="btn-secondary"
             >
               キャンセル
@@ -415,7 +344,9 @@ export default function ManualRegistrationPage() {
         </div>
       </div>
     }>
-      <ManualRegistrationContent />
+      <ErrorBoundary>
+        <ManualRegistrationContent />
+      </ErrorBoundary>
     </Suspense>
   );
 }

@@ -11,7 +11,7 @@ export class MockDbClient {
   private static instance: MockDbClient
   public mockData: Record<string, any[]> = {}
   private mockError: Error | null = null
-  
+
   static getInstance(): MockDbClient {
     if (!MockDbClient.instance) {
       MockDbClient.instance = new MockDbClient()
@@ -33,7 +33,7 @@ export class MockDbClient {
     if (this.mockError) {
       throw this.mockError
     }
-    
+
     // Mock query responses based on SQL patterns
     if (text.includes('SELECT') && text.includes('users')) {
       return { rows: this.mockData.users || [] }
@@ -47,49 +47,6 @@ export class MockDbClient {
       }
       return { rows: orders }
     }
-    if (text.includes('SELECT') && text.includes('categories')) {
-      let categories = this.mockData.categories || []
-      
-      // Handle category name duplication check
-      if (text.includes('WHERE name = $1') && params && params.length >= 2) {
-        const [name, userId] = params
-        categories = categories.filter(cat => 
-          cat.name === name && cat.user_id === userId && cat.is_active !== false
-        )
-        return { rows: categories }
-      }
-      
-      // Handle display order calculation
-      if (text.includes('MAX(display_order)')) {
-        const userId = params?.[0] || 1
-        const userCategories = categories.filter(cat => cat.user_id === userId)
-        const maxOrder = userCategories.length > 0 
-          ? Math.max(...userCategories.map(cat => cat.display_order || 1))
-          : 0
-        return { rows: [{ next_order: maxOrder + 1 }] }
-      }
-      
-      // Handle main categories GET with subquery (most common case)
-      if (text.includes('FROM categories') && text.includes('WHERE is_active = true') && params && params.length >= 1) {
-        const userId = params[0]
-        categories = categories.filter(cat => 
-          cat.user_id === userId && cat.is_active !== false
-        )
-        // Add order_count to each category for subquery
-        const categoriesWithCount = categories.map(cat => ({
-          ...cat,
-          order_count: '0' // Mock order count
-        }))
-        return { rows: categoriesWithCount }
-      }
-      
-      // Default fallback for categories
-      if (params && params.length >= 1) {
-        const userId = params[0]
-        categories = categories.filter(cat => cat.user_id === userId)
-      }
-      return { rows: categories }
-    }
     if (text.includes('INSERT INTO orders')) {
       const mockOrder = {
         id: 1,
@@ -101,65 +58,24 @@ export class MockDbClient {
         order_date: params?.[5] || '2024-01-01',
         delivery_date: params?.[6] || null,
         notes: params?.[7] || '',
-        category_id: params?.[8] || null,
-        source: params?.[9] || 'manual_entry',
-        extra_data: params?.[10] || '{}',
-        user_id: params?.[11] || 1,
+        source: params?.[8] || 'manual_entry',
+        extra_data: params?.[9] || '{}',
+        user_id: params?.[10] || 1,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
       return { rows: [mockOrder] }
     }
-    if (text.includes('INSERT INTO categories')) {
-      const nextId = (this.mockData.categories?.length || 0) + 1
-      const mockCategory = {
-        id: nextId,
-        name: params?.[0] || 'テストカテゴリ',
-        description: params?.[1] || '',
-        color: params?.[2] || 'gray',
-        icon: params?.[3] || 'Package',
-        display_order: params?.[4] || 1,
-        is_active: true,
-        user_id: params?.[5] || 1,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-      // Add to mock data for consistency
-      if (!this.mockData.categories) {
-        this.mockData.categories = []
-      }
-      this.mockData.categories.push(mockCategory)
-      return { rows: [mockCategory] }
-    }
     if (text.includes('INSERT')) {
       return { rows: [{ id: 1, ...params }] }
-    }
-    if (text.includes('UPDATE') && text.includes('categories')) {
-      const categoryId = params?.[params.length - 1] || 1 // ID is usually last param in WHERE clause
-      const existingCategory = this.mockData.categories?.find(cat => cat.id === categoryId)
-      if (existingCategory) {
-        const updatedCategory = { ...existingCategory, updated_at: new Date().toISOString() }
-        return { rows: [updatedCategory] }
-      }
-      return { rows: [] }
     }
     if (text.includes('UPDATE')) {
       return { rows: [{ id: 1, ...params }] }
     }
-    if (text.includes('DELETE') && text.includes('categories')) {
-      // Soft delete - set is_active to false
-      const categoryId = params?.[0] || 1
-      const category = this.mockData.categories?.find(cat => cat.id === categoryId)
-      if (category) {
-        category.is_active = false
-        return { rows: [category] }
-      }
-      return { rows: [] }
-    }
     if (text.includes('DELETE')) {
       return { rows: [] }
     }
-    
+
     return { rows: [] }
   })
 
@@ -236,21 +152,6 @@ export const createMockOrder = (overrides = {}) => ({
   status: 'pending',
   has_memo: false,
   memo: null,
-  category_id: 1,
-  user_id: 1,
-  created_at: '2024-01-01T00:00:00Z',
-  updated_at: '2024-01-01T00:00:00Z',
-  ...overrides
-})
-
-export const createMockCategory = (overrides = {}) => ({
-  id: 1,
-  name: '野菜',
-  description: '新鮮な野菜',
-  color: 'green',
-  icon: 'Carrot',
-  display_order: 1,
-  is_active: true,
   user_id: 1,
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
@@ -271,14 +172,12 @@ export function createMockCsvFile(content: string, fileName = 'test.csv'): File 
 }
 
 export function createFormDataRequest(
-  file: File, 
-  category: string, 
-  sessionToken = 'session-token', 
+  file: File,
+  sessionToken = 'session-token',
   csrfToken = 'csrf-token'
 ): NextRequest {
   const formData = new FormData()
   formData.append('file', file)
-  formData.append('category', category)
   formData.append('csrf_token', csrfToken)
 
   return createMockRequest({
@@ -299,23 +198,17 @@ export async function resetTestDatabase() {
 
 export async function seedTestData() {
   const mockClient = MockDbClient.getInstance()
-  
+
   // Seed users
   mockClient.setMockData('users', [
     createMockUser({ id: 1, username: 'testuser' }),
     createMockUser({ id: 2, username: 'admin', is_super_admin: true }),
   ])
 
-  // Seed categories
-  mockClient.setMockData('categories', [
-    createMockCategory({ id: 1, name: '野菜', user_id: 1 }),
-    createMockCategory({ id: 2, name: '果物', user_id: 1 }),
-  ])
-
   // Seed orders
   mockClient.setMockData('orders', [
-    createMockOrder({ id: 1, order_number: 'ORD-001', user_id: 1, category_id: 1 }),
-    createMockOrder({ id: 2, order_number: 'ORD-002', user_id: 1, category_id: 2 }),
+    createMockOrder({ id: 1, order_number: 'ORD-001', user_id: 1 }),
+    createMockOrder({ id: 2, order_number: 'ORD-002', user_id: 1 }),
   ])
 }
 

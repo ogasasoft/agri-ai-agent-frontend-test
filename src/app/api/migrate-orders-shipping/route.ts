@@ -8,7 +8,6 @@ import { getDbClient } from '@/lib/db';
  * - status: 注文ステータス (pending, processing, shipped, delivered)
  * - shipped_at: 発送日時
  * - tracking_number: 追跡番号
- * - product_category: 商品カテゴリ
  */
 export async function POST(request: NextRequest) {
   const client = await getDbClient();
@@ -37,13 +36,6 @@ export async function POST(request: NextRequest) {
     `);
     console.log('✅ Added tracking_number column');
 
-    // Add product_category column
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS product_category VARCHAR(100)
-    `);
-    console.log('✅ Added product_category column');
-
     // Create index on status for faster queries
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)
@@ -65,7 +57,6 @@ export async function POST(request: NextRequest) {
         'Added status column (VARCHAR(50), DEFAULT \'pending\')',
         'Added shipped_at column (TIMESTAMP)',
         'Added tracking_number column (VARCHAR(100))',
-        'Added product_category column (VARCHAR(100))',
         'Created index on status',
         'Created index on user_id and status'
       ]

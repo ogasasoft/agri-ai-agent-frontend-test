@@ -8,7 +8,6 @@ import {
   BarChart3,
   Plus,
   FileText,
-  Tags,
   LogOut,
   User,
   Shield,
@@ -17,11 +16,10 @@ import {
 } from 'lucide-react';
 
 const navigation = [
-  { name: '新規登録', href: '/orders/register/choose', icon: Plus },
+  { name: '新規登録', href: '/orders/register/data-source', icon: Plus },
   { name: '発送待ちの注文一覧', href: '/orders/shipping/pending', icon: Package },
   { name: '発送済の注文一覧', href: '/orders/shipping/completed', icon: Package },
   { name: 'ダッシュボード', href: '/dashboard', icon: BarChart3 },
-  { name: 'カテゴリ管理', href: '/categories', icon: Tags },
 ];
 
 interface SidebarProps {

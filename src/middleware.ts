@@ -61,9 +61,7 @@ const ADMIN_ROUTES = [
 // Customer-only API routes (admins CANNOT access these)
 const CUSTOMER_ONLY_API_ROUTES = [
   '/api/orders',
-  '/api/categories',
   '/api/upload',
-  '/api/upload-with-category',
   '/api/customers',
   '/api/shipping',
   '/api/ai-insights',
@@ -75,7 +73,6 @@ const CUSTOMER_ONLY_API_ROUTES = [
 // Customer-only pages (admins CANNOT access these)
 const CUSTOMER_ONLY_PAGE_ROUTES = [
   '/orders',
-  '/categories',
   '/dashboard',
   '/settings',
   '/prompts'

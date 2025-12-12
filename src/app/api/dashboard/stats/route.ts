@@ -66,26 +66,7 @@ export async function GET(request: NextRequest) {
         ORDER BY DATE(order_date)
       `, [userId, fromDate, toDate]);
 
-      // 3. カテゴリ別統計
-      const categoryStats = await client.query(`
-        SELECT
-          c.id as category_id,
-          c.name as category_name,
-          c.color as category_color,
-          c.icon as category_icon,
-          COUNT(o.id) as order_count,
-          COALESCE(SUM(o.price), 0) as revenue
-        FROM orders o
-        LEFT JOIN categories c ON o.category_id = c.id
-        WHERE o.user_id = $1
-          AND o.status = 'shipped'
-          AND o.order_date >= $2::date
-          AND o.order_date <= $3::date
-        GROUP BY c.id, c.name, c.color, c.icon
-        ORDER BY revenue DESC
-      `, [userId, fromDate, toDate]);
-
-      // 4. 顧客別ランキング（トップ10）
+      // 3. 顧客別ランキング（トップ10）
       const topCustomers = await client.query(`
         SELECT
           customer_name,
@@ -102,7 +83,7 @@ export async function GET(request: NextRequest) {
         LIMIT 10
       `, [userId, fromDate, toDate]);
 
-      // 5. リピート顧客分析
+      // 4. リピート顧客分析
       const repeatCustomers = await client.query(`
         SELECT
           COUNT(CASE WHEN order_count = 1 THEN 1 END) as new_customers,
@@ -118,7 +99,7 @@ export async function GET(request: NextRequest) {
         ) customer_orders
       `, [userId, fromDate, toDate]);
 
-      // 6. 曜日別統計
+      // 5. 曜日別統計
       const weekdayStats = await client.query(`
         SELECT
           EXTRACT(DOW FROM order_date) as weekday,
@@ -133,7 +114,7 @@ export async function GET(request: NextRequest) {
         ORDER BY weekday
       `, [userId, fromDate, toDate]);
 
-      // 7. 前期比較データ（前月）
+      // 6. 前期比較データ（前月）
       const dateDiff = Math.ceil((new Date(toDate).getTime() - new Date(fromDate).getTime()) / (1000 * 60 * 60 * 24));
       const previousFromDate = new Date(new Date(fromDate).getTime() - dateDiff * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       const previousToDate = new Date(new Date(toDate).getTime() - dateDiff * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -179,14 +160,6 @@ export async function GET(request: NextRequest) {
         },
         dailyTrend: dailyTrend.rows.map(row => ({
           date: row.date,
-          orderCount: parseInt(row.order_count),
-          revenue: parseFloat(row.revenue)
-        })),
-        categoryStats: categoryStats.rows.map(row => ({
-          categoryId: row.category_id,
-          categoryName: row.category_name || '未分類',
-          categoryColor: row.category_color,
-          categoryIcon: row.category_icon,
           orderCount: parseInt(row.order_count),
           revenue: parseFloat(row.revenue)
         })),

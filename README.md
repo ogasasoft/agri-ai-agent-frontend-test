@@ -11,7 +11,6 @@
 - 📦 **注文管理**: 複数ECサイトからの注文を統合管理
 - 🤖 **AI チャット**: OpenAI GPT による注文データ分析と相談機能
 - 👥 **顧客管理**: 顧客データの一元管理と分析
-- 📊 **カテゴリ管理**: 商品・注文の動的カテゴリ分類
 - 🚚 **配送管理**: ヤマト運輸API連携による配送ラベル作成
 - 🔒 **認証・セキュリティ**: 多要素認証、段階的ロックアウト、Remember Me機能
 - 👑 **管理者システム**: スーパー管理者による全システム管理
@@ -120,12 +119,10 @@ src/
 │   │   ├── admin/         # 管理者専用API
 │   │   ├── auth/          # 認証API
 │   │   ├── orders/        # 注文管理API
-│   │   ├── categories/    # カテゴリ管理API
 │   │   └── chat/          # AIチャットAPI
 │   ├── orders/            # 注文管理画面
 │   │   ├── register/      # 注文登録
 │   │   └── shipping/      # 配送管理
-│   ├── categories/        # カテゴリ管理画面
 │   ├── login/             # ログイン画面
 │   └── change-password/   # パスワード変更
 ├── components/            # 共通コンポーネント
@@ -197,7 +194,6 @@ vercel --prod
 - **users**: ユーザー管理（ロール、権限）
 - **sessions**: セッション管理
 - **orders**: 注文データ
-- **categories**: 動的カテゴリ管理
 - **customers**: 顧客情報（自動生成）
 - **system_settings**: システム設定・プロンプト
 - **api_integrations**: 外部API連携設定

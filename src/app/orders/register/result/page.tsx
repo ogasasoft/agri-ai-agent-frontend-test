@@ -27,12 +27,10 @@ interface UploadResult {
 function UploadResultContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const categoryId = searchParams.get('categoryId');
   const method = searchParams.get('method');
   const dataSource = searchParams.get('dataSource');
   const registeredCount = parseInt(searchParams.get('registered') || '0');
   const skippedCount = parseInt(searchParams.get('skipped') || '0');
-  const categoryName = searchParams.get('categoryName') || 'カテゴリ';
 
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -113,7 +111,7 @@ function UploadResultContent() {
             注文一覧に戻る
           </button>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">アップロード結果</h1>
-          <p className="text-gray-600">{categoryName}カテゴリの注文データ処理が完了しました</p>
+          <p className="text-gray-600">注文データ処理が完了しました</p>
         </div>
 
         {/* 成功サマリー */}
@@ -124,7 +122,7 @@ function UploadResultContent() {
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">処理完了</h2>
-              <p className="text-gray-600">{uploadResult?.message || `${categoryName}カテゴリの注文データを処理しました`}</p>
+              <p className="text-gray-600">{uploadResult?.message || '注文データを処理しました'}</p>
             </div>
           </div>
 
@@ -211,7 +209,7 @@ function UploadResultContent() {
             注文一覧を確認する
           </button>
           <button
-            onClick={() => router.push(`/orders/register/choose`)}
+            onClick={() => router.push(`/orders/register/data-source`)}
             className="flex-1 bg-gray-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-700 transition-colors"
           >
             新しい注文を登録する

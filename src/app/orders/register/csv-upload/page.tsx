@@ -2,50 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Upload, ArrowLeft, CheckCircle, AlertCircle, Carrot, Apple, Package, Eye, FileText } from 'lucide-react';
+import { Upload, ArrowLeft, CheckCircle, AlertCircle, Eye, FileText, Package } from 'lucide-react';
 import { detectAndConvertEncoding } from '@/lib/csv-encoding';
 import { Suspense } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Papa from 'papaparse';
-
-type ProductCategory = 'vegetables' | 'fruits' | 'other';
-
-interface CategoryInfo {
-  id: ProductCategory;
-  name: string;
-  description: string;
-  icon: React.ComponentType<any>;
-  color: string;
-  examples: string[];
-}
-
-const categoryInfo: Record<ProductCategory, CategoryInfo> = {
-  vegetables: {
-    id: 'vegetables',
-    name: '野菜',
-    description: '新鮮な野菜の注文データ',
-    icon: Carrot,
-    color: 'text-green-600',
-    examples: ['キャベツ', 'にんじん', 'たまねぎ', 'じゃがいも', 'ほうれん草']
-  },
-  fruits: {
-    id: 'fruits',
-    name: '果物',
-    description: '新鮮な果物の注文データ',
-    icon: Apple,
-    color: 'text-red-600',
-    examples: ['りんご', 'みかん', 'いちご', 'ぶどう', 'もも']
-  },
-  other: {
-    id: 'other',
-    name: 'その他',
-    description: '加工品・その他商品の注文データ',
-    icon: Package,
-    color: 'text-gray-600',
-    examples: ['味噌', '醤油', '米', 'パン', '卵']
-  }
-};
-
 
 interface CSVPreviewData {
   headers: string[];
@@ -58,19 +19,14 @@ interface CSVPreviewData {
 function CSVUploadContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const category = (searchParams.get('category') as ProductCategory) || 'other';
-  const categoryId = searchParams.get('categoryId');
   const dataSource = searchParams.get('dataSource') || 'tabechoku';
-  
+
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<CSVPreviewData | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
-
-  const categoryData = categoryInfo[category];
-  const IconComponent = categoryData.icon;
 
   // ブラウザのデフォルトのドラッグ&ドロップ動作を防止
   useEffect(() => {
@@ -118,19 +74,19 @@ function CSVUploadContent() {
           skipEmptyLines: true,
           complete: (results) => {
           const data = results.data as string[][];
-          
+
           if (data.length === 0) {
             reject(new Error('CSVファイルが空です'));
             return;
           }
-          
+
           const headers = data[0];
           const rows = data.slice(1);
-          
+
           // データソースに基づく必須項目のチェック
           let requiredColumns: string[];
           let errorMessage: string;
-          
+
           if (dataSource === 'colormi') {
             requiredColumns = ['売上ID'];
             errorMessage = '必須列（売上ID）が見つかりません';
@@ -138,21 +94,21 @@ function CSVUploadContent() {
             requiredColumns = ['注文番号', 'order_code'];
             errorMessage = '必須列（注文番号/order_code）が見つかりません';
           }
-          
-          const hasRequiredColumn = requiredColumns.some(col => 
-            headers.some(header => header.toLowerCase().includes(col.toLowerCase()) || 
+
+          const hasRequiredColumn = requiredColumns.some(col =>
+            headers.some(header => header.toLowerCase().includes(col.toLowerCase()) ||
                                   col.toLowerCase().includes(header.toLowerCase()))
           );
-          
+
           if (!hasRequiredColumn) {
             reject(new Error(errorMessage));
             return;
           }
-          
+
           // データの妥当性チェック
           const invalidRows: string[] = [];
           let validRows = 0;
-          
+
           rows.forEach((row, index) => {
             // 空行や不正な行をチェック
             const nonEmptyValues = row.filter(cell => cell && cell.trim());
@@ -162,7 +118,7 @@ function CSVUploadContent() {
               validRows++;
             }
           });
-          
+
           const previewData: CSVPreviewData = {
             headers,
             data: rows.slice(0, 5), // 最初の5行のみプレビュー
@@ -170,7 +126,7 @@ function CSVUploadContent() {
             validRows,
             invalidRows
           };
-          
+
           resolve(previewData);
         },
         error: (error: any) => {
@@ -183,7 +139,7 @@ function CSVUploadContent() {
       return Promise.reject(error);
     }
   }, [dataSource]);
-  
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       const selectedFile = acceptedFiles[0];
@@ -221,10 +177,10 @@ function CSVUploadContent() {
       setFile(null);
     }
   };
-  
+
   const handlePreview = async () => {
     if (!file) return;
-    
+
     try {
       setAnalyzing(true);
       const preview = await analyzeCSV(file);
@@ -257,28 +213,18 @@ function CSVUploadContent() {
 
       const sessionData = await sessionResponse.json();
       let csrfToken = sessionData.session?.csrf_token || '';
-      
+
       // Fallback: CSRFトークンをクッキーから直接取得
       if (!csrfToken) {
         csrfToken = document.cookie.split('csrf_token=')[1]?.split(';')[0] || '';
       }
-      
-
-      // categoryIdが直接URLパラメータで渡されているのでそれを使用
-      const categoryIdNum = categoryId ? parseInt(categoryId) : null;
-      
-      if (!categoryIdNum) {
-        setError('カテゴリIDが指定されていません。');
-        return;
-      }
 
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('categoryId', categoryIdNum.toString()); // IDを送信
-      formData.append('dataSource', dataSource); // データソースを送信
-      formData.append('csrf_token', csrfToken); // FormDataにもCSRFトークンを追加
+      formData.append('dataSource', dataSource);
+      formData.append('csrf_token', csrfToken);
 
-      const response = await fetch('/api/upload-with-category', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         headers: {
           'x-csrf-token': csrfToken,
@@ -293,14 +239,13 @@ function CSVUploadContent() {
         sessionStorage.setItem('uploadResult', JSON.stringify(data));
 
         // 結果表示画面にリダイレクト
-        const categoryName = categoryData?.name || 'カテゴリ';
-        const redirectUrl = `/orders/register/result?categoryId=${categoryId}&categoryName=${encodeURIComponent(categoryName)}&method=csv&registered=${data.registered_count}&skipped=${data.skipped_count}&dataSource=${dataSource}`;
+        const redirectUrl = `/orders/register/result?method=csv&registered=${data.registered_count}&skipped=${data.skipped_count}&dataSource=${dataSource}`;
 
         router.push(redirectUrl);
       } else {
         // 詳細なエラー情報を表示
         let errorMessage = data.message || 'アップロードに失敗しました。';
-        
+
         // 詳細なデバッグ情報がある場合は表示
         if (data.debug_info?.data_analysis) {
           const analysis = data.debug_info.data_analysis;
@@ -315,7 +260,7 @@ function CSVUploadContent() {
             errorMessage += `\n- 検出されたヘッダー: ${analysis.headers.slice(0, 5).join(', ')}${analysis.headers.length > 5 ? '...' : ''}`;
           }
         }
-        
+
         // 修正提案がある場合は表示
         if (data.suggestions && data.suggestions.length > 0) {
           errorMessage += '\n\n💡 修正提案:';
@@ -323,7 +268,7 @@ function CSVUploadContent() {
             errorMessage += `\n${index + 1}. ${suggestion}`;
           });
         }
-        
+
         setError(errorMessage);
       }
     } catch (err) {
@@ -339,25 +284,25 @@ function CSVUploadContent() {
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => router.push(`/orders/register/data-source?categoryId=${categoryId}`)}
+            onClick={() => router.push('/orders/register/data-source')}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             データソース選択に戻る
           </button>
-          
+
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-              <IconComponent className={`w-6 h-6 ${categoryData.color}`} />
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <Package className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{categoryData.name}のCSVアップロード</h1>
-              <p className="text-gray-600">{categoryData.description}をCSVファイルで一括登録</p>
+              <h1 className="text-3xl font-bold text-gray-900">CSVファイルアップロード</h1>
+              <p className="text-gray-600">注文データをCSVファイルで一括登録</p>
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-sm text-gray-500">データソース:</span>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  dataSource === 'colormi' 
-                    ? 'bg-blue-100 text-blue-800' 
+                  dataSource === 'colormi'
+                    ? 'bg-blue-100 text-blue-800'
                     : 'bg-green-100 text-green-800'
                 }`}>
                   {dataSource === 'colormi' ? 'カラーミー' : 'たべちょく'}
@@ -373,49 +318,42 @@ function CSVUploadContent() {
             <div className="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full text-sm font-medium">
               <CheckCircle className="w-4 h-4" />
             </div>
-            <span className="ml-2 text-sm text-gray-600">カテゴリ選択</span>
-          </div>
-          <div className="w-16 h-0.5 bg-green-500 mx-4"></div>
-          <div className="flex items-center">
-            <div className="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full text-sm font-medium">
-              <CheckCircle className="w-4 h-4" />
-            </div>
             <span className="ml-2 text-sm text-gray-600">登録方法選択</span>
-          </div>
-          <div className="w-16 h-0.5 bg-green-500 mx-4"></div>
-          <div className="flex items-center">
-            <div className="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full text-sm font-medium">
-              <CheckCircle className="w-4 h-4" />
-            </div>
-            <span className="ml-2 text-sm text-gray-600">データソース選択</span>
           </div>
           <div className="w-16 h-0.5 bg-blue-500 mx-4"></div>
           <div className="flex items-center">
             <div className="flex items-center justify-center w-8 h-8 bg-blue-500 text-white rounded-full text-sm font-medium">
-              4
+              2
             </div>
             <span className="ml-2 text-sm font-medium text-blue-600">CSVアップロード</span>
+          </div>
+          <div className="w-16 h-0.5 bg-gray-300 mx-4"></div>
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-gray-300 text-white rounded-full text-sm font-medium">
+              3
+            </div>
+            <span className="ml-2 text-sm text-gray-400">完了</span>
           </div>
         </div>
 
         {/* Upload Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">CSVファイルのアップロード</h2>
-          
+
           {!file ? (
-            <div 
+            <div
               {...getRootProps()}
               className={`
                 border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-                ${isDragActive 
-                  ? 'border-primary-500 bg-primary-50' 
+                ${isDragActive
+                  ? 'border-primary-500 bg-primary-50'
                   : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
                 }
               `}
             >
               <input {...getInputProps()} />
               <Upload className={`w-12 h-12 mx-auto mb-4 ${isDragActive ? 'text-primary-500' : 'text-gray-400'}`} />
-              
+
               <div>
                 {isDragActive ? (
                   <p className="text-primary-600 mb-4 font-medium">ファイルをここにドロップしてください</p>
@@ -494,7 +432,7 @@ function CSVUploadContent() {
               <FileText className="w-6 h-6 text-blue-500" />
               <h3 className="text-xl font-semibold text-gray-900">CSVファイルのプレビュー</h3>
             </div>
-            
+
             {/* 統計情報 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-blue-50 rounded-lg p-4">
@@ -544,7 +482,7 @@ function CSVUploadContent() {
                 </p>
               )}
             </div>
-            
+
             {/* エラー情報 */}
             {previewData.invalidRows.length > 0 && (
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
@@ -559,7 +497,7 @@ function CSVUploadContent() {
                 </ul>
               </div>
             )}
-            
+
             {/* アクションボタン */}
             <div className="flex justify-center gap-4">
               <button
@@ -590,12 +528,11 @@ function CSVUploadContent() {
               <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
               <div>
                 <h3 className="font-medium text-red-900">エラーが発生しました</h3>
-                <p className="text-red-800 text-sm mt-1">{error}</p>
+                <p className="text-red-800 text-sm mt-1 whitespace-pre-line">{error}</p>
               </div>
             </div>
           </div>
         )}
-
 
         {/* CSV Format Help */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

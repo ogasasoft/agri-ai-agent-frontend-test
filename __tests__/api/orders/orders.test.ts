@@ -178,35 +178,6 @@ describe('/api/orders', () => {
       expect(data.message).toBe('認証が必要です。')
     })
 
-    it('should validate category ownership', async () => {
-      // Arrange
-      const orderData = {
-        order_code: 'ORD-003',
-        customer_name: '山田太郎',
-        category_id: 999 // Invalid category
-      }
-
-      mockClient.setMockData('categories', []) // No categories found
-
-      const request = createMockRequest({
-        method: 'POST',
-        body: orderData,
-        headers: {
-          'x-user-id': '1',
-          'Content-Type': 'application/json'
-        }
-      })
-
-      // Act
-      const response = await POST(request)
-      const data = await response.json()
-
-      // Assert
-      expect(response.status).toBe(404)
-      expect(data.success).toBe(false)
-      expect(data.message).toBe('指定されたカテゴリが見つかりません。')
-    })
-
     it('should handle database errors', async () => {
       // Arrange
       const orderData = {
@@ -233,44 +204,6 @@ describe('/api/orders', () => {
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
       expect(data.message).toBe('データベースエラーが発生しました。')
-    })
-
-    it('should create order with category', async () => {
-      // Arrange
-      const orderData = {
-        order_code: 'ORD-004',
-        customer_name: '山田太郎',
-        category_id: 1
-      }
-
-      mockClient.setMockData('categories', [
-        { id: 1, name: 'テストカテゴリ', user_id: 1 }
-      ])
-
-      const request = createMockRequest({
-        method: 'POST',
-        body: orderData,
-        headers: {
-          'x-user-id': '1',
-          'Content-Type': 'application/json'
-        }
-      })
-
-      // Act
-      const response = await POST(request)
-      const data = await response.json()
-
-      // Assert
-      expect(response.status).toBe(200)
-      expect(data.success).toBe(true)
-      expect(data.order).toEqual(
-        expect.objectContaining({
-          id: 1,
-          order_number: 'ORD-004',
-          customer_name_masked: '山田太郎',
-          status: 'pending'
-        })
-      )
     })
   })
 })

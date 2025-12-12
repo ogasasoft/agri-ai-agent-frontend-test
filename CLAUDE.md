@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a comprehensive agricultural AI agent frontend application built with Next.js 14, TypeScript, and PostgreSQL. The application provides EC order management, AI-powered chat consultation, dynamic category management, advanced authentication, and a complete admin system for agricultural businesses.
+This is a comprehensive agricultural AI agent frontend application built with Next.js 14, TypeScript, and PostgreSQL. The application provides EC order management, AI-powered chat consultation, advanced authentication, and a complete admin system for agricultural businesses.
 
 ## Key Architecture
 
@@ -84,7 +84,7 @@ vercel --prod        # Deploy to production
 
 ### Middleware Route Protection
 - **Public Routes**: `/login`, `/api/auth/login`, `/api/auth/auto-login`
-- **Protected Routes**: All `/orders/*`, `/categories/*`, `/dashboard/*`
+- **Protected Routes**: All `/orders/*`, `/dashboard/*`
 - **Admin Routes**: `/admin/*`, `/api/admin/*` (super admin only)
 - **Session Validation**: Automatic session extension 2 hours before expiry
 
@@ -92,10 +92,8 @@ vercel --prod        # Deploy to production
 
 ### Core API Routes (`src/app/api/`)
 - `/api/orders` - Multi-tenant order CRUD with user_id isolation
-- `/api/categories` - Dynamic category management with user ownership
 - `/api/chat` - AI chat with live database context and page awareness
 - `/api/upload` - CSV processing with Japanese header mapping
-- `/api/upload-with-category` - Category-specific CSV import
 - `/api/customers` - Customer data derived from orders
 - `/api/shipping` - Yamato Transport API integration (mock)
 
@@ -125,11 +123,6 @@ vercel --prod        # Deploy to production
 - Categories and orders are user-scoped with ownership validation
 - Database RLS policies enforce tenant separation at PostgreSQL level
 
-### Dynamic Category System
-- User-created categories with flexible attributes (color, icon, description)
-- Category-order relationships with cascading operations
-- Admin can view all categories across users
-- Category-specific CSV upload workflows
 
 ### Security Utility Framework
 - Comprehensive security functions in `src/lib/security.ts`
@@ -289,7 +282,6 @@ The codebase includes a complete TDD test suite following t_wada's methodology w
 ```
 /api/auth/*         → Authentication system (login, logout, session management)
 /api/orders/*       → Order CRUD operations with multi-tenant isolation
-/api/categories/*   → Category management with user ownership
 /api/upload/*       → CSV file processing and validation  
 /api/shipping/*     → Yamato Transport integration and shipping management
 /api/admin/*        → Admin system with role-based access and audit logging
