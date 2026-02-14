@@ -50,7 +50,7 @@
 
 1. **リポジトリのクローン**
 ```bash
-git clone <repository-url>
+git clone https://github.com/ogasasoft/agri-ai-agent-frontend-test.git
 cd agri-ai-agent-frontend-test
 ```
 
