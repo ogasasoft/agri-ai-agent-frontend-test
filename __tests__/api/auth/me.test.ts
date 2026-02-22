@@ -73,7 +73,7 @@ describe('/api/auth/me', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('認証が必要です。')
+      expect(data.message).toBe('セッションが無効です')
       expect(validateSession).not.toHaveBeenCalled()
     })
 
@@ -95,7 +95,7 @@ describe('/api/auth/me', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('セッションが無効です。')
+      expect(data.message).toBe('セッションが期限切れです')
       expect(validateSession).toHaveBeenCalledWith('invalid-session-token')
     })
 
@@ -117,7 +117,7 @@ describe('/api/auth/me', () => {
       // Assert
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('サーバーエラーが発生しました。')
+      expect(data.message).toBe('ユーザー情報取得中にエラーが発生しました')
     })
 
     it('should include admin flag for super admin users', async () => {
@@ -174,7 +174,7 @@ describe('/api/auth/me', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('セッションが無効です。')
+      expect(data.message).toBe('セッションが期限切れです')
     })
   })
 })

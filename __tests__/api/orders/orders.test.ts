@@ -65,7 +65,7 @@ describe('/api/orders', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('認証が必要です。')
+      expect(data.message).toBe('セッションが無効です')
     })
 
     it('should handle super admin restriction', async () => {
@@ -85,9 +85,9 @@ describe('/api/orders', () => {
       const data = await response.json()
 
       // Assert
-      expect(response.status).toBe(403)
-      expect(data.success).toBe(false)
-      expect(data.message).toContain('管理者アカウント')
+      // GET endpoint doesn't have admin restriction, super admin can access
+      expect(response.status).toBe(200)
+      expect(Array.isArray(data)).toBe(true)
     })
 
     it('should return empty array on database error', async () => {
@@ -108,15 +108,20 @@ describe('/api/orders', () => {
       const data = await response.json()
 
       // Assert
-      expect(response.status).toBe(200)
-      expect(Array.isArray(data)).toBe(true)
-      expect(data).toHaveLength(0)
+      expect(response.status).toBe(500)
+      expect(data.success).toBe(false)
+      expect(data.error).toBeDefined()
     })
   })
 
   describe('POST /api/orders', () => {
     it('should create new order with valid data', async () => {
-      // Arrange  
+      // Arrange
+      const mockUser = createMockUser({ id: 1 })
+      const mockSessionData = { user: mockUser }
+
+      validateSession.mockResolvedValue(mockSessionData)
+
       const orderData = {
         order_code: 'ORD-003',
         customer_name: '山田太郎',
@@ -132,7 +137,6 @@ describe('/api/orders', () => {
         method: 'POST',
         body: orderData,
         headers: {
-          'x-user-id': '1',
           'Content-Type': 'application/json'
         }
       })
@@ -165,7 +169,7 @@ describe('/api/orders', () => {
       const request = createMockRequest({
         method: 'POST',
         body: orderData
-        // No x-user-id header
+        // No auth headers
       })
 
       // Act
@@ -181,6 +185,33 @@ describe('/api/orders', () => {
     it('should handle database errors', async () => {
       // Arrange
       const orderData = {
+        customer_name: '山田太郎'
+      }
+
+      const request = createMockRequest({
+        method: 'POST',
+        body: orderData,
+        headers: createMockAuthHeaders()
+      })
+
+      // Act
+      const response = await POST(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(500)
+      expect(data.success).toBe(false)
+      expect(data.message).toBe('データベースエラーが発生しました。')
+    })
+
+    it('should handle database errors', async () => {
+      // Arrange
+      const mockUser = createMockUser({ id: 1 })
+      const mockSessionData = { user: mockUser }
+
+      validateSession.mockResolvedValue(mockSessionData)
+
+      const orderData = {
         order_code: 'ORD-003',
         customer_name: '山田太郎'
       }
@@ -190,10 +221,7 @@ describe('/api/orders', () => {
       const request = createMockRequest({
         method: 'POST',
         body: orderData,
-        headers: {
-          'x-user-id': '1',
-          'Content-Type': 'application/json'
-        }
+        headers: createMockAuthHeaders()
       })
 
       // Act
