@@ -110,7 +110,7 @@ describe('/api/orders', () => {
       // Assert
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.error).toBeDefined()
+      expect(data.message).toBeDefined() // Changed from data.error to data.message
     })
   })
 
