@@ -422,18 +422,25 @@ describe('/api/admin/customers', () => {
         headers: { 'x-session-token': 'admin-session', 'Content-Type': 'application/json' }
       })
 
-      // Act
+      // Act - Use a small delay to ensure different timestamps
       await POST(request1)
-      await new Promise(resolve => setTimeout(resolve, 1)) // Ensure different timestamps
+      await new Promise(resolve => setTimeout(resolve, 1))
       await POST(request2)
 
-      // Assert
+      // Assert - Verify the order codes are from different timestamps
       const orderCode1 = mockClient.query.mock.calls[1][1][0] // First insert call, order_code param
       const orderCode2 = mockClient.query.mock.calls[3][1][0] // Second insert call, order_code param
 
       expect(orderCode1).toMatch(/^ADMIN-\d+$/)
       expect(orderCode2).toMatch(/^ADMIN-\d+$/)
-      expect(orderCode1).not.toBe(orderCode2) // Should be different
+
+      // Parse timestamps from order codes
+      const num1 = parseInt(orderCode1.split('-')[1])
+      const num2 = parseInt(orderCode2.split('-')[1])
+
+      // Order codes should be from different timestamps
+      expect(num1).not.toBe(num2)
+      expect(num1).toBeLessThan(num2)  // Simply check they're different numbers
     })
 
     it('should include admin ID in extra_data', async () => {
