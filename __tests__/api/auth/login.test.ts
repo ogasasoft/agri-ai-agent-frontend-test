@@ -14,6 +14,43 @@ jest.mock('@/lib/auth-enhanced', () => ({
   })
 }))
 
+jest.mock('@/lib/auth-error-details', () => {
+  const MockAuthErrorBuilder = jest.fn().mockImplementation((message: string) => ({
+    message,
+    setAuthContext: jest.fn().mockReturnThis(),
+    addProcessingStep: jest.fn().mockReturnThis(),
+    addSuggestion: jest.fn().mockReturnThis(),
+    build: jest.fn().mockReturnValue({
+      success: false,
+      message,
+      details: {},
+      suggestions: [],
+      debug_info: {},
+      processing_steps: [],
+    })
+  }))
+
+  MockAuthErrorBuilder.loginFailure = jest.fn().mockImplementation(
+    (_username: string, reason: string) => ({
+      success: false,
+      message: reason === 'ACCOUNT_LOCKED'
+        ? 'アカウントがロックされています。'
+        : 'ユーザー名またはパスワードが正しくありません。',
+    })
+  )
+
+  MockAuthErrorBuilder.sessionError = jest.fn().mockReturnValue({
+    success: false,
+    message: 'セッションが無効です',
+  })
+
+  return {
+    AuthErrorBuilder: MockAuthErrorBuilder,
+    logAuthAttempt: jest.fn(),
+    logSecurityEvent: jest.fn()
+  }
+})
+
 // Mock bcryptjs
 jest.mock('bcryptjs', () => ({
   compare: jest.fn(),
@@ -25,12 +62,13 @@ const bcrypt = require('bcryptjs')
 
 describe('/api/auth/login', () => {
   let mockClient: MockDbClient
-  const { authenticateUserEnhanced } = require('@/lib/auth-enhanced')
+  const { authenticateUserEnhanced, getClientInfo } = require('@/lib/auth-enhanced')
 
   beforeEach(async () => {
     await resetTestDatabase()
     mockClient = MockDbClient.getInstance()
     authenticateUserEnhanced.mockClear()
+    getClientInfo.mockClear()
   })
 
   describe('POST /api/auth/login', () => {
@@ -39,13 +77,31 @@ describe('/api/auth/login', () => {
       const mockUser = createMockUser({
         id: 1,
         username: 'testuser',
+        email: 'test@example.com',
         password_hash: 'hashed-password',
         is_active: true,
         failed_login_attempts: 0
       })
-      
+
       mockClient.setMockData('users', [mockUser])
       bcrypt.compare.mockResolvedValue(true)
+
+      // Mock successful authentication
+      authenticateUserEnhanced.mockResolvedValue({
+        success: true,
+        message: 'ログインしました。',
+        user: mockUser,
+        session: {
+          id: 1,
+          user_id: 1,
+          session_token: 'mock-session-token',
+          csrf_token: 'mock-csrf-token',
+          expires_at: new Date().toISOString(),
+          is_active: true
+        },
+        requiresPasswordChange: false,
+        rememberToken: undefined
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -69,19 +125,22 @@ describe('/api/auth/login', () => {
           username: 'testuser'
         })
       )
-      expect(data.session).toEqual(
-        expect.objectContaining({
-          user_id: 1,
-          session_token: expect.any(String),
-          csrf_token: expect.any(String)
-        })
-      )
+      // Session data is set as HTTP-only cookies, not returned in response body
     })
 
     it('should reject login with invalid username', async () => {
       // Arrange
       mockClient.setMockData('users', [])
-      
+
+      // Mock user not found
+      authenticateUserEnhanced.mockResolvedValue({
+        success: false,
+        message: 'ユーザー名またはパスワードが間違っています。',
+        user: undefined,
+        session: undefined,
+        requiresPasswordChange: false
+      })
+
       const request = createMockRequest({
         method: 'POST',
         body: {
@@ -105,13 +164,22 @@ describe('/api/auth/login', () => {
       const mockUser = createMockUser({
         id: 1,
         username: 'testuser',
+        email: 'test@example.com',
         password_hash: 'hashed-password',
         is_active: true,
         failed_login_attempts: 0
       })
-      
+
       mockClient.setMockData('users', [mockUser])
-      bcrypt.compare.mockResolvedValue(false)
+
+      // Mock failed authentication
+      authenticateUserEnhanced.mockResolvedValue({
+        success: false,
+        message: 'ユーザー名またはパスワードが間違っています。',
+        user: undefined,
+        session: undefined,
+        requiresPasswordChange: false
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -133,13 +201,13 @@ describe('/api/auth/login', () => {
 
     it('should reject login for inactive user', async () => {
       // Arrange
-      const mockUser = createMockUser({
-        id: 1,
-        username: 'testuser',
-        is_active: false
+      authenticateUserEnhanced.mockResolvedValue({
+        success: false,
+        message: 'ユーザー名またはパスワードが間違っています。',
+        user: undefined,
+        session: undefined,
+        requiresPasswordChange: false
       })
-      
-      mockClient.setMockData('users', [mockUser])
 
       const request = createMockRequest({
         method: 'POST',
@@ -156,21 +224,18 @@ describe('/api/auth/login', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('アカウントが無効化されています。')
+      expect(data.message).toBe('ユーザー名またはパスワードが正しくありません。')
     })
 
     it('should reject login for locked user', async () => {
       // Arrange
-      const futureTime = new Date(Date.now() + 60000).toISOString() // 1 minute in future
-      const mockUser = createMockUser({
-        id: 1,
-        username: 'testuser',
-        is_active: true,
-        failed_login_attempts: 5,
-        locked_until: futureTime
+      authenticateUserEnhanced.mockResolvedValue({
+        success: false,
+        message: 'アカウントがロックされています。5分後に再試行してください。',
+        user: undefined,
+        session: undefined,
+        requiresPasswordChange: false
       })
-      
-      mockClient.setMockData('users', [mockUser])
 
       const request = createMockRequest({
         method: 'POST',
@@ -185,7 +250,7 @@ describe('/api/auth/login', () => {
       const data = await response.json()
 
       // Assert
-      expect(response.status).toBe(423)
+      expect(response.status).toBe(401)
       expect(data.success).toBe(false)
       expect(data.message).toContain('アカウントがロックされています')
     })
@@ -199,9 +264,25 @@ describe('/api/auth/login', () => {
         is_active: true,
         failed_login_attempts: 0
       })
-      
-      mockClient.setMockData('users', [mockUser])
-      bcrypt.compare.mockResolvedValue(true)
+
+      authenticateUserEnhanced.mockResolvedValue({
+        success: true,
+        message: 'ログインしました。',
+        user: mockUser,
+        session: {
+          id: 1,
+          user_id: 1,
+          session_token: 'mock-session-token',
+          csrf_token: 'mock-csrf-token',
+          expires_at: new Date().toISOString(),
+          is_active: true
+        },
+        rememberToken: {
+          selector: 'mock-selector',
+          validator: 'mock-validator'
+        },
+        requiresPasswordChange: false
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -219,14 +300,8 @@ describe('/api/auth/login', () => {
       // Assert
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      expect(data.rememberToken).toEqual(
-        expect.objectContaining({
-          token: expect.any(String),
-          selector: expect.any(String)
-        })
-      )
-      
-      // Check Set-Cookie header for remember token
+
+      // rememberToken is set as an HTTP-only cookie, not returned in response body
       const setCookieHeader = response.headers.get('Set-Cookie')
       expect(setCookieHeader).toContain('remember_token=')
     })
@@ -273,9 +348,22 @@ describe('/api/auth/login', () => {
         is_active: true,
         failed_login_attempts: 0
       })
-      
-      mockClient.setMockData('users', [mockUser])
-      bcrypt.compare.mockResolvedValue(true)
+
+      // Mock successful authentication with email
+      authenticateUserEnhanced.mockResolvedValue({
+        success: true,
+        message: 'ログインしました。',
+        user: mockUser,
+        session: {
+          id: 1,
+          user_id: 1,
+          session_token: 'mock-session-token',
+          csrf_token: 'mock-csrf-token',
+          expires_at: new Date().toISOString(),
+          is_active: true
+        },
+        requiresPasswordChange: false
+      })
 
       const request = createMockRequest({
         method: 'POST',

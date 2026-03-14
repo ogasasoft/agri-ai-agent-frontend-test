@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
       // Create a placeholder order for the customer
       const result = await client.query(`
         INSERT INTO orders (
-          order_code, customer_name, phone, address, price, 
+          order_code, customer_name, phone, address, price,
           order_date, user_id, source, notes, extra_data
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
         'create_customer',
         'customer',
         result.rows[0].id.toString(),
-        { customer_name, phone, address, user_id },
+        { customer_name, phone, address, user_id, email: email || null },
         ipAddress,
         userAgent
       );

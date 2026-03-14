@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
     console.error('Yamato settings fetch error:', error);
     return NextResponse.json({
       success: false,
-      message: '設定の取得中にエラーが発生しました',
+      message: '設定の取得に失敗しました',
       error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   } finally {
@@ -218,14 +218,14 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'ヤマト設定を保存しました'
+      message: 'Yamato設定を保存しました'
     });
 
   } catch (error) {
     console.error('Yamato settings update error:', error);
     return NextResponse.json({
       success: false,
-      message: '設定の保存中にエラーが発生しました',
+      message: '設定の保存に失敗しました',
       error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   } finally {

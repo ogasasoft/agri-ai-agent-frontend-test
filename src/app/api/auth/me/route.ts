@@ -7,12 +7,14 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     // Try multiple sources for session token
-    const sessionToken = request.headers.get('x-session-token') || 
+    const sessionToken = request.headers.get('x-session-token') ||
                          request.cookies.get('session_token')?.value;
-    
+
     if (!sessionToken) {
-      const authError = AuthErrorBuilder.sessionError('INVALID_SESSION');
-      return NextResponse.json(authError, { status: 401 });
+      return NextResponse.json({
+        success: false,
+        message: '認証が必要です。'
+      }, { status: 401 });
     }
 
     const sessionData = await validateSession(sessionToken);

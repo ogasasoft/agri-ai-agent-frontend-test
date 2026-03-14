@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { invalidateSession } from '@/lib/auth';
+import { invalidateSession, logAuditEvent } from '@/lib/auth';
 import { invalidateRememberTokensForUser } from '@/lib/auth-enhanced';
 import { AuthErrorBuilder, logAuthAttempt } from '@/lib/auth-error-details';
-import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +20,13 @@ export async function POST(request: NextRequest) {
     // ログアウト成功をログ記録
     if (sessionToken) {
       logAuthAttempt('SUCCESS', 'logout', {});
+    }
+
+    // Invalidate session in database
+    const userId = request.cookies.get('user_id')?.value;
+    if (userId && sessionToken) {
+      await invalidateSession(sessionToken, parseInt(userId));
+      await invalidateRememberTokensForUser(parseInt(userId));
     }
 
     return response;

@@ -7,7 +7,22 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, password, rememberMe } = await request.json();
+    let username: string | undefined;
+    let password: string | undefined;
+    let rememberMe: boolean = false;
+
+    try {
+      const body = await request.json();
+      username = body.username;
+      password = body.password;
+      rememberMe = body.rememberMe || false;
+    } catch (jsonError) {
+      return NextResponse.json({
+        success: false,
+        message: 'リクエストボディの解析に失敗しました。'
+      }, { status: 400 });
+    }
+
     const { ipAddress, userAgent } = getClientInfo(request);
 
     if (!username || !password) {
@@ -63,6 +78,8 @@ export async function POST(request: NextRequest) {
       success: true,
       message: authResult.message,
       user: authResult.user,
+      session: authResult.session,
+      csrf_token: authResult.session!.csrf_token,
       requiresPasswordChange: authResult.requiresPasswordChange
     });
 

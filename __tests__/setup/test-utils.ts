@@ -27,14 +27,18 @@ export class MockDbClient {
     return Promise.resolve()
   }
 
-  // Add Jest mock properties
-  query = jest.fn().mockImplementation(async (text: string, params?: any[]) => {
+  // Default query handler extracted so it can be restored after tests override query
+  private defaultQueryHandler = async (text: string, params?: any[]) => {
     // Throw error if mock error is set
     if (this.mockError) {
       throw this.mockError
     }
 
     // Mock query responses based on SQL patterns
+    // user_settings must be checked before users (to avoid 'user_settings' matching 'users' substring)
+    if (text.includes('SELECT') && text.includes('user_settings')) {
+      return { rows: this.mockData.user_settings || [] }
+    }
     if (text.includes('SELECT') && text.includes('users')) {
       return { rows: this.mockData.users || [] }
     }
@@ -77,7 +81,10 @@ export class MockDbClient {
     }
 
     return { rows: [] }
-  })
+  }
+
+  // Add Jest mock properties
+  query = jest.fn().mockImplementation(this.defaultQueryHandler)
 
   setMockData(table: string, data: any[]) {
     this.mockData[table] = data
@@ -90,6 +97,8 @@ export class MockDbClient {
   clearMockData() {
     this.mockData = {}
     this.mockError = null
+    // Reset query to default implementation so tests that override query don't bleed into next test
+    this.query = jest.fn().mockImplementation(this.defaultQueryHandler)
   }
 }
 

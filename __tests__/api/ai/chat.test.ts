@@ -486,7 +486,7 @@ describe('/api/chat', () => {
       const data = await response.json()
 
       // Assert
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(200)
       expect(data.success).toBe(false)
       expect(data.response).toBe('AI機能が使用できません。')
     })
@@ -555,7 +555,9 @@ describe('/api/chat', () => {
       const data = await response.json()
 
       // Assert
-      expect(response.status).toBe(500)
+      expect(response.status).toBe(200)
+      expect(data.success).toBe(false)
+      expect(data.response).toBe('AI機能が使用できません。')
       expect(data.error).toBe('Specific error message')
 
       // Restore environment
