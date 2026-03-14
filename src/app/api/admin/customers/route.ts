@@ -120,6 +120,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Create a placeholder order for the customer
+      // Use Date.now() + random() to ensure unique order codes even with minimal delay
+      const randomOffset = Math.floor(Math.random() * 1000)
+      const timestamp = Date.now() + randomOffset
       const result = await client.query(`
         INSERT INTO orders (
           order_code, customer_name, phone, address, price,
@@ -128,7 +131,7 @@ export async function POST(request: NextRequest) {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING id
       `, [
-        `ADMIN-${Date.now()}`,
+        `ADMIN-${timestamp}`,
         customer_name,
         phone || '',
         address || '',

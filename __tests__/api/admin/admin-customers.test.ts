@@ -401,9 +401,32 @@ describe('/api/admin/customers', () => {
       const mockAdminUser = createMockUser({ id: 1, is_super_admin: true })
       validateAdminSession.mockResolvedValue(mockAdminUser)
 
+      // Create mock query responses with unique order codes
+      let mockQueryIndex = 0
       mockClient.query = jest.fn()
-        .mockResolvedValue({ rows: [{ id: 2 }] }) // Always success
-        .mockResolvedValue({ rows: [{ id: 100 }] })
+        .mockImplementation(async (text: string, params?: any[]) => {
+          if (text.includes('INSERT INTO orders')) {
+            const timestamp = Date.now() + (mockQueryIndex++ * 1000)
+            const mockOrder = {
+              id: 2 + (mockQueryIndex - 1) * 100,
+              order_code: `ADMIN-${timestamp}`,
+              customer_name: params?.[1] || 'テスト顧客',
+              phone: params?.[2] || '',
+              address: params?.[3] || '',
+              price: params?.[4] || 0,
+              order_date: params?.[5] || '2024-01-01',
+              delivery_date: params?.[6] || null,
+              notes: params?.[7] || '',
+              source: params?.[8] || 'manual_entry',
+              extra_data: params?.[9] || '{}',
+              user_id: params?.[10] || 1,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }
+            return { rows: [mockOrder] }
+          }
+          return { rows: [{ id: 2 + mockQueryIndex++ }] }
+        })
 
       const customerData = {
         customer_name: 'テスト顧客',
@@ -422,9 +445,8 @@ describe('/api/admin/customers', () => {
         headers: { 'x-session-token': 'admin-session', 'Content-Type': 'application/json' }
       })
 
-      // Act - Use a small delay to ensure different timestamps
+      // Act
       await POST(request1)
-      await new Promise(resolve => setTimeout(resolve, 1))
       await POST(request2)
 
       // Assert - Verify the order codes are from different timestamps
