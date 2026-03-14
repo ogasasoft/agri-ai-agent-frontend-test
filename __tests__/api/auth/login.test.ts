@@ -15,34 +15,36 @@ jest.mock('@/lib/auth-enhanced', () => ({
 }))
 
 jest.mock('@/lib/auth-error-details', () => {
-  const MockAuthErrorBuilder = jest.fn().mockImplementation((message: string) => ({
-    message,
-    setAuthContext: jest.fn().mockReturnThis(),
-    addProcessingStep: jest.fn().mockReturnThis(),
-    addSuggestion: jest.fn().mockReturnThis(),
-    build: jest.fn().mockReturnValue({
-      success: false,
+  const MockAuthErrorBuilder = Object.assign(
+    jest.fn().mockImplementation((message: string) => ({
       message,
-      details: {},
-      suggestions: [],
-      debug_info: {},
-      processing_steps: [],
-    })
-  }))
-
-  MockAuthErrorBuilder.loginFailure = jest.fn().mockImplementation(
-    (_username: string, reason: string) => ({
-      success: false,
-      message: reason === 'ACCOUNT_LOCKED'
-        ? 'アカウントがロックされています。'
-        : 'ユーザー名またはパスワードが正しくありません。',
-    })
+      setAuthContext: jest.fn().mockReturnThis(),
+      addProcessingStep: jest.fn().mockReturnThis(),
+      addSuggestion: jest.fn().mockReturnThis(),
+      build: jest.fn().mockReturnValue({
+        success: false,
+        message,
+        details: {},
+        suggestions: [],
+        debug_info: {},
+        processing_steps: [],
+      })
+    })),
+    {
+      loginFailure: jest.fn().mockImplementation(
+        (_username: string, reason: string) => ({
+          success: false,
+          message: reason === 'ACCOUNT_LOCKED'
+            ? 'アカウントがロックされています。'
+            : 'ユーザー名またはパスワードが正しくありません。',
+        })
+      ),
+      sessionError: jest.fn().mockReturnValue({
+        success: false,
+        message: 'セッションが無効です',
+      })
+    }
   )
-
-  MockAuthErrorBuilder.sessionError = jest.fn().mockReturnValue({
-    success: false,
-    message: 'セッションが無効です',
-  })
 
   return {
     AuthErrorBuilder: MockAuthErrorBuilder,

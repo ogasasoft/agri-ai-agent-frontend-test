@@ -7,12 +7,12 @@ import { validateCompleteErrorResponse, validateDebugInfo } from '../utils/error
 describe('ErrorBuilder Classes', () => {
   beforeEach(() => {
     // テスト環境を開発環境に設定
-    process.env.NODE_ENV = 'development';
+    (process.env as any).NODE_ENV = 'development';
   });
 
   afterEach(() => {
     // 環境変数をリセット
-    delete process.env.NODE_ENV;
+    delete (process.env as any).NODE_ENV;
   });
 
   describe('ErrorDetailBuilder', () => {
@@ -39,11 +39,11 @@ describe('ErrorBuilder Classes', () => {
         .build();
 
       expect(response.debug_info?.processing_steps).toHaveLength(2);
-      expect(response.debug_info?.processing_steps[0]).toMatchObject({
+      expect(response.debug_info?.processing_steps![0]).toMatchObject({
         step: 'Step 1',
         status: 'completed'
       });
-      expect(response.debug_info?.processing_steps[1]).toMatchObject({
+      expect(response.debug_info?.processing_steps![1]).toMatchObject({
         step: 'Step 2',
         status: 'failed',
         details: { error: 'Step failed' }
@@ -65,7 +65,7 @@ describe('ErrorBuilder Classes', () => {
     });
 
     it('should remove debug_info in production', () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
 
       const builder = new ErrorDetailBuilder('Test error', 'TEST_ERROR');
       const response = builder
@@ -285,7 +285,7 @@ describe('ErrorBuilder Classes', () => {
     });
 
     it('should validate debug info presence in development', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
 
       const builder = new ErrorDetailBuilder('Test error', 'TEST_ERROR');
       const response = builder.build();
@@ -294,7 +294,7 @@ describe('ErrorBuilder Classes', () => {
     });
 
     it('should validate debug info absence in production', () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
 
       const builder = new ErrorDetailBuilder('Test error', 'TEST_ERROR');
       const response = builder.build();

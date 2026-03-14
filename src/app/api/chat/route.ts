@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     const responseTime = Date.now() - startTime;
 
     // Parse response data (even for errors)
-    let errorData = {};
+    let errorData: any = {};
     try {
       errorData = await openaiResponse.json().catch(() => ({}));
     } catch {

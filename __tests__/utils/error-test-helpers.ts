@@ -143,7 +143,7 @@ export const createMockRequest = (
     body: options.body ? JSON.stringify(options.body) : undefined
   };
 
-  return new NextRequest(url, requestInit);
+  return new NextRequest(url, requestInit as any);
 };
 
 // データベースエラーシミュレーター
