@@ -98,7 +98,7 @@ describe('/api/auth/login', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('ユーザー名またはパスワードが正しくありません。')
+      expect(data.message).toBe('ユーザー名またはパスワードが間違っています。')
     })
 
     it('should validate required fields', async () => {
