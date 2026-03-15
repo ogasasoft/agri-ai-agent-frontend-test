@@ -65,6 +65,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     initializeDateRange();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initializeDateRange = async () => {

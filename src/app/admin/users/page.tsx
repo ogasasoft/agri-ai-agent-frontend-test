@@ -70,6 +70,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -77,6 +78,7 @@ export default function UsersPage() {
       setLoading(true);
       loadUsers();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPasswords]);
 
   const loadUsers = async () => {

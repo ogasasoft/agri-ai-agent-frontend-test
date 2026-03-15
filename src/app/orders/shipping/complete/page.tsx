@@ -49,6 +49,7 @@ function ShippingCompleteContent() {
       setAutoDownloaded(true);
       downloadYamatoB2CSV();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shippingResult, autoDownloaded]);
 
   const processShipping = async (ids: number[]) => {

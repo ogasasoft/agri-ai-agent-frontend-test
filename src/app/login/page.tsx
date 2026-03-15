@@ -34,6 +34,7 @@ function LoginForm() {
       // Note: No need to check auth status on login page
       // Users are expected to be logged out when accessing login
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, autoLogin]);
 
   // checkAuthStatus removed - not needed on login page
