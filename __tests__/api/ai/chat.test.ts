@@ -105,7 +105,7 @@ describe('/api/chat', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.response).toBe('認証が必要です。')
+      expect(data.message).toBe('セッショントークンがありません')
     })
 
     it('should validate session', async () => {
@@ -125,7 +125,7 @@ describe('/api/chat', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.response).toBe('セッションが無効です。')
+      expect(data.message).toBe('セッションが無効です')
     })
 
     it('should validate CSRF token', async () => {

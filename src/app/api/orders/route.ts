@@ -30,27 +30,10 @@ export async function GET(request: NextRequest) {
     // But regular admin users (admin/admin123) can access their own orders
 
     userId = sessionData.user.id.toString();
-    console.log('🔍 CURRENT USER:', {
-      id: sessionData.user.id,
-      username: sessionData.user.username,
-      email: sessionData.user.email
-    });
 
     const client = await getDbClient();
 
     try {
-      // DEBUG: Check all orders and users
-      const debugUsers = await client.query('SELECT id, username, email FROM users');
-      console.log('🔍 ALL USERS:', debugUsers.rows);
-
-      const debugAllOrders = await client.query(`
-        SELECT o.id, o.order_code, o.customer_name, o.user_id, u.username, u.email
-        FROM orders o
-        LEFT JOIN users u ON o.user_id::integer = u.id
-        ORDER BY o.created_at DESC LIMIT 10
-      `);
-      console.log('🔍 ALL ORDERS:', debugAllOrders.rows);
-
       // Only fetch orders belonging to the authenticated user
       const result = await client.query(`
         SELECT
@@ -90,7 +73,7 @@ export async function GET(request: NextRequest) {
       {
         table: 'orders',
         operation: 'SELECT',
-        userId: userId
+        userId
       }
     );
 

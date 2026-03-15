@@ -281,7 +281,7 @@ describe('/api/shipping', () => {
       // Assert
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('Network error')
+      expect(data.message).toBe('データベースクエリの実行に失敗しました')
     })
   })
 

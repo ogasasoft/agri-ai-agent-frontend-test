@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  UserPlus, Users, Search, Filter, Mail, 
-  Calendar, CheckCircle, XCircle, AlertCircle, Eye, EyeOff 
+import {
+  UserPlus, Users, Search, Mail,
+  Calendar, CheckCircle, XCircle, AlertCircle, Eye, EyeOff
 } from 'lucide-react';
 
 interface User {
@@ -70,6 +70,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     loadUsers();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -77,6 +78,7 @@ export default function UsersPage() {
       setLoading(true);
       loadUsers();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showPasswords]);
 
   const loadUsers = async () => {
@@ -168,7 +170,7 @@ export default function UsersPage() {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        await response.json();
         alert(`お客様IDが作成されました！\n\nメールアドレス: ${newCustomerEmail}\n初期パスワード: 1995\n\nお客様にお伝えください。`);
         setNewCustomerEmail('');
         setShowCreateCustomerId(false);
@@ -216,7 +218,7 @@ export default function UsersPage() {
       });
 
       if (response.ok) {
-        const result = await response.json();
+        await response.json();
         alert(`パスワードが設定されました。\nメールアドレス: ${customerSetup.customerEmail}\nパスワード: ${customerSetup.password}`);
         setCustomerSetup({ customerEmail: '', verificationCode: '', password: '' });
         setShowCustomerSetup(false);

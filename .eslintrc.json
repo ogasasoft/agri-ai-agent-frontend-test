@@ -8,25 +8,61 @@
     }
   },
   "rules": {
-    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
         "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
+        "varsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
       }
     ],
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
     "prefer-const": "error",
-    "eqeqeq": ["error", "always"]
+    "eqeqeq": ["error", "always"],
+    "no-var": "error",
+    "prefer-arrow-callback": "warn",
+    "object-shorthand": "warn",
+    "prefer-template": "warn"
   },
+  "overrides": [
+    {
+      "files": [
+        "src/lib/debug-logger.ts",
+        "src/lib/csv-debug.ts",
+        "src/lib/csv-encoding.ts"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": [
+        "src/app/api/migrate-*.ts",
+        "src/app/api/migrate-*/**/*.ts",
+        "src/app/api/migrate-drop-categories/route.ts",
+        "src/app/api/migrate-orders-shipping/route.ts"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ],
   "env": {
     "browser": true,
     "es2021": true,
     "node": true
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": "./tsconfig.json"
+      }
+    }
   }
 }

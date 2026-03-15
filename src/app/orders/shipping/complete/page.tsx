@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Truck, CheckCircle, AlertCircle, X, Download, ArrowLeft } from 'lucide-react';
+import { CheckCircle, AlertCircle, Download, ArrowLeft } from 'lucide-react';
 import type { Order } from '@/types/order';
 import type { CustomerRegistration } from '@/types/shipping';
 import { Suspense } from 'react';
@@ -25,7 +25,7 @@ function ShippingCompleteContent() {
   const [shippingResult, setShippingResult] = useState<ShippingResult | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [registering, setRegistering] = useState(false);
-  const [orderIds, setOrderIds] = useState<number[]>([]);
+  const [_orderIds, setOrderIds] = useState<number[]>([]);
   const [autoDownloaded, setAutoDownloaded] = useState(false);
 
   useEffect(() => {
@@ -49,6 +49,7 @@ function ShippingCompleteContent() {
       setAutoDownloaded(true);
       downloadYamatoB2CSV();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shippingResult, autoDownloaded]);
 
   const processShipping = async (ids: number[]) => {
@@ -282,7 +283,7 @@ function ShippingCompleteContent() {
               </div>
               
               <div className="divide-y divide-gray-200">
-                {shippingResult.orders.map((order, index) => (
+                {shippingResult.orders.map((order) => (
                   <div key={order.id} className="p-6">
                     <div className="flex items-center gap-3 mb-3">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">

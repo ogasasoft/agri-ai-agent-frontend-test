@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Settings, Power, RefreshCw, ExternalLink, 
+import {
+  RefreshCw,
   Key, Globe, Zap, AlertCircle, CheckCircle,
   Edit, Save, X
 } from 'lucide-react';
@@ -16,7 +16,7 @@ interface APIIntegration {
   api_secret?: string;
   webhook_url?: string;
   is_active: boolean;
-  configuration: any;
+  configuration: Record<string, unknown>;
   last_sync_at?: string;
   created_at: string;
   updated_at: string;
@@ -190,7 +190,7 @@ export default function APIIntegrationsManagement() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {integrations.map((integration) => {
           const template = INTEGRATION_TEMPLATES[integration.name as keyof typeof INTEGRATION_TEMPLATES];
-          const config: IntegrationConfig = integration.configuration || {};
+          const config = (integration.configuration || {}) as unknown as IntegrationConfig;
           
           return (
             <div key={integration.id} className="bg-white shadow rounded-lg overflow-hidden">
@@ -269,9 +269,9 @@ export default function APIIntegrationsManagement() {
 function EditIntegrationForm({ 
   integration, 
   template, 
-  onSave, 
-  onCancel, 
-  onChange 
+  onSave,
+  onCancel,
+  onChange
 }: {
   integration: APIIntegration;
   template: any;
@@ -293,7 +293,7 @@ function EditIntegrationForm({
               </label>
               <input
                 type={field.type}
-                value={integration[field.key as keyof APIIntegration] || ''}
+                value={String(integration[field.key as keyof APIIntegration] ?? '')}
                 onChange={(e) => onChange({
                   ...integration,
                   [field.key]: e.target.value
@@ -316,7 +316,7 @@ function EditIntegrationForm({
             </label>
             <input
               type="number"
-              value={integration.configuration?.sync_interval || 3600}
+              value={Number(integration.configuration?.sync_interval) || 3600}
               onChange={(e) => onChange({
                 ...integration,
                 configuration: {
@@ -333,7 +333,7 @@ function EditIntegrationForm({
             <input
               type="checkbox"
               id={`auto-import-${integration.id}`}
-              checked={integration.configuration?.auto_import || false}
+              checked={Boolean(integration.configuration?.auto_import)}
               onChange={(e) => onChange({
                 ...integration,
                 configuration: {

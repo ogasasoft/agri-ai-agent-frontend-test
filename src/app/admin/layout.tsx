@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
-  Users, Database, Shield, BarChart3,
+  Users, Database, Shield,
   LogOut, Menu, X, Home, Plug
 } from 'lucide-react';
 
@@ -28,6 +28,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     checkAdminAuth();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAdminAuth = async () => {
@@ -141,13 +142,13 @@ export default function AdminLayout({
 }
 
 function SidebarContent({ 
-  navigation, 
-  pathname, 
-  adminUser, 
-  onLogout 
-}: { 
-  navigation: any[]; 
-  pathname: string; 
+  navigation,
+  pathname,
+  adminUser,
+  onLogout
+}: {
+  navigation: any[];
+  pathname: string;
   adminUser: AdminUser;
   onLogout: () => void;
 }) {

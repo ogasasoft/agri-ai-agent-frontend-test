@@ -26,6 +26,7 @@ function ChangePasswordForm() {
 
   useEffect(() => {
     fetchUserInfo();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchUserInfo = async () => {

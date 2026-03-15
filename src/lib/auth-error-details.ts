@@ -59,13 +59,14 @@ export class AuthErrorBuilder extends ErrorDetailBuilder {
 
   // セッション関連エラー
   static sessionError(
-    errorType: 'INVALID_SESSION' | 'EXPIRED_SESSION' | 'CSRF_MISMATCH',
+    errorType: 'INVALID_SESSION' | 'EXPIRED_SESSION' | 'CSRF_MISMATCH' | 'MISSING_TOKEN',
     sessionInfo?: { token?: string; created?: string; userId?: string }
   ): DetailedErrorResponse {
     const messages = {
       INVALID_SESSION: 'セッションが無効です',
       EXPIRED_SESSION: 'セッションが期限切れです',
-      CSRF_MISMATCH: 'CSRF検証に失敗しました'
+      CSRF_MISMATCH: 'CSRF検証に失敗しました',
+      MISSING_TOKEN: 'セッショントークンがありません'
     };
 
     const builder = new AuthErrorBuilder(messages[errorType]);
