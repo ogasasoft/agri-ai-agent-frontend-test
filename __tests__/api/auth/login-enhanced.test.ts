@@ -98,7 +98,7 @@ describe('/api/auth/login', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('ユーザー名またはパスワードが間違っています。')
+      expect(data.message).toBe('ユーザー名またはパスワードが正しくありません。')
     })
 
     it('should validate required fields', async () => {
@@ -180,7 +180,7 @@ describe('/api/auth/login', () => {
       // Arrange
       authenticateUserEnhanced.mockResolvedValue({
         success: false,
-        message: 'アカウントがロックされています。5分後に再試行してください。',
+        message: 'アカウントが一時的にロックされています。5分後に再試行してください。',
         lockoutInfo: {
           isLocked: true,
           lockoutLevel: 1,
@@ -203,7 +203,7 @@ describe('/api/auth/login', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.message).toContain('アカウントがロックされています')
+      expect(data.message).toContain('アカウントが一時的にロックされています')
       expect(data.lockoutInfo).toBeDefined()
     })
 
@@ -226,7 +226,7 @@ describe('/api/auth/login', () => {
       // Assert
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('サーバーエラーが発生しました。')
+      expect(data.message).toBe('システムエラーが発生しました')
     })
 
     it('should set appropriate cookies on successful login', async () => {
