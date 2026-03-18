@@ -401,9 +401,12 @@ describe('/api/admin/customers', () => {
       const mockAdminUser = createMockUser({ id: 1, is_super_admin: true })
       validateAdminSession.mockResolvedValue(mockAdminUser)
 
+      // Mock with fixed, different timestamps for each request
       mockClient.query = jest.fn()
-        .mockResolvedValue({ rows: [{ id: 2 }] }) // Always success
-        .mockResolvedValue({ rows: [{ id: 100 }] })
+        .mockResolvedValueOnce({ rows: [{ id: 2 }] })
+        .mockResolvedValueOnce({ rows: [{ id: 100 }] })
+        .mockResolvedValueOnce({ rows: [{ id: 3 }] })
+        .mockResolvedValueOnce({ rows: [{ id: 101 }] })
 
       const customerData = {
         customer_name: 'テスト顧客',
@@ -424,7 +427,6 @@ describe('/api/admin/customers', () => {
 
       // Act
       await POST(request1)
-      await new Promise(resolve => setTimeout(resolve, 1)) // Ensure different timestamps
       await POST(request2)
 
       // Assert
@@ -434,6 +436,7 @@ describe('/api/admin/customers', () => {
       expect(orderCode1).toMatch(/^ADMIN-\d+$/)
       expect(orderCode2).toMatch(/^ADMIN-\d+$/)
       expect(orderCode1).not.toBe(orderCode2) // Should be different
+      expect(parseInt(orderCode1.split('-')[1])).not.toBe(parseInt(orderCode2.split('-')[1]))
     })
 
     it('should include admin ID in extra_data', async () => {

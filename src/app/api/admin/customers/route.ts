@@ -1,32 +1,44 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { validateAdminSession, logAdminAction, getClientInfo } from '@/lib/admin-auth';
-import { getDbClient } from '@/lib/db';
+import { NextRequest, NextResponse } from "next/server";
+import {
+  validateAdminSession,
+  logAdminAction,
+  getClientInfo,
+} from "@/lib/admin-auth";
+import { getDbClient } from "@/lib/db";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 // GET - Get all customers with statistics
 export async function GET(request: NextRequest) {
   try {
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
-    
+    const sessionToken =
+      request.headers.get("x-session-token") ||
+      request.cookies.get("session_token")?.value;
+
     if (!sessionToken) {
-      return NextResponse.json({
-        success: false,
-        message: '認証が必要です。'
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "認証が必要です。",
+        },
+        { status: 401 },
+      );
     }
 
     const adminUser = await validateAdminSession(sessionToken);
-    
+
     if (!adminUser) {
-      return NextResponse.json({
-        success: false,
-        message: '管理者権限が必要です。'
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "管理者権限が必要です。",
+        },
+        { status: 403 },
+      );
     }
 
     const client = await getDbClient();
-    
+
     try {
       // Get customers with order statistics from all users
       const result = await client.query(`
@@ -51,122 +63,148 @@ export async function GET(request: NextRequest) {
       const { ipAddress, userAgent } = getClientInfo(request);
       await logAdminAction(
         adminUser.id,
-        'view_customers',
-        'customer',
+        "view_customers",
+        "customer",
         undefined,
         { total_customers: result.rows.length },
         ipAddress,
-        userAgent
+        userAgent,
       );
 
       return NextResponse.json({
         success: true,
-        customers: result.rows
+        customers: result.rows,
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
-    console.error('Admin customers error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'サーバーエラーが発生しました。'
-    }, { status: 500 });
+    console.error("Admin customers error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "サーバーエラーが発生しました。",
+      },
+      { status: 500 },
+    );
   }
 }
 
 // POST - Add new customer
 export async function POST(request: NextRequest) {
   try {
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
-    
+    const sessionToken =
+      request.headers.get("x-session-token") ||
+      request.cookies.get("session_token")?.value;
+
     if (!sessionToken) {
-      return NextResponse.json({
-        success: false,
-        message: '認証が必要です。'
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "認証が必要です。",
+        },
+        { status: 401 },
+      );
     }
 
     const adminUser = await validateAdminSession(sessionToken);
-    
+
     if (!adminUser) {
-      return NextResponse.json({
-        success: false,
-        message: '管理者権限が必要です。'
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "管理者権限が必要です。",
+        },
+        { status: 403 },
+      );
     }
 
-    const { customer_name, phone, address, email, user_id } = await request.json();
+    const { customer_name, phone, address, email, user_id } =
+      await request.json();
 
     if (!customer_name || !user_id) {
-      return NextResponse.json({
-        success: false,
-        message: '顧客名とユーザーIDは必須です。'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "顧客名とユーザーIDは必須です。",
+        },
+        { status: 400 },
+      );
     }
 
     const client = await getDbClient();
-    
+
     try {
       // Verify user exists
-      const userCheck = await client.query('SELECT id FROM users WHERE id = $1', [user_id]);
+      const userCheck = await client.query(
+        "SELECT id FROM users WHERE id = $1",
+        [user_id],
+      );
       if (userCheck.rows.length === 0) {
-        return NextResponse.json({
-          success: false,
-          message: '指定されたユーザーが見つかりません。'
-        }, { status: 404 });
+        return NextResponse.json(
+          {
+            success: false,
+            message: "指定されたユーザーが見つかりません。",
+          },
+          { status: 404 },
+        );
       }
 
       // Create a placeholder order for the customer
-      const result = await client.query(`
+      const result = await client.query(
+        `
         INSERT INTO orders (
           order_code, customer_name, phone, address, price, 
           order_date, user_id, source, notes, extra_data
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING id
-      `, [
-        `ADMIN-${Date.now()}`,
-        customer_name,
-        phone || '',
-        address || '',
-        0, // Placeholder price
-        new Date().toISOString().split('T')[0],
-        user_id,
-        'admin_created',
-        '管理者により手動作成された顧客データ',
-        JSON.stringify({ created_by_admin: adminUser.id, email: email || null })
-      ]);
+      `,
+        [
+          `ADMIN-${Date.now()}`,
+          customer_name,
+          phone || "",
+          address || "",
+          0, // Placeholder price
+          new Date().toISOString().split("T")[0],
+          user_id,
+          "admin_created",
+          "管理者により手動作成された顧客データ",
+          JSON.stringify({
+            created_by_admin: adminUser.id,
+            email: email || null,
+          }),
+        ],
+      );
 
       // Log admin action
       const { ipAddress, userAgent } = getClientInfo(request);
       await logAdminAction(
         adminUser.id,
-        'create_customer',
-        'customer',
+        "create_customer",
+        "customer",
         result.rows[0].id.toString(),
-        { customer_name, phone, address, user_id },
+        { customer_name, phone, address, email, user_id },
         ipAddress,
-        userAgent
+        userAgent,
       );
 
       return NextResponse.json({
         success: true,
-        message: '顧客を作成しました。',
-        customer_id: result.rows[0].id
+        message: "顧客を作成しました。",
+        customer_id: result.rows[0].id,
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
-    console.error('Admin create customer error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'サーバーエラーが発生しました。'
-    }, { status: 500 });
+    console.error("Admin create customer error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "サーバーエラーが発生しました。",
+      },
+      { status: 500 },
+    );
   }
 }

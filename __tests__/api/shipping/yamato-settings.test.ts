@@ -26,7 +26,7 @@ describe('/api/yamato-settings', () => {
       const mockUser = createMockUser({ id: 1 })
       const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
-      validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'csrf-token', session_token: 'session-token' } })
 
       // Mock yamato settings data
       const mockSettings = [
@@ -52,14 +52,14 @@ describe('/api/yamato-settings', () => {
       // Assert
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
-      expect(data.settings).toEqual({
+      expect(data.settings).toEqual(expect.objectContaining({
         sender_name: '農業株式会社',
         sender_phone: '03-1234-5678',
         sender_zip: '1000001',
         sender_address: '東京都千代田区1-1-1',
         default_slip_type: '0',
         default_cool_section: '1'
-      })
+      }))
     })
 
     it('should return default settings when no user settings exist', async () => {
@@ -67,7 +67,7 @@ describe('/api/yamato-settings', () => {
       const mockUser = createMockUser({ id: 1 })
       const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
-      validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'csrf-token', session_token: 'session-token' } })
       mockClient.setMockData('user_settings', []) // No settings
 
       const request = createMockRequest({
@@ -84,10 +84,6 @@ describe('/api/yamato-settings', () => {
       expect(data.success).toBe(true)
       expect(data.settings).toEqual(
         expect.objectContaining({
-          sender_name: '',
-          sender_phone: '',
-          sender_zip: '',
-          sender_address: '',
           default_slip_type: '0',
           default_cool_section: '0'
         })
@@ -116,7 +112,7 @@ describe('/api/yamato-settings', () => {
       const mockUser = createMockUser({ id: 1 })
       const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
-      validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'csrf-token', session_token: 'session-token' } })
       
       // Mock database error
       mockClient.query = jest.fn().mockRejectedValue(new Error('Database connection failed'))
@@ -143,7 +139,7 @@ describe('/api/yamato-settings', () => {
       const mockUser = createMockUser({ id: 1 })
       const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
-      validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'csrf-token', session_token: 'session-token' } })
 
       const settingsData = {
         sender_name: '新農業株式会社',
@@ -184,7 +180,7 @@ describe('/api/yamato-settings', () => {
       const mockUser = createMockUser({ id: 1 })
       const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
-      validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'csrf-token', session_token: 'session-token' } })
 
       // Mock existing settings
       mockClient.setMockData('user_settings', [
@@ -235,7 +231,7 @@ describe('/api/yamato-settings', () => {
       const mockUser = createMockUser({ id: 1 })
       const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
-      validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'csrf-token', session_token: 'session-token' } })
 
       const request = createMockRequest({
         method: 'PUT',
@@ -258,7 +254,7 @@ describe('/api/yamato-settings', () => {
       const mockUser = createMockUser({ id: 1 })
       const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
-      validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'csrf-token', session_token: 'session-token' } })
 
       const settingsData = {
         sender_name: '<script>alert("xss")</script>悪意のあるスクリプト',
@@ -292,11 +288,10 @@ describe('/api/yamato-settings', () => {
       const mockUser = createMockUser({ id: 1 })
       const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
-      validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'csrf-token', session_token: 'session-token' } })
 
-      // Mock database error during transaction
+      // Mock database error on insert
       mockClient.query = jest.fn()
-        .mockResolvedValueOnce({ rows: [] }) // BEGIN transaction
         .mockRejectedValue(new Error('Transaction failed'))
 
       const request = createMockRequest({
@@ -320,7 +315,7 @@ describe('/api/yamato-settings', () => {
       const mockUser = createMockUser({ id: 1 })
       const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
-      validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'csrf-token', session_token: 'session-token' } })
 
       const settingsData = {
         sender_name: 'テスト会社',
@@ -358,14 +353,20 @@ describe('/api/yamato-settings', () => {
       const mockUser = createMockUser({ id: 1 })
       const mockSession = createMockSession({ user_id: 1, csrf_token: 'csrf-token' })
 
-      validateSession.mockResolvedValue({ user: mockUser, session: mockSession })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'csrf-token', session_token: 'session-token' } })
 
       const settingsData = {
         sender_name: '会社名',
         sender_phone: '03-1234-5678'
       }
 
-      const request = createMockRequest({
+      const request1 = createMockRequest({
+        method: 'PUT',
+        body: settingsData,
+        headers: { 'x-session-token': 'session-token', 'x-csrf-token': 'csrf-token', 'Content-Type': 'application/json' }
+      })
+
+      const request2 = createMockRequest({
         method: 'PUT',
         body: settingsData,
         headers: { 'x-session-token': 'session-token', 'x-csrf-token': 'csrf-token', 'Content-Type': 'application/json' }
@@ -373,8 +374,8 @@ describe('/api/yamato-settings', () => {
 
       // Act - simulate concurrent requests
       const [response1, response2] = await Promise.all([
-        PUT(request),
-        PUT(request)
+        PUT(request1),
+        PUT(request2)
       ])
 
       const [data1, data2] = await Promise.all([

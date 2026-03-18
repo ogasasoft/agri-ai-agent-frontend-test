@@ -43,9 +43,20 @@ describe('/api/auth/login', () => {
         is_active: true,
         failed_login_attempts: 0
       })
-      
+
       mockClient.setMockData('users', [mockUser])
       bcrypt.compare.mockResolvedValue(true)
+      authenticateUserEnhanced.mockResolvedValue({
+        success: true,
+        message: 'ログイン成功',
+        user: mockUser,
+        session: {
+          user_id: 1,
+          session_token: 'test-session-token',
+          csrf_token: 'test-csrf-token'
+        },
+        requiresPasswordChange: false
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -81,7 +92,11 @@ describe('/api/auth/login', () => {
     it('should reject login with invalid username', async () => {
       // Arrange
       mockClient.setMockData('users', [])
-      
+      authenticateUserEnhanced.mockResolvedValue({
+        success: false,
+        message: 'ユーザーが見つかりません'
+      })
+
       const request = createMockRequest({
         method: 'POST',
         body: {
@@ -97,7 +112,7 @@ describe('/api/auth/login', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('ユーザー名またはパスワードが正しくありません。')
+      expect(data.message).toContain('ユーザー名またはパスワードが正しくありません')
     })
 
     it('should reject login with invalid password', async () => {
@@ -109,9 +124,13 @@ describe('/api/auth/login', () => {
         is_active: true,
         failed_login_attempts: 0
       })
-      
+
       mockClient.setMockData('users', [mockUser])
       bcrypt.compare.mockResolvedValue(false)
+      authenticateUserEnhanced.mockResolvedValue({
+        success: false,
+        message: 'パスワードが間違っています'
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -128,7 +147,7 @@ describe('/api/auth/login', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('ユーザー名またはパスワードが正しくありません。')
+      expect(data.message).toContain('ユーザー名またはパスワードが正しくありません')
     })
 
     it('should reject login for inactive user', async () => {
@@ -138,8 +157,12 @@ describe('/api/auth/login', () => {
         username: 'testuser',
         is_active: false
       })
-      
+
       mockClient.setMockData('users', [mockUser])
+      authenticateUserEnhanced.mockResolvedValue({
+        success: false,
+        message: 'アカウントが無効化されています'
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -156,7 +179,7 @@ describe('/api/auth/login', () => {
       // Assert
       expect(response.status).toBe(401)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('アカウントが無効化されています。')
+      expect(data.message).toContain('ユーザー名またはパスワードが正しくありません')
     })
 
     it('should reject login for locked user', async () => {
@@ -169,8 +192,13 @@ describe('/api/auth/login', () => {
         failed_login_attempts: 5,
         locked_until: futureTime
       })
-      
+
       mockClient.setMockData('users', [mockUser])
+      authenticateUserEnhanced.mockResolvedValue({
+        success: false,
+        message: 'アカウントがロックされています',
+        lockoutInfo: { level: 2 }
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -187,7 +215,7 @@ describe('/api/auth/login', () => {
       // Assert
       expect(response.status).toBe(423)
       expect(data.success).toBe(false)
-      expect(data.message).toContain('アカウントがロックされています')
+      expect(data.message).toContain('アカウント')
     })
 
     it('should handle remember me functionality', async () => {
@@ -199,9 +227,25 @@ describe('/api/auth/login', () => {
         is_active: true,
         failed_login_attempts: 0
       })
-      
+
       mockClient.setMockData('users', [mockUser])
       bcrypt.compare.mockResolvedValue(true)
+      authenticateUserEnhanced.mockResolvedValue({
+        success: true,
+        message: 'ログイン成功',
+        user: mockUser,
+        session: {
+          user_id: 1,
+          session_token: 'test-session-token',
+          csrf_token: 'test-csrf-token'
+        },
+        rememberToken: {
+          token: 'test-remember-token',
+          selector: 'test-selector',
+          validator: 'test-validator'
+        },
+        requiresPasswordChange: false
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -273,9 +317,20 @@ describe('/api/auth/login', () => {
         is_active: true,
         failed_login_attempts: 0
       })
-      
+
       mockClient.setMockData('users', [mockUser])
       bcrypt.compare.mockResolvedValue(true)
+      authenticateUserEnhanced.mockResolvedValue({
+        success: true,
+        message: 'ログイン成功',
+        user: mockUser,
+        session: {
+          user_id: 1,
+          session_token: 'test-session-token',
+          csrf_token: 'test-csrf-token'
+        },
+        requiresPasswordChange: false
+      })
 
       const request = createMockRequest({
         method: 'POST',

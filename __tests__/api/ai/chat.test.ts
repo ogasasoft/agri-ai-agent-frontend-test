@@ -415,7 +415,7 @@ describe('/api/chat', () => {
       const requestBody = JSON.parse(openaiCall?.[1]?.body as string)
 
       expect(requestBody).toEqual({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'user', content: testMessage }
         ],

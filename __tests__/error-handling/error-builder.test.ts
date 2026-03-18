@@ -6,13 +6,26 @@ import { validateCompleteErrorResponse, validateDebugInfo } from '../utils/error
 
 describe('ErrorBuilder Classes', () => {
   beforeEach(() => {
-    // テスト環境を開発環境に設定
-    process.env.NODE_ENV = 'development';
+    // Save original value if it exists, but don't reassign NODE_ENV directly
+    if (process.env.NODE_ENV !== undefined) {
+      (global as any).__savedNodeEnv = process.env.NODE_ENV;
+    }
+    Object.defineProperty(process.env, 'NODE_ENV', {
+      writable: true,
+      configurable: true,
+      value: 'development'
+    });
   });
 
   afterEach(() => {
-    // 環境変数をリセット
-    delete process.env.NODE_ENV;
+    // Restore original value if it existed
+    if ((global as any).__savedNodeEnv !== undefined) {
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        writable: true,
+        configurable: true,
+        value: (global as any).__savedNodeEnv
+      });
+    }
   });
 
   describe('ErrorDetailBuilder', () => {
@@ -39,15 +52,18 @@ describe('ErrorBuilder Classes', () => {
         .build();
 
       expect(response.debug_info?.processing_steps).toHaveLength(2);
-      expect(response.debug_info?.processing_steps[0]).toMatchObject({
-        step: 'Step 1',
-        status: 'completed'
-      });
-      expect(response.debug_info?.processing_steps[1]).toMatchObject({
-        step: 'Step 2',
-        status: 'failed',
-        details: { error: 'Step failed' }
-      });
+      const steps = response.debug_info?.processing_steps;
+      if (steps) {
+        expect(steps[0]).toMatchObject({
+          step: 'Step 1',
+          status: 'completed'
+        });
+        expect(steps[1]).toMatchObject({
+          step: 'Step 2',
+          status: 'failed',
+          details: { error: 'Step failed' }
+        });
+      }
     });
 
     it('should add suggestions', () => {
@@ -65,7 +81,7 @@ describe('ErrorBuilder Classes', () => {
     });
 
     it('should remove debug_info in production', () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
 
       const builder = new ErrorDetailBuilder('Test error', 'TEST_ERROR');
       const response = builder
@@ -285,7 +301,7 @@ describe('ErrorBuilder Classes', () => {
     });
 
     it('should validate debug info presence in development', () => {
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
 
       const builder = new ErrorDetailBuilder('Test error', 'TEST_ERROR');
       const response = builder.build();
@@ -294,7 +310,7 @@ describe('ErrorBuilder Classes', () => {
     });
 
     it('should validate debug info absence in production', () => {
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
 
       const builder = new ErrorDetailBuilder('Test error', 'TEST_ERROR');
       const response = builder.build();

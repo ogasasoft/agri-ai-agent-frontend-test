@@ -116,7 +116,7 @@ describe('/api/orders', () => {
 
   describe('POST /api/orders', () => {
     it('should create new order with valid data', async () => {
-      // Arrange  
+      // Arrange
       const orderData = {
         order_code: 'ORD-003',
         customer_name: '山田太郎',
@@ -128,13 +128,13 @@ describe('/api/orders', () => {
         notes: 'テスト注文'
       }
 
+      const mockUser = createMockUser({ id: 1 })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'mock-csrf-token' } })
+
       const request = createMockRequest({
         method: 'POST',
         body: orderData,
-        headers: {
-          'x-user-id': '1',
-          'Content-Type': 'application/json'
-        }
+        headers: createMockAuthHeaders()
       })
 
       // Act
@@ -185,15 +185,14 @@ describe('/api/orders', () => {
         customer_name: '山田太郎'
       }
 
+      const mockUser = createMockUser({ id: 1 })
+      validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'mock-csrf-token' } })
       mockClient.setMockError(new Error('Database connection failed'))
 
       const request = createMockRequest({
         method: 'POST',
         body: orderData,
-        headers: {
-          'x-user-id': '1',
-          'Content-Type': 'application/json'
-        }
+        headers: createMockAuthHeaders()
       })
 
       // Act

@@ -35,6 +35,9 @@ export class MockDbClient {
     }
 
     // Mock query responses based on SQL patterns
+    if (text.includes('user_settings')) {
+      return { rows: this.mockData.user_settings || [] }
+    }
     if (text.includes('SELECT') && text.includes('users')) {
       return { rows: this.mockData.users || [] }
     }
@@ -90,6 +93,55 @@ export class MockDbClient {
   clearMockData() {
     this.mockData = {}
     this.mockError = null
+    // Reset query mock to default implementation
+    this.query = jest.fn().mockImplementation(async (text: string, params?: any[]) => {
+      if (this.mockError) {
+        throw this.mockError
+      }
+      if (text.includes('user_settings')) {
+        return { rows: this.mockData.user_settings || [] }
+      }
+      if (text.includes('SELECT') && text.includes('users')) {
+        return { rows: this.mockData.users || [] }
+      }
+      if (text.includes('SELECT') && text.includes('orders')) {
+        let orders = this.mockData.orders || []
+        if (params && params.length > 0 && text.includes('IN')) {
+          const orderIds = params.slice(1)
+          orders = orders.filter(order => orderIds.includes(order.id))
+        }
+        return { rows: orders }
+      }
+      if (text.includes('INSERT INTO orders')) {
+        const mockOrder = {
+          id: 1,
+          order_code: params?.[0] || 'ORD-001',
+          customer_name: params?.[1] || 'テストユーザー',
+          phone: params?.[2] || '',
+          address: params?.[3] || '',
+          price: params?.[4] || 0,
+          order_date: params?.[5] || '2024-01-01',
+          delivery_date: params?.[6] || null,
+          notes: params?.[7] || '',
+          source: params?.[8] || 'manual_entry',
+          extra_data: params?.[9] || '{}',
+          user_id: params?.[10] || 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+        return { rows: [mockOrder] }
+      }
+      if (text.includes('INSERT')) {
+        return { rows: [{ id: 1, ...params }] }
+      }
+      if (text.includes('UPDATE')) {
+        return { rows: [{ id: 1, ...params }] }
+      }
+      if (text.includes('DELETE')) {
+        return { rows: [] }
+      }
+      return { rows: [] }
+    })
   }
 }
 

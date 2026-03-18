@@ -271,7 +271,7 @@ describe('/api/yamato-csv', () => {
       validateSession.mockResolvedValue({ user: mockUser })
       
       // Mock database error
-      mockClient.query = jest.fn().mockRejectedValue(new Error('Database connection failed'))
+      mockClient.query.mockRejectedValueOnce(new Error('Database connection failed'))
 
       const request = createMockRequest({
         method: 'POST',

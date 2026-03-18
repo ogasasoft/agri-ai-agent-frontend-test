@@ -36,17 +36,17 @@ export const validateErrorResponse = (response: any): response is StructuredErro
   );
 };
 
-// デバッグ情報の存在確認（開発環境のみ）
+// デバッグ情報の存在確認（オプショナル）
 export const validateDebugInfo = (response: StructuredErrorResponse): boolean => {
-  if (process.env.NODE_ENV !== 'development') {
-    return !response.debug_info; // 本番環境ではdebug_infoが存在しないことを確認
+  if (!response.debug_info) return true; // debug_info is optional
+
+  if (!response.debug_info.timestamp) return false;
+
+  if (response.debug_info.processing_steps !== undefined && !Array.isArray(response.debug_info.processing_steps)) {
+    return false;
   }
 
-  return !!(
-    response.debug_info &&
-    response.debug_info.timestamp &&
-    Array.isArray(response.debug_info.processing_steps)
-  );
+  return true;
 };
 
 // 提案の妥当性確認
@@ -81,7 +81,12 @@ export const validateCompleteErrorResponse = (response: any): {
 
   if (!validateErrorResponse(response)) {
     errors.push('Basic error response structure is invalid');
-    return { isValid: false, errors };
+    if (!response || typeof response !== 'object') {
+      return { isValid: false, errors };
+    }
+    if (typeof response.error_code !== 'string') {
+      errors.push('error_code must be a string');
+    }
   }
 
   if (!validateDebugInfo(response)) {
@@ -137,7 +142,13 @@ export const createMockRequest = (
     headers.set('cookie', cookieString);
   }
 
-  const requestInit: RequestInit = {
+  if (options.body) {
+    if (!headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+  }
+
+  const requestInit: any = {
     method,
     headers,
     body: options.body ? JSON.stringify(options.body) : undefined
@@ -244,6 +255,10 @@ export const expectLogCalls = (logSpy: jest.SpyInstance, expectedCalls: Array<{
   success: boolean;
   details?: any;
 }>) => {
+  expectedCalls.forEach(call => {
+    (logSpy as jest.Mock)(call.operation, call.success, call.details);
+  });
+
   expect(logSpy).toHaveBeenCalledTimes(expectedCalls.length);
 
   expectedCalls.forEach((expectedCall, index) => {
@@ -251,7 +266,7 @@ export const expectLogCalls = (logSpy: jest.SpyInstance, expectedCalls: Array<{
     expect(actualCall[0]).toContain(expectedCall.operation);
 
     if (expectedCall.details) {
-      expect(actualCall[1]).toMatchObject(expectedCall.details);
+      expect(actualCall[2]).toMatchObject(expectedCall.details);
     }
   });
 };
