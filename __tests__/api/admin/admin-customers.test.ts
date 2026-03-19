@@ -1,5 +1,5 @@
 import { GET, POST } from '@/app/api/admin/customers/route'
-import { createMockRequest, MockDbClient, createMockUser, createMockOrder, resetTestDatabase } from '../../setup/test-utils'
+import { createMockRequest, MockDbClient, createMockUser, createMockOrder, resetTestDatabase, seedTestData } from '../../setup/test-utils'
 
 // Mock dependencies
 jest.mock('pg', () => ({
@@ -21,6 +21,7 @@ describe('/api/admin/customers', () => {
 
   beforeEach(async () => {
     await resetTestDatabase()
+    await seedTestData()
     mockClient = MockDbClient.getInstance()
     validateAdminSession.mockClear()
     logAdminAction.mockClear()
@@ -401,13 +402,6 @@ describe('/api/admin/customers', () => {
       const mockAdminUser = createMockUser({ id: 1, is_super_admin: true })
       validateAdminSession.mockResolvedValue(mockAdminUser)
 
-      // Mock with fixed, different timestamps for each request
-      mockClient.query = jest.fn()
-        .mockResolvedValueOnce({ rows: [{ id: 2 }] })
-        .mockResolvedValueOnce({ rows: [{ id: 100 }] })
-        .mockResolvedValueOnce({ rows: [{ id: 3 }] })
-        .mockResolvedValueOnce({ rows: [{ id: 101 }] })
-
       const customerData = {
         customer_name: 'テスト顧客',
         user_id: 2
@@ -426,17 +420,29 @@ describe('/api/admin/customers', () => {
       })
 
       // Act
-      await POST(request1)
-      await POST(request2)
+      const response1 = await POST(request1)
+      const response2 = await POST(request2)
 
       // Assert
-      const orderCode1 = mockClient.query.mock.calls[1][1][0] // First insert call, order_code param
-      const orderCode2 = mockClient.query.mock.calls[3][1][0] // Second insert call, order_code param
+      expect(response1.status).toBe(200)
+      expect(response2.status).toBe(200)
+
+      // Check that mockClient.query was called at least 4 times:
+      // 1. User check, 2. First insert, 3. Second insert, 4. History log
+      expect(mockClient.query).toHaveBeenCalledTimes(4)
+
+      // Extract order codes from the INSERT queries
+      const insertCalls = mockClient.query.mock.calls
+      const orderCode1 = insertCalls[1][1][0] // Second call is INSERT
+      const orderCode2 = insertCalls[2][1][0] // Third call is INSERT
 
       expect(orderCode1).toMatch(/^ADMIN-\d+$/)
       expect(orderCode2).toMatch(/^ADMIN-\d+$/)
       expect(orderCode1).not.toBe(orderCode2) // Should be different
       expect(parseInt(orderCode1.split('-')[1])).not.toBe(parseInt(orderCode2.split('-')[1]))
+
+      // Ensure orderCode2 is actually greater (since it was generated second)
+      expect(parseInt(orderCode2.split('-')[1])).toBeGreaterThan(parseInt(orderCode1.split('-')[1]))
     })
 
     it('should include admin ID in extra_data', async () => {
