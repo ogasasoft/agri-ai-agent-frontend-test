@@ -57,3 +57,7 @@ Thumbs.db
 *.backup
 *.bak
 *.tmp
+
+# Test coverage
+coverage/
+*.lcov
