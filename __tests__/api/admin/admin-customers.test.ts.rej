@@ -1,0 +1,10 @@
+@@ -438,7 +438,7 @@
+       // Extract order codes from the INSERT queries
+       const insertCalls = mockClient.query.mock.calls
+-      const orderCode1 = insertCalls[1][1][0] // Second call is INSERT
+-      const orderCode2 = insertCalls[4][1][0] // Third call is INSERT
++      const orderCode1 = insertCalls[1][1][0] // First call is INSERT
++      const orderCode2 = insertCalls[4][1][0] // Second INSERT (third call total)
+ 
+       expect(orderCode1).toMatch(/^ADMIN-\d+$/)
+       expect(orderCode2).toMatch(/^ADMIN-\d+$/)
