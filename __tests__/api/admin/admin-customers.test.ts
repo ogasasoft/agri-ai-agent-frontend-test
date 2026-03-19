@@ -433,8 +433,8 @@ describe('/api/admin/customers', () => {
 
       // Extract order codes from the INSERT queries
       const insertCalls = mockClient.query.mock.calls
-      const orderCode1 = insertCalls[1][1][0] // Second call is INSERT
-      const orderCode2 = insertCalls[2][1][0] // Third call is INSERT
+      const orderCode1 = insertCalls[1][1][0]
+      const orderCode2 = insertCalls[4][1][0]
 
       expect(orderCode1).toMatch(/^ADMIN-\d+$/)
       expect(orderCode2).toMatch(/^ADMIN-\d+$/)
