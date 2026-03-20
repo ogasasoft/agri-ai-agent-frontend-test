@@ -1,16 +1,16 @@
 'use client';
 
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
 } from 'recharts';
 
 interface ProductStats {
@@ -47,13 +47,7 @@ export default function DashboardCharts({ productStats, statusData }: DashboardC
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={productStats}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="productName" 
-              angle={-45}
-              textAnchor="end"
-              height={100}
-              interval={0}
-            />
+            <XAxis dataKey="productName" angle={-45} textAnchor="end" height={100} interval={0} />
             <YAxis />
             <Tooltip />
             <Bar dataKey="orderCount" fill="#3b82f6" />
@@ -71,7 +65,9 @@ export default function DashboardCharts({ productStats, statusData }: DashboardC
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              label={({ name, percent }) =>
+                `${name} ${percent !== undefined ? (percent * 100).toFixed(0) : 0}%`
+              }
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
