@@ -39,14 +39,17 @@ const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 const PASSWORD_MIN_LENGTH = 8;
 
-
 export async function hashPassword(password: string): Promise<{ hash: string; salt: string }> {
   const salt = randomBytes(32).toString('hex');
   const hash = await bcrypt.hash(password + salt, 12);
   return { hash, salt };
 }
 
-export async function verifyPassword(password: string, hash: string, salt: string): Promise<boolean> {
+export async function verifyPassword(
+  password: string,
+  hash: string,
+  salt: string
+): Promise<boolean> {
   return await bcrypt.compare(password + salt, hash);
 }
 
@@ -69,37 +72,61 @@ export async function logAuditEvent(
   success: boolean = true
 ): Promise<void> {
   const client = await getDbClient();
-  
+
   try {
-    await client.query(`
+    await client.query(
+      `
       INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details, ip_address, user_agent, success)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    `, [userId, action, resourceType, resourceId, JSON.stringify(details), ipAddress, userAgent, success]);
+    `,
+      [
+        userId,
+        action,
+        resourceType,
+        resourceId,
+        JSON.stringify(details),
+        ipAddress,
+        userAgent,
+        success,
+      ]
+    );
   } finally {
     await client.end();
   }
 }
 
 export async function authenticateUser(
-  username: string, 
-  password: string, 
-  ipAddress?: string, 
+  username: string,
+  password: string,
+  ipAddress?: string,
   userAgent?: string
 ): Promise<AuthResult> {
   const client = await getDbClient();
-  
+
   try {
     // Get user and check if account is locked
-    const userResult = await client.query(`
+    const userResult = await client.query(
+      `
       SELECT id, username, email, password_hash, salt, is_active, is_super_admin,
              failed_login_attempts, locked_until, password_changed_at,
              last_login_at, created_at
       FROM users 
       WHERE username = $1 OR email = $1
-    `, [username]);
+    `,
+      [username]
+    );
 
     if (userResult.rows.length === 0) {
-      await logAuditEvent(null, 'LOGIN_FAILED', 'user', undefined, { username, reason: 'user_not_found' }, ipAddress, userAgent, false);
+      await logAuditEvent(
+        null,
+        'LOGIN_FAILED',
+        'user',
+        undefined,
+        { username, reason: 'user_not_found' },
+        ipAddress,
+        userAgent,
+        false
+      );
       return { success: false, message: 'ユーザー名またはパスワードが間違っています。' };
     }
 
@@ -107,14 +134,38 @@ export async function authenticateUser(
 
     // Check if account is locked
     if (user.locked_until && new Date(user.locked_until) > new Date()) {
-      await logAuditEvent(user.id, 'LOGIN_BLOCKED', 'user', user.id, { reason: 'account_locked' }, ipAddress, userAgent, false);
-      return { success: false, message: 'アカウントがロックされています。しばらく待ってから再試行してください。' };
+      await logAuditEvent(
+        user.id,
+        'LOGIN_BLOCKED',
+        'user',
+        user.id,
+        { reason: 'account_locked' },
+        ipAddress,
+        userAgent,
+        false
+      );
+      return {
+        success: false,
+        message: 'アカウントがロックされています。しばらく待ってから再試行してください。',
+      };
     }
 
     // Check if account is active
     if (!user.is_active) {
-      await logAuditEvent(user.id, 'LOGIN_BLOCKED', 'user', user.id, { reason: 'account_inactive' }, ipAddress, userAgent, false);
-      return { success: false, message: 'アカウントが無効になっています。管理者にお問い合わせください。' };
+      await logAuditEvent(
+        user.id,
+        'LOGIN_BLOCKED',
+        'user',
+        user.id,
+        { reason: 'account_inactive' },
+        ipAddress,
+        userAgent,
+        false
+      );
+      return {
+        success: false,
+        message: 'アカウントが無効になっています。管理者にお問い合わせください。',
+      };
     }
 
     // Verify password
@@ -126,49 +177,79 @@ export async function authenticateUser(
       const shouldLock = newFailedAttempts >= MAX_LOGIN_ATTEMPTS;
       const lockUntil = shouldLock ? new Date(Date.now() + LOCKOUT_DURATION) : null;
 
-      await client.query(`
+      await client.query(
+        `
         UPDATE users 
         SET failed_login_attempts = $1, locked_until = $2, updated_at = CURRENT_TIMESTAMP
         WHERE id = $3
-      `, [newFailedAttempts, lockUntil, user.id]);
+      `,
+        [newFailedAttempts, lockUntil, user.id]
+      );
 
-      await logAuditEvent(user.id, 'LOGIN_FAILED', 'user', user.id, { 
-        reason: 'invalid_password', 
-        failed_attempts: newFailedAttempts,
-        locked: shouldLock 
-      }, ipAddress, userAgent, false);
+      await logAuditEvent(
+        user.id,
+        'LOGIN_FAILED',
+        'user',
+        user.id,
+        {
+          reason: 'invalid_password',
+          failed_attempts: newFailedAttempts,
+          locked: shouldLock,
+        },
+        ipAddress,
+        userAgent,
+        false
+      );
 
       if (shouldLock) {
-        return { success: false, message: 'ログイン試行回数が上限に達しました。アカウントがロックされました。' };
+        return {
+          success: false,
+          message: 'ログイン試行回数が上限に達しました。アカウントがロックされました。',
+        };
       }
 
       return { success: false, message: 'ユーザー名またはパスワードが間違っています。' };
     }
 
     // Successful authentication - reset failed attempts and update last login
-    await client.query(`
+    await client.query(
+      `
       UPDATE users 
       SET failed_login_attempts = 0, locked_until = NULL, last_login_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
       WHERE id = $1
-    `, [user.id]);
+    `,
+      [user.id]
+    );
 
     // Create session
     const sessionToken = await generateSessionToken();
     const csrfToken = await generateCSRFToken();
     const expiresAt = new Date(Date.now() + SESSION_DURATION);
 
-    const sessionResult = await client.query(`
+    const sessionResult = await client.query(
+      `
       INSERT INTO sessions (user_id, session_token, csrf_token, expires_at, ip_address, user_agent)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
-    `, [user.id, sessionToken, csrfToken, expiresAt, ipAddress, userAgent]);
+    `,
+      [user.id, sessionToken, csrfToken, expiresAt, ipAddress, userAgent]
+    );
 
     const session = sessionResult.rows[0];
 
-    await logAuditEvent(user.id, 'LOGIN_SUCCESS', 'user', user.id, { session_id: session.id }, ipAddress, userAgent);
+    await logAuditEvent(
+      user.id,
+      'LOGIN_SUCCESS',
+      'user',
+      user.id,
+      { session_id: session.id },
+      ipAddress,
+      userAgent
+    );
 
     // Check if password change is required (default password)
-    const requiresPasswordChange = user.username === 'admin' && user.password_changed_at === user.created_at;
+    const requiresPasswordChange =
+      user.username === 'admin' && user.password_changed_at === user.created_at;
 
     return {
       success: true,
@@ -179,35 +260,39 @@ export async function authenticateUser(
         is_active: user.is_active,
         is_super_admin: user.is_super_admin || false,
         last_login_at: user.last_login_at,
-        created_at: user.created_at
+        created_at: user.created_at,
       },
       session,
       message: 'ログインしました。',
-      requiresPasswordChange
+      requiresPasswordChange,
     };
-
   } finally {
     await client.end();
   }
 }
 
-export async function validateSession(sessionToken: string): Promise<{ user: User; session: Session } | null> {
+export async function validateSession(
+  sessionToken: string
+): Promise<{ user: User; session: Session } | null> {
   const client = await getDbClient();
-  
+
   try {
-    const result = await client.query(`
+    const result = await client.query(
+      `
       SELECT s.*, u.id as user_id, u.username, u.email, u.is_active, u.is_super_admin, u.last_login_at, u.created_at
       FROM sessions s
       JOIN users u ON s.user_id = u.id
       WHERE s.session_token = $1 AND s.is_active = true AND s.expires_at > NOW() AND u.is_active = true
-    `, [sessionToken]);
+    `,
+      [sessionToken]
+    );
 
     if (result.rows.length === 0) {
       return null;
     }
 
     const row = result.rows[0];
-    
+
     return {
       user: {
         id: row.user_id,
@@ -216,7 +301,7 @@ export async function validateSession(sessionToken: string): Promise<{ user: Use
         is_active: row.is_active,
         is_super_admin: row.is_super_admin || false,
         last_login_at: row.last_login_at,
-        created_at: row.created_at
+        created_at: row.created_at,
       },
       session: {
         id: row.id,
@@ -226,10 +311,9 @@ export async function validateSession(sessionToken: string): Promise<{ user: Use
         expires_at: row.expires_at,
         ip_address: row.ip_address,
         user_agent: row.user_agent,
-        is_active: row.is_active
-      }
+        is_active: row.is_active,
+      },
     };
-
   } finally {
     await client.end();
   }
@@ -237,41 +321,51 @@ export async function validateSession(sessionToken: string): Promise<{ user: Use
 
 export async function invalidateSession(sessionToken: string, userId?: number): Promise<void> {
   const client = await getDbClient();
-  
+
   try {
-    await client.query(`
+    await client.query(
+      `
       UPDATE sessions 
       SET is_active = false, updated_at = CURRENT_TIMESTAMP
       WHERE session_token = $1
-    `, [sessionToken]);
+    `,
+      [sessionToken]
+    );
 
     if (userId) {
-      await logAuditEvent(userId, 'LOGOUT', 'session', undefined, { session_token: sessionToken.substring(0, 8) + '...' });
+      await logAuditEvent(userId, 'LOGOUT', 'session', undefined, {
+        session_token: sessionToken.substring(0, 8) + '...',
+      });
     }
-
   } finally {
     await client.end();
   }
 }
 
 export async function changePassword(
-  userId: number, 
-  currentPassword: string, 
+  userId: number,
+  currentPassword: string,
   newPassword: string,
   skipCurrentPasswordCheck: boolean = false
 ): Promise<{ success: boolean; message: string }> {
   const client = await getDbClient();
-  
+
   try {
     if (newPassword.length < PASSWORD_MIN_LENGTH) {
-      return { success: false, message: `パスワードは${PASSWORD_MIN_LENGTH}文字以上である必要があります。` };
+      return {
+        success: false,
+        message: `パスワードは${PASSWORD_MIN_LENGTH}文字以上である必要があります。`,
+      };
     }
 
     // Get current user data
-    const userResult = await client.query(`
+    const userResult = await client.query(
+      `
       SELECT password_hash, salt, username
       FROM users WHERE id = $1
-    `, [userId]);
+    `,
+      [userId]
+    );
 
     if (userResult.rows.length === 0) {
       return { success: false, message: 'ユーザーが見つかりません。' };
@@ -281,9 +375,15 @@ export async function changePassword(
 
     // Verify current password (unless skipping for admin reset)
     if (!skipCurrentPasswordCheck) {
-      const isCurrentPasswordValid = await verifyPassword(currentPassword, user.password_hash, user.salt);
+      const isCurrentPasswordValid = await verifyPassword(
+        currentPassword,
+        user.password_hash,
+        user.salt
+      );
       if (!isCurrentPasswordValid) {
-        await logAuditEvent(userId, 'PASSWORD_CHANGE_FAILED', 'user', userId, { reason: 'invalid_current_password' });
+        await logAuditEvent(userId, 'PASSWORD_CHANGE_FAILED', 'user', userId, {
+          reason: 'invalid_current_password',
+        });
         return { success: false, message: '現在のパスワードが間違っています。' };
       }
     }
@@ -292,28 +392,31 @@ export async function changePassword(
     const { hash: newPasswordHash, salt: newSalt } = await hashPassword(newPassword);
 
     // Update password
-    await client.query(`
+    await client.query(
+      `
       UPDATE users 
       SET password_hash = $1, salt = $2, password_changed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
       WHERE id = $3
-    `, [newPasswordHash, newSalt, userId]);
+    `,
+      [newPasswordHash, newSalt, userId]
+    );
 
-    await logAuditEvent(userId, 'PASSWORD_CHANGED', 'user', userId, { forced_change: skipCurrentPasswordCheck });
+    await logAuditEvent(userId, 'PASSWORD_CHANGED', 'user', userId, {
+      forced_change: skipCurrentPasswordCheck,
+    });
 
     return { success: true, message: 'パスワードを変更しました。' };
-
   } finally {
     await client.end();
   }
 }
 
 export function getClientInfo(request: NextRequest): { ipAddress: string; userAgent: string } {
-  const ipAddress = request.ip || 
-                   request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                   request.headers.get('x-real-ip') || 
-                   'unknown';
-  
   const userAgent = request.headers.get('user-agent') || 'unknown';
-  
+  const forwarded = request.headers.get('x-forwarded-for');
+  const ipAddress = forwarded
+    ? forwarded.split(',')[0].trim()
+    : request.headers.get('x-real-ip') || 'unknown';
+
   return { ipAddress, userAgent };
 }
