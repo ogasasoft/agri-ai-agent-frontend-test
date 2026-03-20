@@ -3,16 +3,18 @@ import { Client } from 'pg';
 import { validateAdminSession } from '@/lib/admin-auth';
 import { createErrorResponse } from '@/lib/security';
 import { getDbClient } from '@/lib/db';
+import { getIPAddressFromRequest } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
 // GET - Get user passwords (admin only)
 export async function GET(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     // Session validation
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       return createErrorResponse('認証が必要です', 401);
     }
@@ -53,7 +55,8 @@ export async function GET(request: NextRequest) {
     `);
 
     // Log admin action
-    await client.query(`
+    await client.query(
+      `
       INSERT INTO admin_audit_logs (
         admin_user_id,
         action,
@@ -64,23 +67,24 @@ export async function GET(request: NextRequest) {
         user_agent,
         created_at
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-    `, [
-      adminUser.id,
-      'VIEW_USER_PASSWORDS',
-      'user',
-      null,
-      JSON.stringify({
-        viewed_users_count: result.rows.length
-      }),
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown',
-      request.headers.get('user-agent') || 'unknown'
-    ]);
+    `,
+      [
+        adminUser.id,
+        'VIEW_USER_PASSWORDS',
+        'user',
+        null,
+        JSON.stringify({
+          viewed_users_count: result.rows.length,
+        }),
+        getIPAddressFromRequest(request),
+        request.headers.get('user-agent') || 'unknown',
+      ]
+    );
 
     return NextResponse.json({
       success: true,
-      users: result.rows
+      users: result.rows,
     });
-
   } catch (error) {
     console.error('Get user passwords error:', error);
     return createErrorResponse('サーバーエラーが発生しました', 500);
