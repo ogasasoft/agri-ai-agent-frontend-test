@@ -3,14 +3,11 @@ const nextConfig = {
   // Remove export mode for development with API routes
   // output: 'export',
   images: {
-    unoptimized: true
-  },
-  experimental: {
-    serverComponentsExternalPackages: ['pg', 'bcryptjs']
+    unoptimized: true,
   },
   // Fix React hydration issues
   reactStrictMode: true,
-  swcMinify: true,
+  serverExternalPackages: ['pg', 'bcryptjs'],
   // セキュリティのため、環境変数をクライアントサイドに露出しない
   // env: {
   //   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
@@ -22,28 +19,28 @@ const nextConfig = {
         headers: [
           {
             key: 'X-Frame-Options',
-            value: 'DENY'
+            value: 'DENY',
           },
           {
             key: 'X-Content-Type-Options',
-            value: 'nosniff'
+            value: 'nosniff',
           },
           {
             key: 'X-XSS-Protection',
-            value: '1; mode=block'
+            value: '1; mode=block',
           },
           {
             key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
+            value: 'strict-origin-when-cross-origin',
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
-          }
-        ]
-      }
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
     ];
-  }
-}
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
