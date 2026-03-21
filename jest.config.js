@@ -1,32 +1,33 @@
-const nextJest = require("next/jest");
+const nextJest = require('next/jest');
 
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files
-  dir: "./",
+  dir: './',
 });
 
 // Add any custom config to be passed to Jest
 const customJestConfig = {
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
-  testEnvironment: "node", // Use node environment for API tests
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  testEnvironment: 'node', // Use node environment for API tests
   testPathIgnorePatterns: [
-    "<rootDir>/.next/",
-    "<rootDir>/node_modules/",
-    "<rootDir>/__tests__/setup/",
-    "<rootDir>/__tests__/utils/error-test-helpers.ts",
+    '<rootDir>/.next/',
+    '<rootDir>/node_modules/',
+    '<rootDir>/__tests__/setup/',
+    '<rootDir>/__tests__/utils/error-test-helpers.ts',
   ],
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/src/$1",
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
   collectCoverageFrom: [
-    "src/**/*.{js,jsx,ts,tsx}",
-    "!src/**/*.d.ts",
-    "!src/**/index.{js,ts}",
-    "!src/**/*.stories.{js,jsx,ts,tsx}",
+    'src/**/*.{js,jsx,ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/**/index.{js,ts}',
+    '!src/**/*.stories.{js,jsx,ts,tsx}',
+    '!**/node_modules/**',
   ],
   testMatch: [
-    "<rootDir>/**/__tests__/**/*.{js,jsx,ts,tsx}",
-    "<rootDir>/**/*.(test|spec).{js,jsx,ts,tsx}",
+    '<rootDir>/**/__tests__/**/*.{js,jsx,ts,tsx}',
+    '<rootDir>/**/*.(test|spec).{js,jsx,ts,tsx}',
   ],
 };
 

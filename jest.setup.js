@@ -21,26 +21,32 @@ jest.mock('next/link', () => ({
   default: (props) => <a {...props}>{props.children}</a>,
 }));
 
-// Mock PDF.js
-jest.mock('pdfjs-dist', () => ({
-  getDocument: jest.fn(),
-  version: '2.0.0',
-}));
+// Mock PDF.js (if not already installed)
+try {
+  jest.mock('pdfjs-dist', () => ({
+    getDocument: jest.fn(),
+    version: '2.0.0',
+  }));
+} catch (error) {
+  // pdfjs-dist not in node_modules, skipping mock
+}
 
-// Mock window.matchMedia (useful for responsive design tests)
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
+// Mock window.matchMedia (useful for responsive design tests) - only in jsdom environment
+if (typeof window !== 'undefined' && !window.matchMedia) {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+}
 
 // Suppress console errors in tests (optional)
 const originalError = console.error;
