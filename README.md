@@ -47,7 +47,7 @@
 
 ### 前提条件
 
-- Node.js 18以上（推奨: Node.js 20 LTS）
+- Node.js 20 LTS以上
 - PostgreSQL データベース
 - OpenAI API キー
 

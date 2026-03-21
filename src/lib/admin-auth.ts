@@ -1,4 +1,4 @@
-import { Client } from 'pg';
+// import { Client } from 'pg';
 import { NextRequest } from 'next/server';
 import { validateSession } from './auth';
 import { getDbClient } from '@/lib/db';
@@ -21,13 +21,16 @@ export async function validateAdminSession(sessionToken: string): Promise<AdminU
     }
 
     const client = await getDbClient();
-    
+
     try {
-      const result = await client.query(`
+      const result = await client.query(
+        `
         SELECT id, username, email, role, is_super_admin, is_active, created_at
         FROM users 
         WHERE id = $1 AND is_active = true AND (role = 'admin' OR role = 'super_admin' OR is_super_admin = true)
-      `, [sessionData.user.id]);
+      `,
+        [sessionData.user.id]
+      );
 
       if (result.rows.length === 0) {
         return null;
@@ -53,35 +56,38 @@ export async function logAdminAction(
   userAgent?: string
 ): Promise<void> {
   const client = await getDbClient();
-  
+
   try {
-    await client.query(`
+    await client.query(
+      `
       INSERT INTO admin_audit_logs (
         admin_user_id, action, target_type, target_id, details, ip_address, user_agent
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7)
-    `, [
-      adminUserId,
-      action,
-      targetType || null,
-      targetId || null,
-      JSON.stringify(details || {}),
-      ipAddress || null,
-      userAgent || null
-    ]);
+    `,
+      [
+        adminUserId,
+        action,
+        targetType || null,
+        targetId || null,
+        JSON.stringify(details || {}),
+        ipAddress || null,
+        userAgent || null,
+      ]
+    );
   } finally {
     await client.end();
   }
 }
 
 export function getClientInfo(request: NextRequest): { ipAddress: string; userAgent: string } {
-  const ipAddress = request.ip || 
-                   request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                   request.headers.get('x-real-ip') || 
-                   'unknown';
-  
+  const ipAddress =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    'unknown';
+
   const userAgent = request.headers.get('user-agent') || 'unknown';
-  
+
   return { ipAddress, userAgent };
 }
 
