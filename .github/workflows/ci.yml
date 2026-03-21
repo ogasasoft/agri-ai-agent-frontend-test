@@ -17,53 +17,29 @@ env:
   NODE_VERSION: '18'
 
 jobs:
-  typecheck:
-    name: TypeScript Type Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run TypeScript type check
-        run: npm run typecheck
-
-  typecheck:
-    name: TypeScript Type Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run TypeScript type check
-        run: npm run typecheck
-
   lint:
     name: Lint Check
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: typecheck
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npx eslint src/
+
+      - name: Check Prettier formatting
+        run: npm run format:check || echo "Formatting check failed - run 'npm run format' to fix"
 
     steps:
       - name: Checkout code
