@@ -7,12 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "vercel-build": "next build",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:ci": "jest --ci --maxWorkers=2 --coverage --coveragePathIgnorePatterns=['<rootDir>/node_modules/'] --coverageReporters='text-summary' --coverageReporters='lcov' --coverageReporters='html'",
     "test:coverage": "jest --coverage",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
+    "test:watch:coverage": "jest --watch --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.0",
