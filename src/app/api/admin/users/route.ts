@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
         email: newUser.email,
         is_admin: newUser.is_admin
       }),
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+      request.headers.get("x-forwarded-for") || "unknown" || request.headers.get('x-forwarded-for') || 'unknown',
       request.headers.get('user-agent') || 'unknown'
     ]);
 

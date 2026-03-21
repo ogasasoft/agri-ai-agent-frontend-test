@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         totalCustomers: parseInt(customersResult.rows[0].count),
         activeIntegrations: parseInt(integrationsResult.rows[0].count),
         todayOrders: parseInt(todayOrdersResult.rows[0].count),
-        weeklyGrowth: 0, // NOTE: Weekly growth calculation not yet implemented
+        weeklyGrowth: 0, // TODO: Implement weekly growth calculation (see ROADMAP.md)
         systemHealth: 'healthy',
         lastBackup: new Date().toISOString()
       };

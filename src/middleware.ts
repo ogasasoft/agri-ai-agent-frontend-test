@@ -84,7 +84,7 @@ export async function middleware(request: NextRequest) {
   // レート制限チェック（APIエンドポイントのみ）
   // 開発環境では完全に無効化
   if (pathname.startsWith('/api/') && process.env.NODE_ENV !== 'development') {
-    const ip = request.ip || 
+    const ip = request.headers.get("x-forwarded-for") || "unknown" || 
               request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
               request.headers.get('x-real-ip') ||
               'localhost-dev';

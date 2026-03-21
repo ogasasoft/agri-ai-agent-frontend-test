@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
         customer_email: customerEmail,
         initial_password_set: true
       }),
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+      request.headers.get("x-forwarded-for") || "unknown" || request.headers.get('x-forwarded-for') || 'unknown',
       request.headers.get('user-agent') || 'unknown'
     ]);
 

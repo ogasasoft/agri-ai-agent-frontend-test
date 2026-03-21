@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
       JSON.stringify({
         viewed_users_count: result.rows.length
       }),
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+      request.headers.get("x-forwarded-for") || "unknown" || request.headers.get('x-forwarded-for') || 'unknown',
       request.headers.get('user-agent') || 'unknown'
     ]);
 

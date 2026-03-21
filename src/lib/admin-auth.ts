@@ -75,7 +75,7 @@ export async function logAdminAction(
 }
 
 export function getClientInfo(request: NextRequest): { ipAddress: string; userAgent: string } {
-  const ipAddress = request.ip || 
+  const ipAddress = request.headers.get("x-forwarded-for") || "unknown" || 
                    request.headers.get('x-forwarded-for')?.split(',')[0] || 
                    request.headers.get('x-real-ip') || 
                    'unknown';

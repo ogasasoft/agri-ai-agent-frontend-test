@@ -11,8 +11,8 @@ const YAMATO_CONFIG = {
 export async function POST(request: NextRequest) {
   try {
     const body: YamatoShippingRequest = await request.json();
-    
-    // NOTE: Currently using mock API - replace with actual Yamato API when credentials are available
+
+    // TODO: Replace with actual Yamato API integration (see ROADMAP.md)
     // Mock implementation for development/testing purposes
     const mockResponse = await generateMockYamatoResponse(body);
     
