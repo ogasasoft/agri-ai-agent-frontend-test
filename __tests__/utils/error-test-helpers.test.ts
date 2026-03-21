@@ -421,16 +421,14 @@ describe('エラーハンドリングヘルパー', () => {
 
     it('非同期関数の実行時間を測定する', async () => {
       const testFunction = jest.fn().mockImplementation(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10))
+        await new Promise(resolve => setTimeout(resolve, 15))
         return { success: true }
       })
 
-      const start = performance.now()
-      await measureErrorHandlingPerformance(testFunction)
-      const end = performance.now()
+      const result = await measureErrorHandlingPerformance(testFunction)
 
-      const duration = end - start
-      expect(duration).toBeGreaterThanOrEqual(10)
+      // 15msを設定しているので、必ず10ms以上になるはず
+      expect(result.duration).toBeGreaterThanOrEqual(10)
     })
   })
 })
