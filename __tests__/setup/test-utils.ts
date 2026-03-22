@@ -41,12 +41,66 @@ export class MockDbClient {
     if (text.includes('SELECT') && text.includes('users')) {
       return { rows: this.mockData.users || [] }
     }
+
+    // Categories queries - must be before orders since GET categories has a subquery mentioning orders
+    if (text.includes('categories')) {
+      // Get max display_order for new category
+      if (text.includes('COALESCE') && text.includes('display_order')) {
+        return { rows: [{ next_order: (this.mockData.categories?.length || 0) + 1 }] }
+      }
+      // Order count check for DELETE (FROM orders without FROM categories as outer)
+      if (text.includes('COUNT(*)') && text.includes('category_id') && !text.includes('FROM categories')) {
+        const orders = this.mockData.orders || []
+        const categoryId = params?.[0]
+        const count = orders.filter((o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)).length
+        return { rows: [{ count: count.toString() }] }
+      }
+      if (text.includes('SELECT') && text.includes('FROM categories')) {
+        const cats = this.mockData.categories || []
+        // Duplicate name check: WHERE name = $1 AND ... user_id = $2
+        if (params && text.includes('name = $1') && text.includes('user_id = $2')) {
+          return { rows: cats.filter((c: any) => c.name === params[0] && c.user_id === params[1]) }
+        }
+        // Name conflict check: WHERE name = $1 AND id != $2
+        if (params && text.includes('name = $1') && text.includes('id !=')) {
+          return { rows: cats.filter((c: any) => c.name === params[0] && c.id !== params[1] && c.id !== Number(params[1])) }
+        }
+        // Exists by ID: WHERE id = $1 (exclude user_id = $1 matches)
+        if (params && text.includes('id = $1') && !text.includes('user_id = $1')) {
+          return { rows: cats.filter((c: any) => c.id === params[0] || c.id === Number(params[0])) }
+        }
+        return { rows: cats }
+      }
+      if (text.includes('INSERT INTO categories')) {
+        const [name, description, color, icon, display_order, user_id] = params || []
+        return { rows: [{ id: 1, name, description: description || '', color: color || 'gray', icon: icon || 'Package', display_order: display_order || 1, is_active: true, user_id: user_id || 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }] }
+      }
+      // UPDATE categories (data fields update)
+      if (text.includes('UPDATE categories') && text.includes('name = $1')) {
+        const [name, description, color, icon, display_order] = params || []
+        const cats = this.mockData.categories || []
+        const existing = cats.length > 0 ? cats[0] : {}
+        return { rows: [{ ...existing, name, description, color, icon, display_order, updated_at: new Date().toISOString() }] }
+      }
+      // Soft delete or other UPDATE
+      if (text.includes('UPDATE categories') || text.includes('DELETE FROM categories')) {
+        return { rows: [] }
+      }
+    }
+
+    // Count orders by category_id (DELETE category check - query uses FROM orders not FROM categories)
+    if (text.includes('COUNT(*)') && text.includes('category_id') && !text.includes('FROM categories')) {
+      const orders = this.mockData.orders || []
+      const categoryId = params?.[0]
+      const count = orders.filter((o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)).length
+      return { rows: [{ count: count.toString() }] }
+    }
     if (text.includes('SELECT') && text.includes('orders')) {
       let orders = this.mockData.orders || []
       // Filter by order IDs if specified in query
       if (params && params.length > 0 && text.includes('IN')) {
         const orderIds = params.slice(1) // Skip user_id parameter
-        orders = orders.filter(order => orderIds.includes(order.id))
+        orders = orders.filter((order: any) => orderIds.includes(order.id))
       }
       return { rows: orders }
     }
@@ -104,11 +158,56 @@ export class MockDbClient {
       if (text.includes('SELECT') && text.includes('users')) {
         return { rows: this.mockData.users || [] }
       }
+      // Categories queries - must be before orders
+      if (text.includes('categories')) {
+        if (text.includes('COALESCE') && text.includes('display_order')) {
+          return { rows: [{ next_order: (this.mockData.categories?.length || 0) + 1 }] }
+        }
+        if (text.includes('COUNT(*)') && text.includes('category_id') && !text.includes('FROM categories')) {
+          const orders = this.mockData.orders || []
+          const categoryId = params?.[0]
+          const count = orders.filter((o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)).length
+          return { rows: [{ count: count.toString() }] }
+        }
+        if (text.includes('SELECT') && text.includes('FROM categories')) {
+          const cats = this.mockData.categories || []
+          if (params && text.includes('name = $1') && text.includes('user_id = $2')) {
+            return { rows: cats.filter((c: any) => c.name === params[0] && c.user_id === params[1]) }
+          }
+          if (params && text.includes('name = $1') && text.includes('id !=')) {
+            return { rows: cats.filter((c: any) => c.name === params[0] && c.id !== params[1] && c.id !== Number(params[1])) }
+          }
+          if (params && text.includes('id = $1') && !text.includes('user_id = $1')) {
+            return { rows: cats.filter((c: any) => c.id === params[0] || c.id === Number(params[0])) }
+          }
+          return { rows: cats }
+        }
+        if (text.includes('INSERT INTO categories')) {
+          const [name, description, color, icon, display_order, user_id] = params || []
+          return { rows: [{ id: 1, name, description: description || '', color: color || 'gray', icon: icon || 'Package', display_order: display_order || 1, is_active: true, user_id: user_id || 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }] }
+        }
+        if (text.includes('UPDATE categories') && text.includes('name = $1')) {
+          const [name, description, color, icon, display_order] = params || []
+          const cats = this.mockData.categories || []
+          const existing = cats.length > 0 ? cats[0] : {}
+          return { rows: [{ ...existing, name, description, color, icon, display_order, updated_at: new Date().toISOString() }] }
+        }
+        if (text.includes('UPDATE categories') || text.includes('DELETE FROM categories')) {
+          return { rows: [] }
+        }
+      }
+      // Count orders by category_id (DELETE category check)
+      if (text.includes('COUNT(*)') && text.includes('category_id') && !text.includes('FROM categories')) {
+        const orders = this.mockData.orders || []
+        const categoryId = params?.[0]
+        const count = orders.filter((o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)).length
+        return { rows: [{ count: count.toString() }] }
+      }
       if (text.includes('SELECT') && text.includes('orders')) {
         let orders = this.mockData.orders || []
         if (params && params.length > 0 && text.includes('IN')) {
           const orderIds = params.slice(1)
-          orders = orders.filter(order => orderIds.includes(order.id))
+          orders = orders.filter((order: any) => orderIds.includes(order.id))
         }
         return { rows: orders }
       }
@@ -190,6 +289,20 @@ export const createMockSession = (user: any = null) => ({
     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     is_active: true
   }
+})
+
+export const createMockCategory = (overrides = {}) => ({
+  id: 1,
+  name: '野菜',
+  description: '新鮮な野菜',
+  color: 'green',
+  icon: 'Carrot',
+  display_order: 1,
+  is_active: true,
+  user_id: 1,
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
+  ...overrides
 })
 
 export const createMockOrder = (overrides = {}) => ({
