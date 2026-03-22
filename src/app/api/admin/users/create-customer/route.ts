@@ -120,7 +120,9 @@ export async function POST(request: NextRequest) {
           customer_email: customerEmail,
           initial_password_set: true,
         }),
-        (request as any).ip || request.headers.get('x-forwarded-for') || 'unknown',
+        request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+          request.headers.get('x-real-ip') ||
+          'unknown',
         request.headers.get('user-agent') || 'unknown',
       ]
     );
