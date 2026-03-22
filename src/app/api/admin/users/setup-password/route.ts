@@ -9,10 +9,11 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     // Session validation
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       return createErrorResponse('認証が必要です', 401);
     }
@@ -55,22 +56,29 @@ export async function POST(request: NextRequest) {
     );
 
     if (existingUser.rows.length === 0) {
-      return createErrorResponse('お客様のメールアドレスが見つかりません。先にお客様IDを作成してください。', 404);
+      return createErrorResponse(
+        'お客様のメールアドレスが見つかりません。先にお客様IDを作成してください。',
+        404
+      );
     }
 
     const user = existingUser.rows[0];
-    
+
     // Verify current password is "1995"
     const currentPasswordValid = await bcrypt.compare('1995', user.password_hash);
     if (!currentPasswordValid) {
-      return createErrorResponse('初期パスワード「1995」が正しくありません。既にパスワードが変更されている可能性があります。', 400);
+      return createErrorResponse(
+        '初期パスワード「1995」が正しくありません。既にパスワードが変更されている可能性があります。',
+        400
+      );
     }
 
     // Update password
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    await client.query(`
+    await client.query(
+      `
       UPDATE users SET 
         password_hash = $1,
         failed_login_attempts = 0,
@@ -79,20 +87,26 @@ export async function POST(request: NextRequest) {
         requires_password_change = false,
         is_active = true
       WHERE id = $2
-    `, [hashedPassword, user.id]);
+    `,
+      [hashedPassword, user.id]
+    );
 
     const userId = user.id;
     const userEmail = user.email;
 
     // Update plain text password for admin access
-    await client.query(`
+    await client.query(
+      `
       UPDATE user_passwords 
       SET plain_password = $1, updated_at = NOW()
       WHERE user_id = $2
-    `, [password, userId]);
+    `,
+      [password, userId]
+    );
 
     // Log admin action
-    await client.query(`
+    await client.query(
+      `
       INSERT INTO admin_audit_logs (
         admin_user_id,
         action,
@@ -103,18 +117,20 @@ export async function POST(request: NextRequest) {
         user_agent,
         created_at
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-    `, [
-      adminUser.id,
-      'SETUP_CUSTOMER_PASSWORD',
-      'user',
-      userId,
-      JSON.stringify({
-        customer_email: customerEmail,
-        action: 'password_updated'
-      }),
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown',
-      request.headers.get('user-agent') || 'unknown'
-    ]);
+    `,
+      [
+        adminUser.id,
+        'SETUP_CUSTOMER_PASSWORD',
+        'user',
+        userId,
+        JSON.stringify({
+          customer_email: customerEmail,
+          action: 'password_updated',
+        }),
+        (request as any).ip || request.headers.get('x-forwarded-for') || 'unknown',
+        request.headers.get('user-agent') || 'unknown',
+      ]
+    );
 
     return NextResponse.json({
       success: true,
@@ -122,10 +138,9 @@ export async function POST(request: NextRequest) {
       user: {
         id: userId,
         username: customerEmail,
-        email: userEmail
-      }
+        email: userEmail,
+      },
     });
-
   } catch (error) {
     console.error('Setup customer password error:', error);
     return createErrorResponse('パスワード設定に失敗しました', 500);
