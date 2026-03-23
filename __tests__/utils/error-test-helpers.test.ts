@@ -421,7 +421,7 @@ describe('エラーハンドリングヘルパー', () => {
 
     it('非同期関数の実行時間を測定する', async () => {
       const testFunction = jest.fn().mockImplementation(async () => {
-        await new Promise(resolve => setTimeout(resolve, 10))
+        await new Promise(resolve => setTimeout(resolve, 50))
         return { success: true }
       })
 
