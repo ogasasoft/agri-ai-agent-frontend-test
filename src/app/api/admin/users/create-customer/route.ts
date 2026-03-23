@@ -9,10 +9,11 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     // Session validation
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       return createErrorResponse('認証が必要です', 401);
     }
@@ -60,7 +61,8 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(initialPassword, saltRounds);
 
     // Create customer user with initial password "1995"
-    const result = await client.query(`
+    const result = await client.query(
+      `
       INSERT INTO users (
         username, 
         email, 
@@ -72,26 +74,32 @@ export async function POST(request: NextRequest) {
         created_at
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
       RETURNING id, username, email, created_at
-    `, [
-      customerEmail, // Use email as username too
-      customerEmail, // Email field
-      hashedPassword, 
-      false, 
-      false, 
-      true,
-      true // Requires password change on first login
-    ]);
+    `,
+      [
+        customerEmail, // Use email as username too
+        customerEmail, // Email field
+        hashedPassword,
+        false,
+        false,
+        true,
+        true, // Requires password change on first login
+      ]
+    );
 
     const newUser = result.rows[0];
 
     // Store plain text password for admin access
-    await client.query(`
+    await client.query(
+      `
       INSERT INTO user_passwords (user_id, plain_password)
       VALUES ($1, $2)
-    `, [newUser.id, initialPassword]);
+    `,
+      [newUser.id, initialPassword]
+    );
 
     // Log admin action
-    await client.query(`
+    await client.query(
+      `
       INSERT INTO admin_audit_logs (
         admin_user_id,
         action,
@@ -102,18 +110,22 @@ export async function POST(request: NextRequest) {
         user_agent,
         created_at
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-    `, [
-      adminUser.id,
-      'CREATE_CUSTOMER_ID',
-      'user',
-      newUser.id,
-      JSON.stringify({
-        customer_email: customerEmail,
-        initial_password_set: true
-      }),
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown',
-      request.headers.get('user-agent') || 'unknown'
-    ]);
+    `,
+      [
+        adminUser.id,
+        'CREATE_CUSTOMER_ID',
+        'user',
+        newUser.id,
+        JSON.stringify({
+          customer_email: customerEmail,
+          initial_password_set: true,
+        }),
+        request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+          request.headers.get('x-real-ip') ||
+          'unknown',
+        request.headers.get('user-agent') || 'unknown',
+      ]
+    );
 
     return NextResponse.json({
       success: true,
@@ -123,10 +135,9 @@ export async function POST(request: NextRequest) {
         username: newUser.username,
         email: newUser.email,
         created_at: newUser.created_at,
-        initial_password: initialPassword
-      }
+        initial_password: initialPassword,
+      },
     });
-
   } catch (error) {
     console.error('Create customer ID error:', error);
     return createErrorResponse('お客様ID作成に失敗しました', 500);

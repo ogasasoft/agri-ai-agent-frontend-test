@@ -9,10 +9,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     // Session validation
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       return createErrorResponse('認証が必要です', 401);
     }
@@ -51,9 +52,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      users: result.rows
+      users: result.rows,
     });
-
   } catch (error) {
     console.error('Get users error:', error);
     return createErrorResponse('サーバーエラーが発生しました', 500);
@@ -66,10 +66,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     // Session validation
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       return createErrorResponse('認証が必要です', 401);
     }
@@ -121,7 +122,8 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create user
-    const result = await client.query(`
+    const result = await client.query(
+      `
       INSERT INTO users (
         username, 
         email, 
@@ -132,18 +134,24 @@ export async function POST(request: NextRequest) {
         created_at
       ) VALUES ($1, $2, $3, $4, $5, $6, NOW())
       RETURNING id, username, email, created_at, is_admin, is_super_admin
-    `, [username, email, hashedPassword, isAdmin, false, true]);
+    `,
+      [username, email, hashedPassword, isAdmin, false, true]
+    );
 
     const newUser = result.rows[0];
 
     // Store plain text password for admin access
-    await client.query(`
+    await client.query(
+      `
       INSERT INTO user_passwords (user_id, plain_password)
       VALUES ($1, $2)
-    `, [newUser.id, password]);
+    `,
+      [newUser.id, password]
+    );
 
     // Log admin action
-    await client.query(`
+    await client.query(
+      `
       INSERT INTO admin_audit_logs (
         admin_user_id,
         action,
@@ -154,19 +162,23 @@ export async function POST(request: NextRequest) {
         user_agent,
         created_at
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-    `, [
-      adminUser.id,
-      'CREATE_USER',
-      'user',
-      newUser.id,
-      JSON.stringify({
-        username: newUser.username,
-        email: newUser.email,
-        is_admin: newUser.is_admin
-      }),
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown',
-      request.headers.get('user-agent') || 'unknown'
-    ]);
+    `,
+      [
+        adminUser.id,
+        'CREATE_USER',
+        'user',
+        newUser.id,
+        JSON.stringify({
+          username: newUser.username,
+          email: newUser.email,
+          is_admin: newUser.is_admin,
+        }),
+        request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+          request.headers.get('x-real-ip') ||
+          'unknown',
+        request.headers.get('user-agent') || 'unknown',
+      ]
+    );
 
     return NextResponse.json({
       success: true,
@@ -177,10 +189,9 @@ export async function POST(request: NextRequest) {
         email: newUser.email,
         created_at: newUser.created_at,
         is_admin: newUser.is_admin,
-        is_super_admin: newUser.is_super_admin
-      }
+        is_super_admin: newUser.is_super_admin,
+      },
     });
-
   } catch (error) {
     console.error('Create user error:', error);
     return createErrorResponse('ユーザー作成に失敗しました', 500);
