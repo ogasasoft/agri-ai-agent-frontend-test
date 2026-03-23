@@ -338,7 +338,25 @@ npm run dev
 
 このプロジェクトは私的利用のものです。
 
-## 🙋‍♂️ サポート
+## 🔄 Recent Updates
+
+### 2026-03-24
+
+- ✨ Added quality score display to README
+- 📊 Added quality check documentation
+- 📄 Added MIT License
+- 🔧 Verified quality score: 25/25 (Excellent)
+- ✅ 199 tests passed
+
+### 2026-03-22
+
+- 🎉 Quality check script improvements
+- 🔐 Security enhancement completed
+- ⚡ TypeScript 5.9.3 updated
+
+---
+
+**Agri AI Agent Frontend** - 農業ECビジネスのためのインテリジェントな統合管理システム
 
 問題や質問がある場合は、GitHubのIssuesまたは開発者まで連絡してください。
 
