@@ -148,8 +148,209 @@ jobs:
       - name: Run npm audit
         run: npm audit --audit-level=moderate || echo "Security vulnerabilities found. Review manually."
 
-      - name: Run nsp audit (optional, requires nsp package)
+      - name: Run nsp audit (optional)
         run: nsp audit || echo "nsp not installed, skipping"
+
+      - name: Check for known security patterns
+        run: |
+          echo "🔍 Checking for common security patterns..."
+          # Check for hardcoded secrets
+          if grep -r "API_KEY\s*=\s*['\"][^'\"]+['\"]" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" .; then
+            echo "⚠️  WARNING: Potential hardcoded API keys found"
+          fi
+
+          # Check for SQL injection patterns
+          if grep -r "concat.*\$" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" src/ | grep -v "node_modules"; then
+            echo "⚠️  WARNING: Potential SQL injection patterns detected"
+          fi
+
+          # Check for environment variable usage in source code
+          if grep -r "process\.env" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" . | grep -v "node_modules" | grep -v ".env."; then
+            echo "✅ Environment variables used in production code"
+          fi
+
+  error-handling-check:
+    name: Error Handling Compliance Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [test]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check error handling implementation
+        run: ./scripts/check-error-handling.sh
+
+      - name: Verify ERROR_HANDLING_RULES.md exists
+        run: |
+          if [ ! -f "ERROR_HANDLING_RULES.md" ]; then
+            echo "❌ ERROR: ERROR_HANDLING_RULES.md is missing"
+            exit 1
+          fi
+          echo "✅ ERROR_HANDLING_RULES.md exists"
+
+      - name: Verify CLAUDE.md has error handling documentation
+        run: |
+          if grep -q "構造化エラー診断システム" CLAUDE.md; then
+            echo "✅ CLAUDE.md has error handling documentation"
+          else
+            echo "⚠️  WARNING: CLAUDE.md missing error handling documentation"
+          fi
+
+  db-migration-check:
+    name: Database Migration Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [test]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify migration files exist
+        run: |
+          echo "📋 Checking database migration files..."
+
+          # Check for required migration endpoints
+          MIGRATIONS=(
+            "api/migrate-auth"
+            "api/migrate-security-enhancements"
+            "api/migrate-admin-system"
+          )
+
+          for migration in "${MIGRATIONS[@]}"; do
+            if [ -f "src/app/api/$migration/route.ts" ]; then
+              echo "✅ Migration file found: $migration"
+            else
+              echo "❌ ERROR: Migration file missing: $migration"
+              exit 1
+            fi
+          done
+
+          # Check for migration documentation
+          if grep -q "api/migrate-auth" README.md; then
+            echo "✅ Migration documentation in README"
+          else
+            echo "⚠️  WARNING: Migration documentation might be missing in README"
+          fi
+
+      - name: Verify migration structure
+        run: |
+          echo "🔍 Verifying migration file structure..."
+
+          # Check migration files have required functions
+          MIGRATIONS=(
+            "src/app/api/migrate-auth/route.ts"
+            "src/app/api/migrate-security-enhancements/route.ts"
+            "src/app/api/migrate-admin-system/route.ts"
+          )
+
+          for migration in "${MIGRATIONS[@]}"; do
+            echo "Checking: $migration"
+
+            # Check for basic structure
+            if [ ! -f "$migration" ]; then
+              echo "❌ File not found: $migration"
+              continue
+            fi
+
+            # Check for required functions
+            if ! grep -q "export.*GET" "$migration" && ! grep -q "export.*POST" "$migration"; then
+              echo "❌ No export found in $migration"
+              exit 1
+            fi
+
+            echo "✅ Structure looks good"
+          done
+
+      - name: Verify migration endpoint accessibility
+        run: |
+          echo "🌐 Checking migration endpoint accessibility..."
+
+          # Verify migrations are documented as endpoints
+          if grep -q "localhost:3000/api/migrate-auth" README.md || \
+             grep -q "/api/migrate-auth" CLAUDE.md || \
+             grep -q "api/migrate-auth" CONTRIBUTING.md; then
+            echo "✅ Migration endpoints documented"
+          else
+            echo "⚠️  WARNING: Migration endpoints might not be well documented"
+          fi
+
+      - name: Verify environment variables for migrations
+        run: |
+          echo "🔑 Checking environment variables for migrations..."
+
+          # Check .env.example has required variables
+          if [ -f ".env.example" ]; then
+            if grep -q "DATABASE_URL" .env.example; then
+              echo "✅ DATABASE_URL in .env.example"
+            else
+              echo "❌ ERROR: DATABASE_URL not in .env.example"
+              exit 1
+            fi
+
+            if grep -q "OPENAI_API_KEY" .env.example; then
+              echo "✅ OPENAI_API_KEY in .env.example"
+            else
+              echo "❌ ERROR: OPENAI_API_KEY not in .env.example"
+              exit 1
+            fi
+          else
+            echo "⚠️  WARNING: .env.example not found"
+          fi
+
+  quality-check:
+    name: Quality Checklist Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run quality checklist
+        run: npm run quality
+
+      - name: Verify quality score
+        run: |
+          SCORE=$(npm run quality 2>&1 | grep "Quality Score" | grep -oP '\d+/\d+')
+          echo "📊 Current Quality Score: $SCORE"
+
+          if [ "$SCORE" != "25/25" ]; then
+            echo "⚠️  WARNING: Quality score is not 25/25"
+            echo "   Please review the quality checklist in QUALITY_CHECKLIST.md"
+          else
+            echo "✅ Quality score is 25/25 (Excellent)"
+          fi
 
   # Deploy job (uncomment and configure for deployment)
   # deploy:
