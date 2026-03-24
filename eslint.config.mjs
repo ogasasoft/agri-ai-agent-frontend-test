@@ -1,17 +1,13 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import nextConfig from "eslint-config-next/core-web-vitals";
 
 export default [
-  ...compat.extends("next/core-web-vitals"),
+  ...nextConfig,
   {
+    settings: {
+      react: {
+        version: "19.0.0",
+      },
+    },
     rules: {
       "@next/next/no-html-link-for-pages": "off",
     },
