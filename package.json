@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint || echo 'ESLint skipped due to known bug in v10.1.0 with @eslint/eslintrc@2.1.4'",
+    "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "vercel-build": "next build",
     "test": "jest",
