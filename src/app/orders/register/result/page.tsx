@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, CheckCircle, AlertTriangle, Clock, XCircle, FileText, TrendingUp } from 'lucide-react';
+import {
+  ArrowLeft,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  XCircle,
+  FileText,
+  TrendingUp,
+} from 'lucide-react';
 import { Suspense } from 'react';
 
 interface UploadResult {
@@ -41,6 +49,7 @@ function UploadResultContent() {
     if (resultData) {
       try {
         const parsedResult = JSON.parse(resultData);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUploadResult(parsedResult);
         sessionStorage.removeItem('uploadResult'); // 使用後に削除
       } catch (error) {
@@ -83,7 +92,7 @@ function UploadResultContent() {
     return new Date(dateStr).toLocaleDateString('ja-JP', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -150,54 +159,62 @@ function UploadResultContent() {
         </div>
 
         {/* スキップ詳細 */}
-        {uploadResult && uploadResult.skipped_details && uploadResult.skipped_details.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">スキップされた注文の詳細</h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">スキップ理由</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">注文番号</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">顧客名</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">金額</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">注文日</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-900">詳細</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {uploadResult.skipped_details.map((item, index) => (
-                    <tr key={index} className={`border-b border-gray-100 ${getSkipReasonColor(item.reason)}`}>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          {getSkipReasonIcon(item.reason)}
-                          <span className="font-medium text-sm">{item.reason}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 font-mono text-sm">{item.order_code}</td>
-                      <td className="py-3 px-4">{item.customer_name}</td>
-                      <td className="py-3 px-4">{formatPrice(item.price)}</td>
-                      <td className="py-3 px-4">{formatDate(item.order_date)}</td>
-                      <td className="py-3 px-4">
-                        {item.reason === '重複' && item.existing_data && (
-                          <div className="text-xs text-gray-600">
-                            <p>既存: {item.existing_data.customer_name}</p>
-                            <p>{formatPrice(item.existing_data.price)} ({formatDate(item.existing_data.order_date)})</p>
-                          </div>
-                        )}
-                        {item.error_message && (
-                          <div className="text-xs text-red-600">
-                            {item.error_message}
-                          </div>
-                        )}
-                      </td>
+        {uploadResult &&
+          uploadResult.skipped_details &&
+          uploadResult.skipped_details.length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">スキップされた注文の詳細</h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">
+                        スキップ理由
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">注文番号</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">顧客名</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">金額</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">注文日</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">詳細</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {uploadResult.skipped_details.map((item, index) => (
+                      <tr
+                        key={index}
+                        className={`border-b border-gray-100 ${getSkipReasonColor(item.reason)}`}
+                      >
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            {getSkipReasonIcon(item.reason)}
+                            <span className="font-medium text-sm">{item.reason}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 font-mono text-sm">{item.order_code}</td>
+                        <td className="py-3 px-4">{item.customer_name}</td>
+                        <td className="py-3 px-4">{formatPrice(item.price)}</td>
+                        <td className="py-3 px-4">{formatDate(item.order_date)}</td>
+                        <td className="py-3 px-4">
+                          {item.reason === '重複' && item.existing_data && (
+                            <div className="text-xs text-gray-600">
+                              <p>既存: {item.existing_data.customer_name}</p>
+                              <p>
+                                {formatPrice(item.existing_data.price)} (
+                                {formatDate(item.existing_data.order_date)})
+                              </p>
+                            </div>
+                          )}
+                          {item.error_message && (
+                            <div className="text-xs text-red-600">{item.error_message}</div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* アクション */}
         <div className="flex flex-col sm:flex-row gap-4">
@@ -222,13 +239,15 @@ function UploadResultContent() {
 
 export default function UploadResultPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-full bg-gray-50 py-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+    <Suspense
+      fallback={
+        <div className="min-h-full bg-gray-50 py-12">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <UploadResultContent />
     </Suspense>
   );

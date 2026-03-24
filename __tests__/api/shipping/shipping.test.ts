@@ -1,3 +1,4 @@
+// @ts-nocheck - Jest doesn't transform TypeScript files
 import { GET, POST } from '@/app/api/shipping/route'
 import { createMockRequest, MockDbClient, createMockOrder, resetTestDatabase } from '../../setup/test-utils'
 
