@@ -359,7 +359,3 @@ npm run dev
 **Agri AI Agent Frontend** - 農業ECビジネスのためのインテリジェントな統合管理システム
 
 問題や質問がある場合は、GitHubのIssuesまたは開発者まで連絡してください。
-
----
-
-**Agri AI Agent Frontend** - 農業ECビジネスのためのインテリジェントな統合管理システム
