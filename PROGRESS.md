@@ -19,27 +19,34 @@
 - [x] テストの再確認（463 passed）
 - [x] lint, build, test の全チェック
 - [x] プロジェクト品質スコア確認（25/25 - Excellent）
+- [x] bcryptjs のアップデート（^2.4.6 → ^3.0.3）
+- [x] @types/bcryptjs のアップデート（^2.4.6 → ^3.0.0）
+- [x] deprecated @types/bcryptjs スタブパッケージの削除（bcryptjs が独自の型定義を提供）
+- [x] build 成功確認
+- [x] テスト実行確認（463 passed）
+- [x] lint エラーなし確認
+- [x] git commit & push
 
 ## 改善内容
 
-### Jest 設定の検証と動作確認
+### bcryptjs のアップデート
 
 **目的**:
 
-- ESLint v10 アップグレードに伴う Jest 設定の検証
-- 全テストの動作確認
+- パスワードハッシュライブラリを最新バージョンにアップデート
+- セキュリティ改善
 
 **変更内容**:
 
-- `jest.config.mjs` の確認
-- `jest.setup.js` の存在確認と動作検証
+- `bcryptjs` を ^2.4.6 から ^3.0.3 に更新
+- `@types/bcryptjs` を ^2.4.6 から ^3.0.0 に更新
+- `@types/bcryptjs` 3.0.0 はスタブ定義であり、bcryptjs は独自の型定義を提供するため削除
 
 **結果**:
 
 - テスト: 463 passed, 0 failed ✅
-- lint: エラーなし ✅
 - build: 成功 ✅
-- 品質スコア: 25/25 (Excellent) ✅
+- lint: エラーなし ✅
 
 ### テスト結果
 
@@ -53,12 +60,12 @@ npm test
 
 ```bash
 npm run build
-# Result: ✅ Compiled successfully
+# Result: ✅ Compiled successfully in 1165ms
 # Next.js 16.2.1 (Turbopack)
 # 0 TypeScript errors
 ```
 
-### 質品質スコア
+### 品質スコア
 
 ```
 🔥 CRITICAL LEVEL (16 points)
@@ -77,5 +84,4 @@ npm run build
 
 ## 次にやること
 
-プロジェクトは本番デプロイ可能なエンタープライズ品質を維持しています。
-他のプロジェクトの改善を確認します。
+bcryptjs のアップデートは完了しました。swift-template-gallery-main でも同様に依存関係を確認します。
