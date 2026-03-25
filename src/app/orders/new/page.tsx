@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
@@ -16,11 +16,15 @@ const orderSchema = z.object({
   delivery_date: z.string().optional(),
   status: z.enum(['pending', 'processing', 'shipped', 'delivered']),
   memo: z.string().optional(),
-  items: z.array(z.object({
-    product_name: z.string().min(1, '商品名は必須です'),
-    quantity: z.number().min(1, '数量は1以上である必要があります'),
-    unit_price: z.number().min(0, '単価は0以上である必要があります'),
-  })).min(1, '少なくとも1つの商品が必要です'),
+  items: z
+    .array(
+      z.object({
+        product_name: z.string().min(1, '商品名は必須です'),
+        quantity: z.number().min(1, '数量は1以上である必要があります'),
+        unit_price: z.number().min(0, '単価は0以上である必要があります'),
+      })
+    )
+    .min(1, '少なくとも1つの商品が必要です'),
 });
 
 type OrderFormData = z.infer<typeof orderSchema>;
@@ -33,26 +37,25 @@ export default function NewOrderPage() {
     register,
     control,
     handleSubmit,
-    watch,
-    formState: { errors }
+    formState: { errors },
   } = useForm<OrderFormData>({
     resolver: zodResolver(orderSchema),
     defaultValues: {
       status: 'pending',
       order_date: new Date().toISOString().split('T')[0],
-      items: [{ product_name: '', quantity: 1, unit_price: 0 }]
-    }
+      items: [{ product_name: '', quantity: 1, unit_price: 0 }],
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'items'
+    name: 'items',
   });
 
-  const watchedItems = watch('items');
-  const totalAmount = watchedItems?.reduce((sum, item) => 
-    sum + (item.quantity || 0) * (item.unit_price || 0), 0
-  ) || 0;
+  const watchedItems = useWatch({ control, name: 'items' });
+  const totalAmount =
+    watchedItems?.reduce((sum, item) => sum + (item.quantity || 0) * (item.unit_price || 0), 0) ||
+    0;
 
   const onSubmit = async (data: OrderFormData) => {
     // セッションストレージに保存して確認画面に遷移
@@ -60,7 +63,7 @@ export default function NewOrderPage() {
       ...data,
       total_amount: totalAmount,
     };
-    
+
     sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
     router.push('/orders/register/confirm?type=manual');
   };
@@ -79,21 +82,17 @@ export default function NewOrderPage() {
             </button>
             <h1 className="text-2xl font-semibold text-gray-900">新規注文登録</h1>
           </div>
-          <p className="text-sm text-gray-600">
-            電話・窓口での注文をシステムに登録します
-          </p>
+          <p className="text-sm text-gray-600">電話・窓口での注文をシステムに登録します</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
             <h2 className="text-lg font-medium text-gray-900">基本情報</h2>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  注文番号 *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">注文番号 *</label>
                 <input
                   {...register('order_number')}
                   className="input-field w-full"
@@ -105,9 +104,7 @@ export default function NewOrderPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  ステータス
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ステータス</label>
                 <select {...register('status')} className="input-field w-full">
                   <option value="pending">未処理</option>
                   <option value="processing">処理中</option>
@@ -118,9 +115,7 @@ export default function NewOrderPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                顧客名 *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">顧客名 *</label>
               <input
                 {...register('customer_name')}
                 className="input-field w-full"
@@ -133,9 +128,7 @@ export default function NewOrderPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  電話番号
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">電話番号</label>
                 <input
                   {...register('customer_phone')}
                   className="input-field w-full"
@@ -144,9 +137,7 @@ export default function NewOrderPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  住所
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">住所</label>
                 <input
                   {...register('customer_address')}
                   className="input-field w-full"
@@ -157,28 +148,16 @@ export default function NewOrderPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  注文日 *
-                </label>
-                <input
-                  type="date"
-                  {...register('order_date')}
-                  className="input-field w-full"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">注文日 *</label>
+                <input type="date" {...register('order_date')} className="input-field w-full" />
                 {errors.order_date && (
                   <p className="text-red-500 text-sm mt-1">{errors.order_date.message}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  到着希望日
-                </label>
-                <input
-                  type="date"
-                  {...register('delivery_date')}
-                  className="input-field w-full"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">到着希望日</label>
+                <input type="date" {...register('delivery_date')} className="input-field w-full" />
               </div>
             </div>
           </div>
@@ -218,9 +197,7 @@ export default function NewOrderPage() {
                     </div>
 
                     <div className="col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        数量 *
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">数量 *</label>
                       <input
                         type="number"
                         min="1"
@@ -267,9 +244,7 @@ export default function NewOrderPage() {
               ))}
             </div>
 
-            {errors.items && (
-              <p className="text-red-500 text-sm">{errors.items.message}</p>
-            )}
+            {errors.items && <p className="text-red-500 text-sm">{errors.items.message}</p>}
           </div>
 
           {/* Total Amount */}
@@ -284,9 +259,7 @@ export default function NewOrderPage() {
 
           {/* Memo */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              備考
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">備考</label>
             <textarea
               {...register('memo')}
               className="input-field w-full h-20"
@@ -296,17 +269,10 @@ export default function NewOrderPage() {
 
           {/* Submit */}
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="btn-secondary"
-            >
+            <button type="button" onClick={() => router.back()} className="btn-secondary">
               キャンセル
             </button>
-            <button
-              type="submit"
-              className="btn-primary flex items-center gap-2"
-            >
+            <button type="submit" className="btn-primary flex items-center gap-2">
               <Save className="w-4 h-4" />
               確認画面へ進む
             </button>
