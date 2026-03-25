@@ -39,7 +39,7 @@
     "react-hook-form": "^7.72.0",
     "recharts": "^3.8.0",
     "tailwindcss": "^4.2.2",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "zod": "^4.3.6",
     "zustand": "^5.0.12"
   },
@@ -51,11 +51,11 @@
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",
-    "eslint": "^9.39.4",
+    "eslint": "^10.1.0",
     "eslint-config-next": "^16.2.1",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
     "prettier": "^3.8.1",
-    "typescript-eslint": "^8.57.3-alpha.1"
+    "typescript-eslint": "^8.57.2"
   }
 }
