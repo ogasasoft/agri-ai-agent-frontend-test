@@ -64,7 +64,6 @@ describe('YamatoApiResponse type', () => {
       success: true,
       tracking_number: 'TRK-123456',
       label_url: 'https://example.com/label.pdf',
-      error_message: 'This should not be present',
     };
 
     expect(response.success).toBe(true);

@@ -2,7 +2,9 @@
  * Component tests for DashboardCharts
  */
 
+import React from 'react';
 import { render } from '@testing-library/react';
+import DashboardCharts from '@/components/DashboardCharts';
 
 // Mock the DashboardCharts component
 jest.mock('@/components/DashboardCharts', () => ({
@@ -60,7 +62,7 @@ describe('DashboardCharts', () => {
     );
 
     expect(container.querySelector('[data-testid="status-distribution-chart"]')).toBeInTheDocument();
-    expect(container.querySelector('h3')).toHaveTextContent('注文ステータス分布');
+    expect(container.querySelector('[data-testid="status-distribution-chart"] h3')).toHaveTextContent('注文ステータス分布');
   });
 
   it('should handle empty product stats', () => {

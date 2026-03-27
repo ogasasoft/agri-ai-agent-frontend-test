@@ -2,10 +2,12 @@
  * Component tests for LayoutWrapper
  */
 
+import React from 'react';
 import { render } from '@testing-library/react';
+import LayoutWrapper from '@/components/LayoutWrapper';
 
 // Mock the LayoutWrapper component
-jest.mock('../LayoutWrapper', () => ({
+jest.mock('@/components/LayoutWrapper', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => {
     return (
