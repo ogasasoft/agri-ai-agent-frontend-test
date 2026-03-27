@@ -31,15 +31,12 @@ export class DatabaseErrorBuilder extends ErrorDetailBuilder {
     return this.setDetails({
       table: context.table,
       query_type: context.operation,
-      transaction_id: context.transactionId
+      transaction_id: context.transactionId,
     });
   }
 
   // データベース接続エラー
-  static connectionError(
-    errorDetails: any,
-    context: DatabaseErrorContext
-  ): DetailedErrorResponse {
+  static connectionError(errorDetails: any, context: DatabaseErrorContext): DetailedErrorResponse {
     const builder = new DatabaseErrorBuilder('データベース接続に失敗しました');
 
     builder
@@ -69,7 +66,7 @@ export class DatabaseErrorBuilder extends ErrorDetailBuilder {
       .addProcessingStep('Query Validation', 'completed')
       .addProcessingStep('Query Execution', 'failed', {
         error: errorDetails.message,
-        query_preview: query.substring(0, 100) + '...'
+        query_preview: query.substring(0, 100) + '...',
       });
 
     // SQLエラーの分析
@@ -80,22 +77,20 @@ export class DatabaseErrorBuilder extends ErrorDetailBuilder {
   }
 
   // トランザクションエラー
-  static transactionError(
-    errorDetails: any,
-    context: DatabaseErrorContext
-  ): DetailedErrorResponse {
+  static transactionError(errorDetails: any, context: DatabaseErrorContext): DetailedErrorResponse {
     const builder = new DatabaseErrorBuilder('データベーストランザクションに失敗しました');
 
     builder
       .setDatabaseContext(context)
       .addProcessingStep('Transaction Begin', 'completed')
       .addProcessingStep('Query Execution', 'failed', { error: errorDetails.message })
-      .addProcessingStep('Transaction Rollback', 'completed');
+      .addProcessingStep('Transaction Rollback', 'completed')
+      .addProcessingStep('Data Integrity Check', 'completed');
 
     const suggestions = [
       'トランザクションが自動的にロールバックされました',
       'データの整合性は保たれています',
-      '一時的なエラーの可能性があります。再試行してください'
+      '一時的なエラーの可能性があります。再試行してください',
     ];
     builder.addSuggestions(suggestions);
 
@@ -162,15 +157,12 @@ export class ExternalAPIErrorBuilder extends ErrorDetailBuilder {
       endpoint: context.endpoint,
       method: context.method,
       status_code: context.statusCode,
-      response_time: context.responseTime
+      response_time: context.responseTime,
     });
   }
 
   // OpenAI APIエラー
-  static openAIError(
-    errorDetails: any,
-    context: ExternalAPIErrorContext
-  ): DetailedErrorResponse {
+  static openAIError(errorDetails: any, context: ExternalAPIErrorContext): DetailedErrorResponse {
     const builder = new ExternalAPIErrorBuilder('OpenAI APIの呼び出しに失敗しました');
 
     builder
@@ -178,7 +170,7 @@ export class ExternalAPIErrorBuilder extends ErrorDetailBuilder {
       .addProcessingStep('API Request', 'completed')
       .addProcessingStep('OpenAI Processing', 'failed', {
         error: errorDetails.message,
-        error_code: errorDetails.code
+        error_code: errorDetails.code,
       })
       .addProcessingStep('Response Processing', 'skipped');
 
@@ -266,7 +258,7 @@ export const logDatabaseOperation = (
     success,
     user_id: userId,
     details,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
   if (success) {
@@ -291,7 +283,7 @@ export const logExternalAPICall = (
     success,
     response_time: responseTime,
     status_code: statusCode,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
   if (success) {

@@ -8,7 +8,7 @@ const config = {
     '^.+\\.(ts|tsx|js|mjs|cjs)$': 'babel-jest',
     '^jest\\.setup\\.js$': 'babel-jest',
   },
-  testMatch: ['**/__tests__/**/*.test.ts'],
+  testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'mjs', 'cjs', 'json'],
   transformIgnorePatterns: [
     'node_modules/(?!(?:@testing-library|@babel|jest-)?)/',

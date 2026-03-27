@@ -380,6 +380,7 @@ jest.mock('next/server', () => {
 // Mock environment variables
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db';
 process.env.OPENAI_API_KEY = 'test-openai-key';
+process.env.NODE_ENV = 'development';
 
 // Global test utilities
 global.fetch = jest.fn();

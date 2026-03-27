@@ -1,6 +1,6 @@
 # Agri AI Agent Frontend
 
-農業EC統合管理システム - Next.js 14 + TypeScript + PostgreSQL
+農業EC統合管理システム - Next.js 16 + TypeScript + PostgreSQL
 
 ## 🌟 概要
 
@@ -20,7 +20,7 @@
 
 ### フロントエンド
 
-- **Next.js 14** - App Router使用
+- **Next.js 16** - App Router使用
 - **TypeScript** - 型安全性
 - **Tailwind CSS** - スタイリング
 - **Lucide React** - アイコン
@@ -121,7 +121,7 @@ npm run dev
 
 ```
 src/
-├── app/                    # Next.js 14 App Router
+├── app/                    # Next.js 16 App Router
 │   ├── admin/             # 管理者画面
 │   │   ├── customers/     # 顧客管理
 │   │   ├── prompts/       # AIプロンプト設定
