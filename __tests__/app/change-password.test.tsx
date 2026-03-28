@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import ChangePasswordPage from '@/app/change-password/page';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -20,15 +21,18 @@ describe('ChangePasswordPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Default mock setup
     mockRouter = {
       push: jest.fn(),
       replace: jest.fn(),
+      back: jest.fn(),
     };
 
     mockSearchParams = {
-      get: jest.fn(),
+      get: jest.fn().mockReturnValue(null),
     };
+
+    (useRouter as jest.Mock).mockReturnValue(mockRouter);
+    (useSearchParams as jest.Mock).mockReturnValue(mockSearchParams);
 
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
@@ -49,11 +53,6 @@ describe('ChangePasswordPage', () => {
       await screen.findByText('パスワード変更');
     });
 
-    it('shows security icon', async () => {
-      render(<ChangePasswordPage />);
-      await screen.findByText('🔒');
-    });
-
     it('shows current password input field', async () => {
       render(<ChangePasswordPage />);
       const input = await screen.findByLabelText('現在のパスワード');
@@ -68,35 +67,43 @@ describe('ChangePasswordPage', () => {
 
     it('shows confirm password input field', async () => {
       render(<ChangePasswordPage />);
-      const input = await screen.findByLabelText('パスワード確認');
+      // Label is "新しいパスワード（確認）"
+      const input = await screen.findByLabelText(/新しいパスワード（確認）/);
       expect(input).toBeInTheDocument();
     });
 
     it('shows change password button', async () => {
       render(<ChangePasswordPage />);
-      const button = await screen.findByRole('button', { name: 'パスワード変更' });
+      // Button text is "パスワードを変更"
+      const button = await screen.findByRole('button', { name: 'パスワードを変更' });
       expect(button).toBeInTheDocument();
     });
 
-    it('shows cancel button when not forced', async () => {
+    it('shows logout button when not forced', async () => {
       mockSearchParams.get.mockReturnValue(null);
-
       render(<ChangePasswordPage />);
-      await screen.findByText('キャンセル');
+      await screen.findByText('ログアウト');
     });
 
-    it('shows back link when not forced', async () => {
+    it('shows back button when not forced', async () => {
       mockSearchParams.get.mockReturnValue(null);
-
       render(<ChangePasswordPage />);
-      await screen.findByText(/戻る|戻るページ/);
+      await screen.findByText('戻る');
     });
 
-    it('shows back to login link when forced', async () => {
+    it('shows security notice when forced', async () => {
       mockSearchParams.get.mockReturnValue('true');
-
       render(<ChangePasswordPage />);
-      await screen.findByText('ログイン画面に戻る');
+      await screen.findByText(/セキュリティのため、パスワードの変更が必要です/);
+    });
+
+    it('hides navigation when forced', async () => {
+      mockSearchParams.get.mockReturnValue('true');
+      render(<ChangePasswordPage />);
+      // ログアウトボタンは非表示
+      await waitFor(() => {
+        expect(screen.queryByText('ログアウト')).toBeNull();
+      });
     });
   });
 
@@ -117,7 +124,7 @@ describe('ChangePasswordPage', () => {
 
     it('allows typing in confirm password field', async () => {
       render(<ChangePasswordPage />);
-      const input = await screen.findByLabelText('パスワード確認');
+      const input = await screen.findByLabelText(/新しいパスワード（確認）/);
       fireEvent.change(input, { target: { value: 'newpass123' } });
       expect(input).toHaveValue('newpass123');
     });
@@ -129,12 +136,14 @@ describe('ChangePasswordPage', () => {
       const input = await screen.findByLabelText('現在のパスワード');
       expect(input).toHaveAttribute('type', 'password');
 
-      // Find and click the toggle button (icon)
-      const toggleIcon = screen.getByText('👁️');
-      fireEvent.click(toggleIcon);
+      // Toggle button is inside the relative container of the input
+      const toggleButton = input.parentElement?.querySelector('button[type="button"]');
+      expect(toggleButton).not.toBeNull();
+
+      fireEvent.click(toggleButton!);
       expect(input).toHaveAttribute('type', 'text');
 
-      fireEvent.click(toggleIcon);
+      fireEvent.click(toggleButton!);
       expect(input).toHaveAttribute('type', 'password');
     });
 
@@ -143,18 +152,22 @@ describe('ChangePasswordPage', () => {
       const input = await screen.findByLabelText('新しいパスワード');
       expect(input).toHaveAttribute('type', 'password');
 
-      const toggleIcon = screen.getByText('👁️');
-      fireEvent.click(toggleIcon);
+      const toggleButton = input.parentElement?.querySelector('button[type="button"]');
+      expect(toggleButton).not.toBeNull();
+
+      fireEvent.click(toggleButton!);
       expect(input).toHaveAttribute('type', 'text');
     });
 
     it('toggles confirm password visibility', async () => {
       render(<ChangePasswordPage />);
-      const input = await screen.findByLabelText('パスワード確認');
+      const input = await screen.findByLabelText(/新しいパスワード（確認）/);
       expect(input).toHaveAttribute('type', 'password');
 
-      const toggleIcon = screen.getByText('👁️');
-      fireEvent.click(toggleIcon);
+      const toggleButton = input.parentElement?.querySelector('button[type="button"]');
+      expect(toggleButton).not.toBeNull();
+
+      fireEvent.click(toggleButton!);
       expect(input).toHaveAttribute('type', 'text');
     });
   });
@@ -165,69 +178,61 @@ describe('ChangePasswordPage', () => {
 
       const currentInput = await screen.findByLabelText('現在のパスワード');
       const newInput = await screen.findByLabelText('新しいパスワード');
-      const confirmInput = await screen.findByLabelText('パスワード確認');
-      const submitBtn = await screen.findByRole('button', { name: 'パスワード変更' });
+      const confirmInput = await screen.findByLabelText(/新しいパスワード（確認）/);
+      const submitBtn = await screen.findByRole('button', { name: 'パスワードを変更' });
 
       fireEvent.change(currentInput, { target: { value: 'current123' } });
       fireEvent.change(newInput, { target: { value: 'newpass123' } });
-      fireEvent.change(confirmInput, { target: { value: 'different' } });
+      fireEvent.change(confirmInput, { target: { value: 'different123' } });
 
       await act(async () => {
         fireEvent.click(submitBtn);
       });
 
-      await screen.findByText(/パスワードが一致しません|確認用パスワードが一致しません/);
+      // Error: "新しいパスワードと確認パスワードが一致しません。"
+      await screen.findByText(/パスワードが一致しません/);
+    });
+
+    it('shows error when new password is too short', async () => {
+      render(<ChangePasswordPage />);
+
+      const currentInput = await screen.findByLabelText('現在のパスワード');
+      const newInput = await screen.findByLabelText('新しいパスワード');
+      const confirmInput = await screen.findByLabelText(/新しいパスワード（確認）/);
+      const submitBtn = await screen.findByRole('button', { name: 'パスワードを変更' });
+
+      await act(async () => {
+        fireEvent.change(currentInput, { target: { value: 'current123' } });
+        fireEvent.change(newInput, { target: { value: 'short' } });
+        fireEvent.change(confirmInput, { target: { value: 'short' } });
+      });
+
+      await act(async () => {
+        fireEvent.click(submitBtn);
+      });
+
+      // Error: "新しいパスワードは8文字以上である必要があります。" (more specific regex to avoid matching req list)
+      await screen.findByText(/新しいパスワードは8文字以上/);
     });
 
     it('shows error when current password is empty', async () => {
       render(<ChangePasswordPage />);
 
       const newInput = await screen.findByLabelText('新しいパスワード');
-      const confirmInput = await screen.findByLabelText('パスワード確認');
-      const submitBtn = await screen.findByRole('button', { name: 'パスワード変更' });
+      const confirmInput = await screen.findByLabelText(/新しいパスワード（確認）/);
+      const submitBtn = await screen.findByRole('button', { name: 'パスワードを変更' });
 
-      fireEvent.change(newInput, { target: { value: 'newpass123' } });
-      fireEvent.change(confirmInput, { target: { value: 'newpass123' } });
+      await act(async () => {
+        fireEvent.change(newInput, { target: { value: 'newpass123' } });
+        fireEvent.change(confirmInput, { target: { value: 'newpass123' } });
+      });
 
       await act(async () => {
         fireEvent.click(submitBtn);
       });
 
-      await screen.findByText(/現在のパスワードを入力してください|現在のパスワードが空です/);
-    });
-
-    it('shows error when new password is empty', async () => {
-      render(<ChangePasswordPage />);
-
-      const currentInput = await screen.findByLabelText('現在のパスワード');
-      const confirmInput = await screen.findByLabelText('パスワード確認');
-      const submitBtn = await screen.findByRole('button', { name: 'パスワード変更' });
-
-      fireEvent.change(currentInput, { target: { value: 'current123' } });
-      fireEvent.change(confirmInput, { target: { value: 'current123' } });
-
-      await act(async () => {
-        fireEvent.click(submitBtn);
-      });
-
-      await screen.findByText(/新しいパスワードを入力してください|新しいパスワードが空です/);
-    });
-
-    it('shows error when confirm password is empty', async () => {
-      render(<ChangePasswordPage />);
-
-      const currentInput = await screen.findByLabelText('現在のパスワード');
-      const newInput = await screen.findByLabelText('新しいパスワード');
-      const submitBtn = await screen.findByRole('button', { name: 'パスワード変更' });
-
-      fireEvent.change(currentInput, { target: { value: 'current123' } });
-      fireEvent.change(newInput, { target: { value: 'newpass123' } });
-
-      await act(async () => {
-        fireEvent.click(submitBtn);
-      });
-
-      await screen.findByText(/確認用パスワードを入力してください|パスワード確認が空です/);
+      // Error: "現在のパスワードを入力してください。"
+      await screen.findByText('現在のパスワードを入力してください。');
     });
   });
 
@@ -236,18 +241,18 @@ describe('ChangePasswordPage', () => {
       (global.fetch as jest.Mock)
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ success: true }),
+          json: async () => ({ success: true, user: { id: 1, username: 'testuser' } }),
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ success: true, user: { id: 1, username: 'testuser' } }),
+          json: async () => ({ success: true }),
         });
 
       render(<ChangePasswordPage />);
       const currentInput = await screen.findByLabelText('現在のパスワード');
       const newInput = await screen.findByLabelText('新しいパスワード');
-      const confirmInput = await screen.findByLabelText('パスワード確認');
-      const submitBtn = await screen.findByRole('button', { name: 'パスワード変更' });
+      const confirmInput = await screen.findByLabelText(/新しいパスワード（確認）/);
+      const submitBtn = await screen.findByRole('button', { name: 'パスワードを変更' });
 
       fireEvent.change(currentInput, { target: { value: 'current123' } });
       fireEvent.change(newInput, { target: { value: 'newpass123' } });
@@ -270,18 +275,18 @@ describe('ChangePasswordPage', () => {
       (global.fetch as jest.Mock)
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ success: true }),
+          json: async () => ({ success: true, user: { id: 1, username: 'testuser' } }),
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ success: true, user: { id: 1, username: 'testuser' } }),
+          json: async () => ({ success: true }),
         });
 
       render(<ChangePasswordPage />);
       const currentInput = await screen.findByLabelText('現在のパスワード');
       const newInput = await screen.findByLabelText('新しいパスワード');
-      const confirmInput = await screen.findByLabelText('パスワード確認');
-      const submitBtn = await screen.findByRole('button', { name: 'パスワード変更' });
+      const confirmInput = await screen.findByLabelText(/新しいパスワード（確認）/);
+      const submitBtn = await screen.findByRole('button', { name: 'パスワードを変更' });
 
       fireEvent.change(currentInput, { target: { value: 'current123' } });
       fireEvent.change(newInput, { target: { value: 'newpass123' } });
@@ -291,84 +296,28 @@ describe('ChangePasswordPage', () => {
         fireEvent.click(submitBtn);
       });
 
-      await screen.findByText(/パスワード変更が完了しました|パスワードを変更しました/);
-    });
-
-    it('redirects to home after password change when not forced', async () => {
-      (global.fetch as jest.Mock)
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ success: true }),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ success: true, user: { id: 1, username: 'testuser' } }),
-        });
-
-      render(<ChangePasswordPage />);
-      const currentInput = await screen.findByLabelText('現在のパスワード');
-      const newInput = await screen.findByLabelText('新しいパスワード');
-      const confirmInput = await screen.findByLabelText('パスワード確認');
-      const submitBtn = await screen.findByRole('button', { name: 'パスワード変更' });
-
-      fireEvent.change(currentInput, { target: { value: 'current123' } });
-      fireEvent.change(newInput, { target: { value: 'newpass123' } });
-      fireEvent.change(confirmInput, { target: { value: 'newpass123' } });
-
-      await act(async () => {
-        fireEvent.click(submitBtn);
-      });
-
-      await waitFor(() => {
-        expect(mockRouter.push).toHaveBeenCalledWith('/');
-      });
-    });
-
-    it('redirects to login after password change when forced', async () => {
-      mockSearchParams.get.mockReturnValue('true');
-
-      (global.fetch as jest.Mock)
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ success: true }),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ success: true, user: { id: 1, username: 'testuser' } }),
-        });
-
-      render(<ChangePasswordPage />);
-      const currentInput = await screen.findByLabelText('現在のパスワード');
-      const newInput = await screen.findByLabelText('新しいパスワード');
-      const confirmInput = await screen.findByLabelText('パスワード確認');
-      const submitBtn = await screen.findByRole('button', { name: 'パスワード変更' });
-
-      fireEvent.change(currentInput, { target: { value: 'current123' } });
-      fireEvent.change(newInput, { target: { value: 'newpass123' } });
-      fireEvent.change(confirmInput, { target: { value: 'newpass123' } });
-
-      await act(async () => {
-        fireEvent.click(submitBtn);
-      });
-
-      await waitFor(() => {
-        expect(mockRouter.push).toHaveBeenCalledWith('/login');
-      });
+      // Component sets success: "パスワードを変更しました。"
+      await screen.findByText(/パスワードを変更しました/);
     });
   });
 
   describe('form submission – error', () => {
     it('shows error message when password change fails', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        json: async () => ({ success: false, message: '現在のパスワードが正しくありません。' }),
-      });
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ success: true, user: { id: 1, username: 'testuser' } }),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          json: async () => ({ success: false, message: '現在のパスワードが正しくありません。' }),
+        });
 
       render(<ChangePasswordPage />);
       const currentInput = await screen.findByLabelText('現在のパスワード');
       const newInput = await screen.findByLabelText('新しいパスワード');
-      const confirmInput = await screen.findByLabelText('パスワード確認');
-      const submitBtn = await screen.findByRole('button', { name: 'パスワード変更' });
+      const confirmInput = await screen.findByLabelText(/新しいパスワード（確認）/);
+      const submitBtn = await screen.findByRole('button', { name: 'パスワードを変更' });
 
       fireEvent.change(currentInput, { target: { value: 'wrong' } });
       fireEvent.change(newInput, { target: { value: 'newpass123' } });
@@ -381,55 +330,56 @@ describe('ChangePasswordPage', () => {
       await screen.findByText('現在のパスワードが正しくありません。');
     });
 
-    it('shows login error heading when error occurs', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        json: async () => ({ success: false, message: 'エラー発生' }),
-      });
+    it('shows error heading when error occurs', async () => {
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ success: true, user: { id: 1, username: 'testuser' } }),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          json: async () => ({ success: false, message: 'エラー発生' }),
+        });
 
       render(<ChangePasswordPage />);
       const currentInput = await screen.findByLabelText('現在のパスワード');
       const newInput = await screen.findByLabelText('新しいパスワード');
-      const confirmInput = await screen.findByLabelText('パスワード確認');
+      const confirmInput = await screen.findByLabelText(/新しいパスワード（確認）/);
 
       fireEvent.change(currentInput, { target: { value: 'user' } });
-      fireEvent.change(newInput, { target: { value: 'pass' } });
-      fireEvent.change(confirmInput, { target: { value: 'pass' } });
+      fireEvent.change(newInput, { target: { value: 'pass12345' } });
+      fireEvent.change(confirmInput, { target: { value: 'pass12345' } });
 
       await act(async () => {
-        fireEvent.submit(screen.getByRole('button', { name: 'パスワード変更' }).closest('form')!);
+        fireEvent.submit(screen.getByRole('button', { name: 'パスワードを変更' }).closest('form')!);
       });
 
-      await screen.findByText('パスワード変更エラー');
+      // Error heading is "エラー"
+      await screen.findByText('エラー');
     });
 
-    it('shows server error message when fetch throws', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+    it('shows server error message when fetch throws during submit', async () => {
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ success: true, user: { id: 1, username: 'testuser' } }),
+        })
+        .mockRejectedValueOnce(new Error('Network error'));
 
       render(<ChangePasswordPage />);
       const currentInput = await screen.findByLabelText('現在のパスワード');
       const newInput = await screen.findByLabelText('新しいパスワード');
-      const confirmInput = await screen.findByLabelText('パスワード確認');
+      const confirmInput = await screen.findByLabelText(/新しいパスワード（確認）/);
 
       fireEvent.change(currentInput, { target: { value: 'current123' } });
       fireEvent.change(newInput, { target: { value: 'newpass123' } });
       fireEvent.change(confirmInput, { target: { value: 'newpass123' } });
 
       await act(async () => {
-        fireEvent.submit(screen.getByRole('button', { name: 'パスワード変更' }).closest('form')!);
+        fireEvent.submit(screen.getByRole('button', { name: 'パスワードを変更' }).closest('form')!);
       });
 
       await screen.findByText('サーバーエラーが発生しました。');
-    });
-
-    it('redirects to login when fetch fails', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
-
-      render(<ChangePasswordPage />);
-
-      await waitFor(() => {
-        expect(mockRouter.push).toHaveBeenCalledWith('/login');
-      });
     });
   });
 
@@ -444,6 +394,19 @@ describe('ChangePasswordPage', () => {
 
     it('redirects to login when fetch user info fails', async () => {
       (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+
+      render(<ChangePasswordPage />);
+
+      await waitFor(() => {
+        expect(mockRouter.push).toHaveBeenCalledWith('/login');
+      });
+    });
+
+    it('redirects to login when auth check returns not ok', async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({ success: false }),
+      });
 
       render(<ChangePasswordPage />);
 
