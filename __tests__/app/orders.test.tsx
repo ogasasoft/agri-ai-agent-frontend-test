@@ -1,8 +1,8 @@
 // FILE: __tests__/app/orders.test.tsx
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import OrdersPage from '@/app/orders/page';
-import { useRouter } from 'next/navigation';
+import { redirect } from 'next/navigation';
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -11,13 +11,12 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('OrdersPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('redirects to pending shipping page', () => {
-    const mockRedirect = jest.fn();
-    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn(), redirect: mockRedirect });
-
     render(<OrdersPage />);
-
-    // Check if redirect was called
-    expect(mockRedirect).toHaveBeenCalledWith('/orders/shipping/pending');
+    expect(redirect).toHaveBeenCalledWith('/orders/shipping/pending');
   });
 });
