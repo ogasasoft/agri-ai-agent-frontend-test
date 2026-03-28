@@ -2,12 +2,22 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import OrdersPage from '@/app/orders/page';
+import { useRouter } from 'next/navigation';
+
+// Mock next/navigation
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  redirect: jest.fn(),
+}));
 
 describe('OrdersPage', () => {
-  it('redirects to pending shipping page', async () => {
+  it('redirects to pending shipping page', () => {
+    const mockRedirect = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn(), redirect: mockRedirect });
+
     render(<OrdersPage />);
 
-    // Check for redirect behavior
-    await screen.findByText('Loading');
+    // Check if redirect was called
+    expect(mockRedirect).toHaveBeenCalledWith('/orders/shipping/pending');
   });
 });
