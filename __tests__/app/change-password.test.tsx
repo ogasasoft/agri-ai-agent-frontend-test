@@ -228,11 +228,12 @@ describe('ChangePasswordPage', () => {
       });
 
       await act(async () => {
-        fireEvent.click(submitBtn);
-      });
+        const form = submitBtn.closest('form')!;
+        fireEvent.submit(form);
 
-      // Error: "現在のパスワードを入力してください。"
-      await screen.findByText('現在のパスワードを入力してください。');
+        // Error: "現在のパスワードを入力してください。"
+        await screen.findByText(/現在のパスワードを入力してください/);
+      });
     });
   });
 

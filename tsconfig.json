@@ -26,11 +26,11 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "!__tests__/**/*.ts",
-    "!__tests__/**/*.tsx",
     ".next/types/**/*.ts",
     "types/**/*.d.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx"
   ],
-  "exclude": ["node_modules", "functions", "__tests__"]
+  "exclude": ["node_modules", "functions", ".next"]
 }
