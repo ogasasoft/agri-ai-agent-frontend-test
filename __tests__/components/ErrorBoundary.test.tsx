@@ -9,7 +9,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // Mock client-error-details module
 jest.mock('@/lib/client-error-details', () => ({
-  ClientErrorBuilder: jest.fn().mockImplementation(function (message: string, errorCode: string) {
+  ClientErrorBuilder: jest.fn().mockImplementation(function (this: any, message: string, errorCode: string) {
     this.message = message;
     this.errorCode = errorCode;
     this._suggestions = [] as string[];
@@ -19,15 +19,15 @@ jest.mock('@/lib/client-error-details', () => ({
 
     this.setContext = jest.fn().mockReturnThis();
     this.addProcessingStep = jest.fn().mockReturnThis();
-    this.addSuggestion = jest.fn().mockImplementation(function (s: string) {
+    this.addSuggestion = jest.fn().mockImplementation(function (this: any, s: string) {
       this._suggestions.push(s);
       return this;
     });
-    this.addUserAction = jest.fn().mockImplementation(function (label: string, action: string, params?: any) {
+    this.addUserAction = jest.fn().mockImplementation(function (this: any, label: string, action: string, params?: any) {
       this._userActions.push({ label, action, params });
       return this;
     });
-    this.build = jest.fn().mockImplementation(function () {
+    this.build = jest.fn().mockImplementation(function (this: any) {
       return {
         success: false,
         message: this.message,
@@ -257,7 +257,7 @@ describe('ErrorBoundary', () => {
   describe('Suggestions display', () => {
     it('displays suggestions when errorDetails includes them', () => {
       const { ClientErrorBuilder } = require('@/lib/client-error-details');
-      ClientErrorBuilder.mockImplementationOnce(function () {
+      ClientErrorBuilder.mockImplementationOnce(function (this: any) {
         this.setContext = jest.fn().mockReturnThis();
         this.addProcessingStep = jest.fn().mockReturnThis();
         this.addSuggestion = jest.fn().mockReturnThis();

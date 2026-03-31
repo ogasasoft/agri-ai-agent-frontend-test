@@ -42,7 +42,7 @@ describe('db.ts', () => {
     });
 
     it('should create and connect a new PostgreSQL client using POSTGRES_URL if DATABASE_URL is not set', async () => {
-      delete process.env.DATABASE_URL;
+      delete (process.env as any).DATABASE_URL;
       process.env.POSTGRES_URL = 'postgresql://user:password@host:port/database_postgres';
       const client = await getDbClient();
 
@@ -54,8 +54,8 @@ describe('db.ts', () => {
     });
 
     it('should create and connect a new PostgreSQL client using POSTGRES_URL_NON_POOLING if others are not set', async () => {
-      delete process.env.DATABASE_URL;
-      delete process.env.POSTGRES_URL;
+      delete (process.env as any).DATABASE_URL;
+      delete (process.env as any).POSTGRES_URL;
       process.env.POSTGRES_URL_NON_POOLING = 'postgresql://user:password@host:port/database_non_pooling';
       const client = await getDbClient();
 
@@ -67,16 +67,16 @@ describe('db.ts', () => {
     });
 
     it('should throw an error if no database connection string is found', async () => {
-      delete process.env.DATABASE_URL;
-      delete process.env.POSTGRES_URL;
-      delete process.env.POSTGRES_URL_NON_POOLING;
+      delete (process.env as any).DATABASE_URL;
+      delete (process.env as any).POSTGRES_URL;
+      delete (process.env as any).POSTGRES_URL_NON_POOLING;
 
       await expect(getDbClient()).rejects.toThrow('No database connection string found in environment variables');
     });
 
     it('should set ssl to rejectUnauthorized: false in production environment', async () => {
       process.env.DATABASE_URL = 'postgresql://user:password@host:port/database';
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
       await getDbClient();
 
       expect(MockClient).toHaveBeenCalledWith(
@@ -85,7 +85,7 @@ describe('db.ts', () => {
         })
       );
       // Restore NODE_ENV for other tests
-      process.env.NODE_ENV = 'test';
+      (process.env as any).NODE_ENV = 'test';
     });
   });
 

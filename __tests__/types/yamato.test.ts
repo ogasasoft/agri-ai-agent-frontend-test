@@ -190,6 +190,7 @@ describe('YamatoApiResponse type', () => {
     const response: YamatoApiResponse = {
       success: false,
       error_message: 'API connection failed',
+      results: [],
     };
 
     expect(response.success).toBe(false);

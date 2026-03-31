@@ -6,19 +6,10 @@
  * we'll use TypeScript's type-checking and verify basic type constraints.
  */
 
-import type {
-  Order,
-  OrderItem,
-  OrderFilters,
-  OrderStats,
-  ShippingLabel,
-  YamatoApiResponse,
-  ShippingRequest,
-  CustomerRegistration,
-  YamatoApiConfig,
-  YamatoShippingRequest,
-  YamatoApiResponseItem,
-} from '@/types';
+import type { Order, OrderItem, OrderFilters, OrderStats } from '@/types/order';
+import type { ShippingLabel, ShippingRequest, CustomerRegistration } from '@/types/shipping';
+import type { YamatoApiConfig, YamatoShippingRequest, YamatoApiResponseItem } from '@/types/yamato';
+import type { YamatoApiResponse } from '@/types/shipping';
 
 describe('Order Type', () => {
   it('should have all required properties', () => {
@@ -281,7 +272,6 @@ describe('CustomerRegistration Type', () => {
       order_code: 'ORD-001',
       customer_name: 'Test Customer',
       total_amount: 1000,
-      created_at: '2024-01-01T00:00:00Z',
     };
 
     expect(registration.customer_phone).toBeUndefined();

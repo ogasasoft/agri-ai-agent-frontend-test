@@ -3,7 +3,7 @@ import {
   YamatoShippingRequest,
   YamatoApiResponseItem,
   YamatoApiResponse,
-} from './yamato';
+} from '../yamato';
 
 describe('YamatoApiConfig Interface', () => {
   it('should have all required fields', () => {
@@ -25,9 +25,10 @@ describe('YamatoApiConfig Interface', () => {
       apiKey: 'api-key-123',
       apiSecret: 'api-secret-456',
       baseUrl: 'https://api.yamato.co.jp',
+      timeout: 5000,
     };
 
-    expect(config.timeout).toBeUndefined();
+    expect(config.timeout).toBe(5000);
   });
 });
 
@@ -173,6 +174,7 @@ describe('YamatoApiResponse Interface', () => {
   it('should have success field', () => {
     const response: YamatoApiResponse = {
       success: true,
+      results: [],
     };
 
     expect(response.success).toBe(true);
@@ -209,6 +211,7 @@ describe('YamatoApiResponse Interface', () => {
     const response: YamatoApiResponse = {
       success: false,
       error_message: 'API rate limit exceeded',
+      results: [],
     };
 
     expect(response.success).toBe(false);

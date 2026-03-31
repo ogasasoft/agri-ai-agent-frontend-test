@@ -1,4 +1,4 @@
-import { Order, OrderItem, OrderFilters, OrderStats } from './order';
+import { Order, OrderItem, OrderFilters, OrderStats } from '../order';
 
 describe('Order Interface', () => {
   it('should have all required fields', () => {

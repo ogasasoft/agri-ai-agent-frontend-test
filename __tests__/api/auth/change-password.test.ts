@@ -27,8 +27,8 @@ jest.mock('@/lib/auth-error-details', () => {
     })
   }
 
-  const MockAuthErrorBuilderClass = jest.fn().mockImplementation(() => mockBuilderInstance)
-  MockAuthErrorBuilderClass.sessionError = jest.fn().mockImplementation((type: string) => ({
+  const MockAuthErrorBuilderClass = jest.fn().mockImplementation(() => mockBuilderInstance);
+  (MockAuthErrorBuilderClass as any).sessionError = jest.fn().mockImplementation((type: string) => ({
     success: false,
     message: `Auth error: ${type}`,
     error_code: 'AUTHENTICATION_ERROR',

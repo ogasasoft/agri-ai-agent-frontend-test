@@ -141,7 +141,7 @@ describe('POST /api/create-test-users', () => {
 
   it('should return 404 in production environment', async () => {
     const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV ='production';
 
     const req = createMockRequest({});
     const response = await POST(req);
@@ -150,7 +150,7 @@ describe('POST /api/create-test-users', () => {
     expect(response.status).toBe(404);
     expect(data.success).toBe(false);
 
-    process.env.NODE_ENV = originalEnv;
+    (process.env as any).NODE_ENV =originalEnv;
   });
 
   it('should create test users in development environment', async () => {
@@ -190,7 +190,7 @@ describe('POST /api/delete-test-users', () => {
 
   it('should return 404 in production environment', async () => {
     const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV ='production';
 
     const req = createMockRequest({});
     const response = await POST(req);
@@ -199,7 +199,7 @@ describe('POST /api/delete-test-users', () => {
     expect(response.status).toBe(404);
     expect(data.success).toBe(false);
 
-    process.env.NODE_ENV = originalEnv;
+    (process.env as any).NODE_ENV =originalEnv;
   });
 
   it('should delete test users in development environment', async () => {

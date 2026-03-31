@@ -51,31 +51,31 @@ describe('ErrorDetailBuilder', () => {
       .build();
 
     expect(response.debug_info?.processing_steps).toHaveLength(3);
-    expect(response.debug_info?.processing_steps[0].step).toBe('Step1');
-    expect(response.debug_info?.processing_steps[0].status).toBe('completed');
-    expect(response.debug_info?.processing_steps[1].step).toBe('Step2');
-    expect(response.debug_info?.processing_steps[1].status).toBe('failed');
-    expect(response.debug_info?.processing_steps[1].details).toEqual({ data: 'test' });
-    expect(response.debug_info?.processing_steps[1].error).toBe('Error message');
-    expect(response.debug_info?.processing_steps[2].step).toBe('Step3');
-    expect(response.debug_info?.processing_steps[2].status).toBe('skipped');
+    expect(response.debug_info?.processing_steps![0].step).toBe('Step1');
+    expect(response.debug_info?.processing_steps![0].status).toBe('completed');
+    expect(response.debug_info?.processing_steps![1].step).toBe('Step2');
+    expect(response.debug_info?.processing_steps![1].status).toBe('failed');
+    expect(response.debug_info?.processing_steps![1].details).toEqual({ data: 'test' });
+    expect(response.debug_info?.processing_steps![1].error).toBe('Error message');
+    expect(response.debug_info?.processing_steps![2].step).toBe('Step3');
+    expect(response.debug_info?.processing_steps![2].status).toBe('skipped');
   });
 
   it('should add suggestions', () => {
     const response = builder.addSuggestion('Test suggestion').addSuggestion('Another suggestion').build();
 
     expect(response.suggestions).toHaveLength(2);
-    expect(response.suggestions[0]).toBe('Test suggestion');
-    expect(response.suggestions[1]).toBe('Another suggestion');
+    expect(response.suggestions![0]).toBe('Test suggestion');
+    expect(response.suggestions![1]).toBe('Another suggestion');
   });
 
   it('should add multiple suggestions at once', () => {
     const response = builder.addSuggestions(['Suggestion 1', 'Suggestion 2', 'Suggestion 3']).build();
 
     expect(response.suggestions).toHaveLength(3);
-    expect(response.suggestions[0]).toBe('Suggestion 1');
-    expect(response.suggestions[1]).toBe('Suggestion 2');
-    expect(response.suggestions[2]).toBe('Suggestion 3');
+    expect(response.suggestions![0]).toBe('Suggestion 1');
+    expect(response.suggestions![1]).toBe('Suggestion 2');
+    expect(response.suggestions![2]).toBe('Suggestion 3');
   });
 
   it('should set details', () => {
@@ -87,14 +87,14 @@ describe('ErrorDetailBuilder', () => {
   it('should build correctly in production mode', () => {
     // Mock NODE_ENV to production
     const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV ='production';
 
     const response = builder.build();
 
     expect(response.debug_info).toBeUndefined();
 
     // Restore original NODE_ENV
-    process.env.NODE_ENV = originalEnv;
+    (process.env as any).NODE_ENV =originalEnv;
   });
 });
 
@@ -129,8 +129,8 @@ describe('CSVErrorBuilder', () => {
       );
 
       expect(response.debug_info?.processing_steps).toHaveLength(2);
-      expect(response.debug_info?.processing_steps[0].step).toBe('Parse CSV Headers');
-      expect(response.debug_info?.processing_steps[1].step).toBe('Map Required Fields');
+      expect(response.debug_info?.processing_steps![0].step).toBe('Parse CSV Headers');
+      expect(response.debug_info?.processing_steps![1].step).toBe('Map Required Fields');
     });
 
     it('should include data analysis with headers', () => {
@@ -198,7 +198,7 @@ describe('CSVErrorBuilder', () => {
       );
 
       expect(response.debug_info?.processing_steps).toHaveLength(2);
-      expect(response.debug_info?.processing_steps[1].details).toEqual({
+      expect(response.debug_info?.processing_steps![1].details).toEqual({
         validation_errors: 1,
         processed_rows: 2,
       });
@@ -233,7 +233,7 @@ describe('CSVErrorBuilder', () => {
       );
 
       expect(response.suggestions).toBeDefined();
-      expect(response.suggestions.length).toBeGreaterThan(0);
+      expect(response.suggestions!.length).toBeGreaterThan(0);
     });
   });
 });

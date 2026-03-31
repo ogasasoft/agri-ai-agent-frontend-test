@@ -3,7 +3,7 @@ import {
   YamatoApiResponse,
   ShippingRequest,
   CustomerRegistration,
-} from './shipping';
+} from '../shipping';
 
 describe('ShippingLabel Interface', () => {
   it('should have all required fields', () => {

@@ -16,6 +16,7 @@ describe('OrdersPage', () => {
   });
 
   it('redirects to pending shipping page', () => {
+    // @ts-expect-error - OrdersPage uses redirect() which makes return type void
     render(<OrdersPage />);
     expect(redirect).toHaveBeenCalledWith('/orders/shipping/pending');
   });

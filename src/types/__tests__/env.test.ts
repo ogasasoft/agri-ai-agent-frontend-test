@@ -1,4 +1,4 @@
-import { ProcessEnv } from './env';
+type ProcessEnv = NodeJS.ProcessEnv;
 
 describe('ProcessEnv Interface', () => {
   it('should have all required fields', () => {

@@ -14,20 +14,20 @@ describe('api-error-details.ts', () => {
   describe('DatabaseErrorBuilder', () => {
     it('should create a DatabaseErrorBuilder with message and type', () => {
       const builder = new DatabaseErrorBuilder('Test message');
-      expect(builder.errorResponse.message).toBe('Test message');
-      expect(builder.errorResponse.error_code).toBe('DATABASE_ERROR');
+      expect((builder as any).errorResponse.message).toBe('Test message');
+      expect((builder as any).errorResponse.error_code).toBe('DATABASE_ERROR');
     });
 
     it('should create a DatabaseErrorBuilder and have message property', () => {
       const builder = new DatabaseErrorBuilder('Test message');
       expect(builder.message).toBe('Test message');
-      expect(builder.errorResponse.error_code).toBe('DATABASE_ERROR');
+      expect((builder as any).errorResponse.error_code).toBe('DATABASE_ERROR');
     });
 
     it('should create a DatabaseErrorBuilder with correct error code and message', () => {
       const builder = new DatabaseErrorBuilder('Test message');
-      expect(builder.errorResponse.error_code).toBe('DATABASE_ERROR');
-      expect(builder.errorResponse.message).toBe('Test message');
+      expect((builder as any).errorResponse.error_code).toBe('DATABASE_ERROR');
+      expect((builder as any).errorResponse.message).toBe('Test message');
     });
 
     it('should set database context correctly', () => {
@@ -38,14 +38,14 @@ describe('api-error-details.ts', () => {
         userId: 'user123',
         transactionId: 'tx456',
       };
-      const result = builder.setDatabaseContext(context);
+      const result = builder.setDatabaseContext(context as any);
 
       expect(result).toBe(builder);
-      expect(builder.errorResponse.debug_info?.operation).toBe('DB_INSERT');
-      expect(builder.errorResponse.debug_info?.user_id).toBe('user123');
-      expect(builder.errorResponse.details?.table).toBe('users');
-      expect(builder.errorResponse.details?.query_type).toBe('INSERT');
-      expect(builder.errorResponse.details?.transaction_id).toBe('tx456');
+      expect((builder as any).errorResponse.debug_info?.operation).toBe('DB_INSERT');
+      expect((builder as any).errorResponse.debug_info?.user_id).toBe('user123');
+      expect((builder as any).errorResponse.details?.table).toBe('users');
+      expect((builder as any).errorResponse.details?.query_type).toBe('INSERT');
+      expect((builder as any).errorResponse.details?.transaction_id).toBe('tx456');
     });
 
     it('should add processing steps', () => {
@@ -54,14 +54,14 @@ describe('api-error-details.ts', () => {
         .addProcessingStep('Step1', 'completed')
         .addProcessingStep('Step2', 'failed', { error: 'Something went wrong' });
 
-      expect(builder.errorResponse.debug_info?.processing_steps).toBeDefined();
-      expect(Array.isArray(builder.errorResponse.debug_info?.processing_steps)).toBe(true);
-      expect(builder.errorResponse.debug_info?.processing_steps.length).toBe(2);
-      expect(builder.errorResponse.debug_info?.processing_steps[0].step).toBe('Step1');
-      expect(builder.errorResponse.debug_info?.processing_steps[0].status).toBe('completed');
-      expect(builder.errorResponse.debug_info?.processing_steps[1].step).toBe('Step2');
-      expect(builder.errorResponse.debug_info?.processing_steps[1].status).toBe('failed');
-      expect(builder.errorResponse.debug_info?.processing_steps[1].details?.error).toBe('Something went wrong');
+      expect((builder as any).errorResponse.debug_info?.processing_steps).toBeDefined();
+      expect(Array.isArray((builder as any).errorResponse.debug_info?.processing_steps)).toBe(true);
+      expect((builder as any).errorResponse.debug_info?.processing_steps.length).toBe(2);
+      expect((builder as any).errorResponse.debug_info?.processing_steps[0].step).toBe('Step1');
+      expect((builder as any).errorResponse.debug_info?.processing_steps[0].status).toBe('completed');
+      expect((builder as any).errorResponse.debug_info?.processing_steps[1].step).toBe('Step2');
+      expect((builder as any).errorResponse.debug_info?.processing_steps[1].status).toBe('failed');
+      expect((builder as any).errorResponse.debug_info?.processing_steps[1].details?.error).toBe('Something went wrong');
     });
 
     it('should add suggestions', () => {
@@ -71,9 +71,9 @@ describe('api-error-details.ts', () => {
         'Suggestion 2',
       ]);
 
-      expect(builder.errorResponse.suggestions).toHaveLength(2);
-      expect(builder.errorResponse.suggestions[0]).toBe('Suggestion 1');
-      expect(builder.errorResponse.suggestions[1]).toBe('Suggestion 2');
+      expect((builder as any).errorResponse.suggestions).toHaveLength(2);
+      expect((builder as any).errorResponse.suggestions[0]).toBe('Suggestion 1');
+      expect((builder as any).errorResponse.suggestions[1]).toBe('Suggestion 2');
     });
 
     it('should build error response correctly', () => {
@@ -94,7 +94,7 @@ describe('api-error-details.ts', () => {
 
     it('should analyze connection error correctly', () => {
       const errorDetails = { message: 'connection refused' };
-      const suggestions = DatabaseErrorBuilder.analyzeConnectionError(errorDetails);
+      const suggestions = (DatabaseErrorBuilder as any).analyzeConnectionError(errorDetails);
 
       expect(suggestions).toContain('データベースサーバーが起動していません');
       expect(suggestions).toContain('ネットワーク接続を確認してください');
@@ -103,7 +103,7 @@ describe('api-error-details.ts', () => {
     it('should analyze SQL error correctly', () => {
       const errorDetails = { message: 'syntax error at or near SELECT' };
       const query = 'SELECT * FROM users';
-      const suggestions = DatabaseErrorBuilder.analyzeSQLError(errorDetails, query);
+      const suggestions = (DatabaseErrorBuilder as any).analyzeSQLError(errorDetails, query);
 
       expect(suggestions).toContain('SQLクエリの構文エラーです');
       expect(suggestions).toContain('クエリの書式を確認してください');
@@ -114,7 +114,7 @@ describe('api-error-details.ts', () => {
     it('should create an ExternalAPIErrorBuilder with message and type', () => {
       const builder = new ExternalAPIErrorBuilder('Test message');
       expect(builder.message).toBe('Test message');
-      expect(builder.errorResponse.error_code).toBe('EXTERNAL_API_ERROR');
+      expect((builder as any).errorResponse.error_code).toBe('EXTERNAL_API_ERROR');
     });
 
     it('should have constructor that sets message property', () => {
@@ -124,8 +124,8 @@ describe('api-error-details.ts', () => {
 
     it('should create an ExternalAPIErrorBuilder with correct error code and message', () => {
       const builder = new ExternalAPIErrorBuilder('Test message');
-      expect(builder.errorResponse.error_code).toBe('EXTERNAL_API_ERROR');
-      expect(builder.errorResponse.message).toBe('Test message');
+      expect((builder as any).errorResponse.error_code).toBe('EXTERNAL_API_ERROR');
+      expect((builder as any).errorResponse.message).toBe('Test message');
     });
 
     it('should set API context correctly', () => {
@@ -140,12 +140,12 @@ describe('api-error-details.ts', () => {
       const result = builder.setAPIContext(context);
 
       expect(result).toBe(builder);
-      expect(builder.errorResponse.debug_info?.operation).toBe('API_POST');
-      expect(builder.errorResponse.details?.api_name).toBe('OpenAI');
-      expect(builder.errorResponse.details?.endpoint).toBe('/v1/chat');
-      expect(builder.errorResponse.details?.method).toBe('POST');
-      expect(builder.errorResponse.details?.status_code).toBe(200);
-      expect(builder.errorResponse.details?.response_time).toBe(1000);
+      expect((builder as any).errorResponse.debug_info?.operation).toBe('API_POST');
+      expect((builder as any).errorResponse.details?.api_name).toBe('OpenAI');
+      expect((builder as any).errorResponse.details?.endpoint).toBe('/v1/chat');
+      expect((builder as any).errorResponse.details?.method).toBe('POST');
+      expect((builder as any).errorResponse.details?.status_code).toBe(200);
+      expect((builder as any).errorResponse.details?.response_time).toBe(1000);
     });
 
     it('should analyze OpenAI error correctly', () => {
@@ -153,7 +153,7 @@ describe('api-error-details.ts', () => {
         code: 'insufficient_quota',
         message: 'Your quota has been exceeded'
       };
-      const suggestions = ExternalAPIErrorBuilder.analyzeOpenAIError(errorDetails);
+      const suggestions = (ExternalAPIErrorBuilder as any).analyzeOpenAIError(errorDetails);
 
       expect(suggestions).toContain('OpenAI APIの利用量が上限に達しています');
       expect(suggestions).toContain('API利用プランの確認またはアップグレードが必要です');
@@ -161,7 +161,7 @@ describe('api-error-details.ts', () => {
 
     it('should analyze shipping error correctly', () => {
       const errorDetails = { message: 'authentication failed' };
-      const suggestions = ExternalAPIErrorBuilder.analyzeShippingError(errorDetails);
+      const suggestions = (ExternalAPIErrorBuilder as any).analyzeShippingError(errorDetails);
 
       expect(suggestions).toContain('配送API認証に失敗しました');
       expect(suggestions).toContain('APIキーとシークレットを確認してください');

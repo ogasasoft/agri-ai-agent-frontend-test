@@ -109,10 +109,10 @@ beforeEach(() => {
 // Ensure development mode so rate limiting is bypassed for most tests
 const originalNodeEnv = process.env.NODE_ENV;
 beforeAll(() => {
-  process.env.NODE_ENV = 'development';
+  (process.env as any).NODE_ENV ='development';
 });
 afterAll(() => {
-  process.env.NODE_ENV = originalNodeEnv;
+  (process.env as any).NODE_ENV =originalNodeEnv;
 });
 
 describe('middleware', () => {
