@@ -354,6 +354,11 @@ npm run dev
 
 ## 🔄 Recent Updates
 
+### 2026-04-02
+
+- 🐛 Swift Template Gallery: GitHub Actions Node.js version unified to 20.x (ci.yml)
+- 🔧 Updated dependency versions for stability
+
 ### 2026-03-24
 
 - ✨ Added quality score display to README
