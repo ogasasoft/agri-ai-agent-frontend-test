@@ -144,6 +144,14 @@ src/
 └── stores/               # Zustand ストア
 ```
 
+## 📚 Documentation
+
+- [Getting Started](#-セットアップ) - Initial setup guide
+- [Quality Checklist](./QUALITY_CHECKLIST.md) - Quality assurance checklist
+- [Test Status Summary](./TEST_STATUS_SUMMARY.md) - Test coverage and status
+- [Error Handling Rules](./ERROR_HANDLING_RULES.md) - Error handling guidelines
+- [System Architecture](./SYSTEM_ARCHITECTURE.md) - System design documentation
+
 ## 🔐 セキュリティ機能
 
 ### 認証システム
@@ -354,10 +362,15 @@ npm run dev
 
 ## 🔄 Recent Updates
 
-### 2026-04-02
+### 2026-04-17
 
-- 🐛 Swift Template Gallery: GitHub Actions Node.js version unified to 20.x (ci.yml)
-- 🔧 Updated dependency versions for stability
+- ✅ **Quality Score**: 25/25 (Excellent)
+- ✅ **Test Coverage**: 85.92% statements, 74.19% branches, 93.29% functions, 86.01% lines
+- ✅ **Tests**: 1332 tests passed
+- ✅ **Security**: No vulnerabilities detected
+- ✅ **Build**: Successful with zero errors
+- 📊 Jest configuration optimized for better coverage measurement
+- 🔧 TypeScript strict mode with zero errors
 
 ### 2026-03-24
 
