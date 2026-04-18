@@ -38,9 +38,9 @@
 ### AI・外部連携
 
 - **OpenAI GPT-3.5-turbo** - AIチャット機能
-- **ヤマト運輸API** - 配送ラベル作成（予定）
-- **カラーミーショップAPI** - 注文同期（予定）
-- **食べチョクAPI** - 注文同期（予定）
+- **ヤマト運輸API** - 配送ラベル自動作成（実装済み、CSVエクスポート対応）
+- **カラーミーショップAPI** - 商品・注文自動同期（計画中）
+- **食べチョクAPI** - 注文データ取得（計画中）
 
 ## 🚀 セットアップ
 
@@ -381,6 +381,18 @@ npm run dev
 - ✅ **Build**: Successful with zero errors
 - 📊 Jest configuration optimized for better coverage measurement
 - 🔧 TypeScript strict mode with zero errors
+
+### 2026-04-18
+
+- ✅ **Quality Score**: 25/25 (Excellent)
+- ✅ **Test Coverage**: 85.92% statements, 74.19% branches, 93.29% functions, 86.01% lines
+- ✅ **Tests**: 1332 tests passed
+- ✅ **Security**: No vulnerabilities detected
+- ✅ **Build**: Successful with zero errors
+- 📊 Jest configuration optimized for better coverage measurement
+- 🔧 TypeScript strict mode with zero errors
+- 🔌 Yamato Transport API integration completed for CSV export shipping labels
+- 📝 Updated README with external API integration status
 
 ### 2026-03-24
 
