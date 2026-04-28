@@ -1,0 +1,271 @@
+# GitHub Actions CI/CD Documentation
+
+**Last Updated:** 2026-04-28 12:45 UTC
+
+## Overview
+
+This project uses GitHub Actions for continuous integration and deployment. All quality checks (TypeScript, ESLint, Tests) are automated on every pull request and push.
+
+---
+
+## CI/CD Pipeline
+
+### Workflow File
+
+- **Location:** `.github/workflows/ci.yml`
+- **Triggers:** Pull requests and pushes to any branch
+
+### Workflow Stages
+
+1. **Code Quality Checks**
+   - TypeScript type checking
+   - ESLint validation
+   - Automated test execution
+
+2. **Build Validation**
+   - Production build execution
+   - Asset optimization
+
+3. **Deployment (Production)**
+   - Automatic deployment to Vercel on main branch pushes
+
+---
+
+## Quality Checks
+
+### Pre-Commit Checks (Local)
+
+All quality checks should pass before committing:
+
+```bash
+# Run all quality checks
+npm run quality
+
+# TypeScript type check
+npm run typecheck
+
+# ESLint check
+npm run lint
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm test -- --coverage
+```
+
+### CI Checks (GitHub Actions)
+
+#### TypeScript Type Check
+
+```yaml
+- name: TypeScript Type Check
+  run: npm run typecheck
+```
+
+**Expected Result:** Zero errors
+
+#### ESLint Check
+
+```yaml
+- name: ESLint
+  run: npm run lint
+```
+
+**Expected Result:** Zero errors
+
+#### Test Execution
+
+```yaml
+- name: Run Tests
+  run: npm test
+```
+
+**Expected Result:** All tests passing
+
+---
+
+## Build Validation
+
+### Production Build
+
+```bash
+npm run build
+```
+
+**Expected Result:** Build succeeds with zero errors
+
+### Build Artifacts
+
+- `.next/` directory (Next.js build output)
+- Static assets and optimized files
+
+---
+
+## Deployment
+
+### Vercel Deployment
+
+- **Trigger:** Push to `main` branch
+- **Platform:** Vercel
+- **Environment:** Production
+
+### Deployment Steps
+
+1. Triggered by GitHub Actions workflow
+2. Build executes locally (next build)
+3. Artifacts uploaded to Vercel
+4. Site goes live automatically
+
+### Deployment Configuration
+
+```yaml
+- name: Deploy to Vercel
+  run: vercel --prod
+```
+
+---
+
+## Test Coverage
+
+### Coverage Thresholds
+
+- **Statements:** 85% minimum
+- **Branches:** 70% minimum
+- **Functions:** 90% minimum
+- **Lines:** 85% minimum
+
+### Viewing Coverage Reports
+
+```bash
+# Run tests with coverage
+npm test -- --coverage
+
+# View HTML report
+open coverage/index.html
+```
+
+---
+
+## Branch Protection Rules
+
+### Main Branch Protection
+
+- **Required Status Checks:**
+  - TypeScript typecheck
+  - ESLint
+  - Tests
+  - Build
+
+- **Pull Request Reviews:** Required
+- **Require branches to be up to date before merging:** Required
+- **Prevent merge commits:** Required
+
+### Developer Branch Protection
+
+- **Required Status Checks:**
+  - TypeScript typecheck
+  - ESLint
+  - Tests
+
+- **Allow non-fast-forward merges:** Allowed
+- **Prevent merge commits:** Not required
+
+---
+
+## Common CI/CD Issues
+
+### TypeScript Errors
+
+**Issue:** Type errors in source code
+**Solution:** Run `npm run typecheck` locally and fix errors before pushing
+
+### ESLint Warnings
+
+**Issue:** Linting issues in source code
+**Solution:** Run `npm run lint:fix` locally to auto-fix issues
+
+### Test Failures
+
+**Issue:** Test failures in CI
+**Solution:** Run `npm test` locally to reproduce and fix issues
+
+### Build Failures
+
+**Issue:** Production build fails
+**Solution:** Run `npm run build` locally to reproduce and fix issues
+
+---
+
+## Maintenance Tasks
+
+### Weekly
+
+- Review CI/CD logs for any failures
+- Update workflow configurations if needed
+- Monitor test coverage trends
+
+### Monthly
+
+- Review and update dependency versions
+- Optimize build time if needed
+- Review and update deployment configurations
+
+### Quarterly
+
+- Review and update security policies
+- Optimize workflow performance
+- Review and update branch protection rules
+
+---
+
+## Tools and Dependencies
+
+### GitHub Actions
+
+- **Actions Used:**
+  - `actions/checkout@v4` - Checkout code
+  - `actions/setup-node@v4` - Setup Node.js environment
+  - `OpenSauced/pull-request-comment@v1` - Pull request comments
+  - `clawHQ/action-github-actions-reviewer@v2` - Automated PR reviews
+
+### CI Dependencies
+
+- **Node.js:** 18.x or higher
+- **npm:** Latest version
+- **Vercel CLI:** Installed globally for deployment
+
+---
+
+## Troubleshooting
+
+### Workflow Fails to Run
+
+1. Check GitHub Actions logs for detailed error messages
+2. Verify branch protection rules are correctly configured
+3. Ensure all required checks are passing locally
+
+### Deployment Fails
+
+1. Check Vercel deployment logs
+2. Verify environment variables are set correctly
+3. Ensure build artifacts are properly uploaded
+
+### Tests Timeout
+
+1. Increase test timeout if necessary
+2. Review test performance and optimize slow tests
+3. Check for resource limitations
+
+---
+
+## References
+
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Next.js Deployment Guide](https://nextjs.org/docs/deployment)
+- [Vercel Documentation](https://vercel.com/docs)
+
+---
+
+_Generated by: Autonomous Agent (GLM API Rate Limit)_
+_Status: ✅ All CI/CD Checks Passing_

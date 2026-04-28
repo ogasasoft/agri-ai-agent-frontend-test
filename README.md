@@ -149,6 +149,7 @@ src/
 - [Getting Started](#-セットアップ) - Initial setup guide
 - [Quality Checklist](./QUALITY_CHECKLIST.md) - Quality assurance checklist
 - [Test Status Summary](./TEST_STATUS_SUMMARY.md) - Test coverage and status
+- [Project Status](./PROJECT_STATUS.md) - Current quality metrics and status
 - [Error Handling Rules](./ERROR_HANDLING_RULES.md) - Error handling guidelines
 - [System Architecture](./SYSTEM_ARCHITECTURE.md) - System design documentation
 
