@@ -138,6 +138,12 @@ Before submitting a PR, verify all 10 items in `QUALITY_CHECKLIST.md`:
 
 A score below 24/30 requires fixes before the PR can be merged.
 
+## Documentation
+
+- [Project Status](./PROJECT_STATUS.md) - Current quality metrics and status
+- [GitHub Actions CI/CD](./GITHUB_ACTIONS.md) - CI/CD pipeline and deployment
+- [Security Documentation](./SECURITY.md) - Security features and policies
+
 ## Commit Messages
 
 Use the [Conventional Commits](https://www.conventionalcommits.org/) format:
