@@ -87,3 +87,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced CI/CD documentation with workflow stages and troubleshooting guide
 - Expanded security documentation with code security practices and compliance information
 - Documented security features (MFA, rate limiting, CSRF protection, data encryption)
+
+### Upgrades
+
+- **TypeScript**: 5.9.3 → 6.0.2
+  - Full TypeScript strict mode support
+  - Updated `@types/react` and `@types/react-dom` for TypeScript 6
+  - Type safety improvements across the codebase
+  - Verified all 1329 tests pass with zero type errors
+
+- **eslint-config-next**: 16.2.2 → 16.3.0-canary.7
+  - Latest Next.js ESLint configuration
+  - Improved type checking integration
+  - Compatible with TypeScript 6.0.2
+  - All lint rules pass without warnings
