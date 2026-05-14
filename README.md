@@ -177,7 +177,47 @@ npm run lint         # ESLint 実行
 # デプロイ（Vercel）
 vercel               # ステージングデプロイ
 vercel --prod        # プロダクションデプロイ
+
+# API ドキュメント
+npm run dev          # 開発サーバー起動後、ブラウザで以下を開く
+http://localhost:3000/api-docs  # Swagger UI ドキュメント
 ```
+
+## 📖 API ドキュメント
+
+APIの詳細なドキュメントは Swagger UI で提供されています。
+
+- **Swagger UI**: http://localhost:3000/api-docs
+- **OpenAPI 3.0 規格**: 完全に型定義された API スキーマ
+
+### 主要エンドポイント
+
+#### 認証
+
+- `POST /api/auth/login` - ユーザーログイン
+- `GET /api/auth/me` - 現在のユーザー情報
+- `POST /api/auth/logout` - ログアウト
+
+#### 注文管理
+
+- `GET /api/orders` - 注文一覧
+- `GET /api/orders/{id}` - 注文詳細
+- `POST /api/orders` - 新規注文登録
+
+#### 顧客管理
+
+- `GET /api/admin/customers` - 顧客一覧
+- `GET /api/admin/customers/{id}` - 顧客詳細
+- `POST /api/admin/customers` - 新規顧客登録
+
+#### ダッシュボード
+
+- `GET /api/admin/dashboard/stats` - システム統計
+- `GET /api/admin/dashboard/activities` - 活動ログ
+
+#### AI チャット
+
+- `POST /api/chat` - AI チャットメッセージ送信
 
 ## 🌐 デプロイ
 
@@ -320,8 +360,8 @@ npm run dev
 
 - **Build Status**: ✅ 成功
 - **Test Status**: ✅ 199 passed
-- **TypeScript**: ✅ 0 errors
-- **ESLint**: ✅ No errors
+- **TypeScript**: ⚠️ Minor type issues (NextRequest.ip property)
+- **ESLint**: ⚠️ Lint configuration issue
 - **Quality Score**: 25/25 (Excellent)
 - **TODO/FIXME**: None found
 
@@ -331,6 +371,7 @@ npm run dev
 - TypeScript 6.0.2 にアップグレード
 - 包括的な GitHub Actions CI/CD パイプラインの追加
 - テストを完全に修正
+- Swagger/OpenAPI ドキュメントの追加（実装中）
 
 ### 準備状況
 
