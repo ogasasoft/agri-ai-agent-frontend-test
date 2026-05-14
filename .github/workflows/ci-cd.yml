@@ -252,6 +252,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
     needs: [test, build]
+    if: success()
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -276,7 +277,6 @@ jobs:
         run: |
           npm i -g vercel
           vercel --prod --token=$VERCEL_TOKEN
-        if: success()
 
   # --- Deploy Production (if on main) ---
   deploy-production:
@@ -284,6 +284,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [test, build, security-scan]
+    if: success()
     environment:
       name: production
       url: https://your-production-url.com
@@ -311,7 +312,6 @@ jobs:
         run: |
           npm i -g vercel
           vercel --prod --token=$VERCEL_TOKEN
-        if: success()
 
       - name: Create deployment status comment
         uses: actions/github-script@v7

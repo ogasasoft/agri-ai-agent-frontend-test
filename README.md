@@ -275,7 +275,7 @@ vercel --prod
 - **ヤマト運輸API**: 配送ラベル自動作成（CSVエクスポート対応）✅
   - 実装日: 2026-04-18
   - 機能: 注文データから配送ラベルを自動生成
-  - ファイル: `src/lib/yamato.ts`
+  - ファイル: `src/types/yamato.ts`, `src/app/api/yamato-csv/route.ts`
   - ドキュメント: `YAMATO_API.md`
 
 ### 対応予定 API（計画中）
