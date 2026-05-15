@@ -29,9 +29,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
       {/* Main Content */}
       <div className="flex-1 flex">
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto">{children}</main>
 
         {/* AI Chat Panel */}
         {isChatOpen && (

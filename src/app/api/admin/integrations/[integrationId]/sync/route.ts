@@ -10,9 +10,9 @@ export async function POST(
   { params }: { params: { integrationId: string } }
 ) {
   try {
-    const sessionToken = request.headers.get('x-session-token') || 
-                         request.cookies.get('session_token')?.value;
-    
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+
     if (!sessionToken) {
       return createErrorResponse('認証が必要です。', 401);
     }
@@ -56,7 +56,7 @@ export async function POST(
         message: '',
         syncedRecords: 0,
         errors: [] as string[],
-        duration: 0
+        duration: 0,
       };
 
       const startTime = Date.now();
@@ -67,15 +67,15 @@ export async function POST(
           const ordersResponse = await fetch(`${integration.api_endpoint}/api/orders`, {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${integration.api_key}`,
-              'Content-Type': 'application/json'
+              Authorization: `Bearer ${integration.api_key}`,
+              'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(30000) // 30 second timeout
+            signal: AbortSignal.timeout(30000), // 30 second timeout
           });
 
           if (ordersResponse.ok) {
             const ordersData = await ordersResponse.json();
-            
+
             // Process and sync orders to database
             let syncedCount = 0;
             for (const order of ordersData.orders || []) {
@@ -108,7 +108,7 @@ export async function POST(
                     new Date(order.orderDate),
                     integrationId,
                     order.id,
-                    adminUser.id // Use admin user as default
+                    adminUser.id, // Use admin user as default
                   ]
                 );
                 syncedCount++;
@@ -120,25 +120,23 @@ export async function POST(
             syncResult.success = true;
             syncResult.syncedRecords = syncedCount;
             syncResult.message = `ColorMiから${syncedCount}件の注文を同期しました。`;
-
           } else {
             throw new Error(`ColorMi API error: ${ordersResponse.status}`);
           }
-
         } else if (integration.type === 'tabechoku') {
           // Sync Tabechoku products/orders
           const productsResponse = await fetch(`${integration.api_endpoint}/products`, {
             method: 'GET',
             headers: {
               'X-API-Key': integration.api_key,
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(30000) // 30 second timeout
+            signal: AbortSignal.timeout(30000), // 30 second timeout
           });
 
           if (productsResponse.ok) {
             const productsData = await productsResponse.json();
-            
+
             // Process and sync products
             let syncedCount = 0;
             for (const product of productsData.products || []) {
@@ -160,7 +158,7 @@ export async function POST(
                     product.price,
                     integrationId,
                     product.id,
-                    adminUser.id
+                    adminUser.id,
                   ]
                 );
                 syncedCount++;
@@ -172,15 +170,12 @@ export async function POST(
             syncResult.success = true;
             syncResult.syncedRecords = syncedCount;
             syncResult.message = `Tabechokuから${syncedCount}件の商品を同期しました。`;
-
           } else {
             throw new Error(`Tabechoku API error: ${productsResponse.status}`);
           }
-
         } else {
           throw new Error('サポートされていない統合タイプです。');
         }
-
       } catch (syncError: any) {
         syncResult.success = false;
         syncResult.message = `同期に失敗しました: ${syncError.message}`;
@@ -190,10 +185,9 @@ export async function POST(
       syncResult.duration = Date.now() - startTime;
 
       // Update last_synced timestamp
-      await client.query(
-        'UPDATE api_integrations SET last_synced_at = NOW() WHERE id = $1',
-        [integrationId]
-      );
+      await client.query('UPDATE api_integrations SET last_synced_at = NOW() WHERE id = $1', [
+        integrationId,
+      ]);
 
       // Log admin action
       await client.query(
@@ -206,10 +200,10 @@ export async function POST(
             integrationId,
             integrationName: integration.name,
             integrationType: integration.type,
-            syncResult
+            syncResult,
           }),
           request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
-          request.headers.get('user-agent') || 'unknown'
+          request.headers.get('user-agent') || 'unknown',
         ]
       );
 
@@ -220,16 +214,14 @@ export async function POST(
         integration: {
           id: integrationId,
           name: integration.name,
-          type: integration.type
-        }
+          type: integration.type,
+        },
       });
 
       return addSecurityHeaders(response);
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
     console.error('Sync integration error:', error);
     return createErrorResponse('統合設定の同期に失敗しました。', 500);

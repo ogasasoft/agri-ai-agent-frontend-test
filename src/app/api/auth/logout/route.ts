@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { validateSession, invalidateSession } from "@/lib/auth";
-import { invalidateRememberTokensForUser } from "@/lib/auth-enhanced";
-import { logAuthAttempt } from "@/lib/auth-error-details";
+import { NextRequest, NextResponse } from 'next/server';
+import { validateSession, invalidateSession } from '@/lib/auth';
+import { invalidateRememberTokensForUser } from '@/lib/auth-enhanced';
+import { logAuthAttempt } from '@/lib/auth-error-details';
 
 export async function POST(request: NextRequest) {
-  const sessionToken = request.cookies.get("session_token")?.value;
+  const sessionToken = request.cookies.get('session_token')?.value;
 
   if (sessionToken) {
     try {
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
       if (sessionData) {
         await invalidateSession(sessionToken, sessionData.user.id);
-        logAuthAttempt("SUCCESS", "logout", {});
+        logAuthAttempt('SUCCESS', 'logout', {});
       }
     } catch {
       // Session invalidation errors should not prevent logout
@@ -22,12 +22,12 @@ export async function POST(request: NextRequest) {
   // Clear cookies with Max-Age=0
   const response = NextResponse.json({
     success: true,
-    message: "ログアウトしました。",
+    message: 'ログアウトしました。',
   });
 
-  response.cookies.set("session_token", "", { maxAge: 0, path: "/" });
-  response.cookies.set("csrf_token", "", { maxAge: 0, path: "/" });
-  response.cookies.set("remember_token", "", { maxAge: 0, path: "/" });
+  response.cookies.set('session_token', '', { maxAge: 0, path: '/' });
+  response.cookies.set('csrf_token', '', { maxAge: 0, path: '/' });
+  response.cookies.set('remember_token', '', { maxAge: 0, path: '/' });
 
   return response;
 }

@@ -207,12 +207,26 @@ function convertOrderToYamatoCsv(order: any, senderInfo: any, settings?: any): Y
     posting_email_address: '', // 空白
     posting_email_message: '', // 空白
     // 2個目のフォーマット項目
-    delivery_complete_email_usage: settings?.enable_delivery_complete_email === 'true' ? (settings?.delivery_complete_email_type || '1') : '0',
-    delivery_complete_email_address: settings?.enable_delivery_complete_email === 'true' ? (order.customer_email || '') : '',
-    delivery_complete_email_message: settings?.enable_delivery_complete_email === 'true' ? (settings?.delivery_complete_email_message || '') : '',
-    sender_complete_email_usage: settings?.enable_sender_complete_email === 'true' ? (settings?.sender_complete_email_type || '1') : '0',
-    sender_complete_email_address: settings?.enable_sender_complete_email === 'true' ? (senderInfo.email || '') : '',
-    sender_complete_email_message: settings?.enable_sender_complete_email === 'true' ? (settings?.sender_complete_email_message || '') : '',
+    delivery_complete_email_usage:
+      settings?.enable_delivery_complete_email === 'true'
+        ? settings?.delivery_complete_email_type || '1'
+        : '0',
+    delivery_complete_email_address:
+      settings?.enable_delivery_complete_email === 'true' ? order.customer_email || '' : '',
+    delivery_complete_email_message:
+      settings?.enable_delivery_complete_email === 'true'
+        ? settings?.delivery_complete_email_message || ''
+        : '',
+    sender_complete_email_usage:
+      settings?.enable_sender_complete_email === 'true'
+        ? settings?.sender_complete_email_type || '1'
+        : '0',
+    sender_complete_email_address:
+      settings?.enable_sender_complete_email === 'true' ? senderInfo.email || '' : '',
+    sender_complete_email_message:
+      settings?.enable_sender_complete_email === 'true'
+        ? settings?.sender_complete_email_message || ''
+        : '',
     kuroneko_web_collect_data: '0', // 無し
     kuroneko_web_collect_member_no: '', // 空白
     kuroneko_web_collect_receipt_no1: '', // 空白
@@ -240,91 +254,177 @@ function convertOrderToYamatoCsv(order: any, senderInfo: any, settings?: any): Y
     reserve2: order.notes ? order.notes.substring(0, 50) : '', // メモの一部
     // 3個目のフォーマット項目
     delivery_schedule_email_usage: settings?.enable_delivery_schedule_email === 'true' ? '1' : '0',
-    delivery_schedule_email_address: settings?.enable_delivery_schedule_email === 'true' ? (order.customer_email || '').substring(0, 60) : '',
-    input_device_type: settings?.enable_delivery_schedule_email === 'true' ? (settings?.delivery_schedule_device_type || '1') : '',
-    delivery_schedule_email_message: settings?.enable_delivery_schedule_email === 'true' ? (settings?.delivery_schedule_email_message || '').substring(0, 74) : '',
-    delivery_complete_email_usage_v2: settings?.enable_delivery_complete_email_v2 === 'true' ? '1' : '0',
-    delivery_complete_email_address_v2: settings?.enable_delivery_complete_email_v2 === 'true' ? (order.customer_email || '').substring(0, 60) : '',
-    delivery_complete_email_message_v2: settings?.enable_delivery_complete_email_v2 === 'true' ? (settings?.delivery_complete_email_message_v2 || '').substring(0, 159) : '',
+    delivery_schedule_email_address:
+      settings?.enable_delivery_schedule_email === 'true'
+        ? (order.customer_email || '').substring(0, 60)
+        : '',
+    input_device_type:
+      settings?.enable_delivery_schedule_email === 'true'
+        ? settings?.delivery_schedule_device_type || '1'
+        : '',
+    delivery_schedule_email_message:
+      settings?.enable_delivery_schedule_email === 'true'
+        ? (settings?.delivery_schedule_email_message || '').substring(0, 74)
+        : '',
+    delivery_complete_email_usage_v2:
+      settings?.enable_delivery_complete_email_v2 === 'true' ? '1' : '0',
+    delivery_complete_email_address_v2:
+      settings?.enable_delivery_complete_email_v2 === 'true'
+        ? (order.customer_email || '').substring(0, 60)
+        : '',
+    delivery_complete_email_message_v2:
+      settings?.enable_delivery_complete_email_v2 === 'true'
+        ? (settings?.delivery_complete_email_message_v2 || '').substring(0, 159)
+        : '',
     kuroneko_collection_usage: settings?.enable_kuroneko_collection === 'true' ? '1' : '0',
-    collection_billing_amount_v2: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_billing_amount || '0').padStart(7, '0') : '',
-    collection_billing_tax_v2: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_billing_tax || '0').padStart(7, '0') : '',
-    collection_billing_zip_v2: settings?.enable_kuroneko_collection === 'true' ? formatZip(settings?.collection_billing_zip || '') : '',
-    collection_billing_address_v2: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_billing_address || '').substring(0, 64) : '',
-    collection_billing_building_v2: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_billing_building || '').substring(0, 32) : '',
-    collection_billing_company1_v2: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_billing_company1 || '').substring(0, 50) : '',
-    collection_billing_company2_v2: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_billing_company2 || '').substring(0, 50) : '',
-    collection_billing_name_kanji: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_billing_name_kanji || '').substring(0, 32) : '',
-    collection_billing_name_kana: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_billing_name_kana || '').substring(0, 50) : '',
-    collection_inquiry_name_kanji: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_inquiry_name_kanji || '').substring(0, 32) : '',
-    collection_inquiry_zip: settings?.enable_kuroneko_collection === 'true' ? formatZip(settings?.collection_inquiry_zip || '') : '',
-    collection_inquiry_address: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_inquiry_address || '').substring(0, 64) : '',
-    collection_inquiry_building: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_inquiry_building || '').substring(0, 32) : '',
-    collection_inquiry_phone: settings?.enable_kuroneko_collection === 'true' ? formatPhone(settings?.collection_inquiry_phone || '') : '',
-    collection_management_number: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_management_number || '').substring(0, 20) : '',
-    collection_item_name_v2: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_item_name || '').substring(0, 50) : '',
-    collection_note_v2: settings?.enable_kuroneko_collection === 'true' ? (settings?.collection_note || '').substring(0, 28) : '',
+    collection_billing_amount_v2:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_billing_amount || '0').padStart(7, '0')
+        : '',
+    collection_billing_tax_v2:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_billing_tax || '0').padStart(7, '0')
+        : '',
+    collection_billing_zip_v2:
+      settings?.enable_kuroneko_collection === 'true'
+        ? formatZip(settings?.collection_billing_zip || '')
+        : '',
+    collection_billing_address_v2:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_billing_address || '').substring(0, 64)
+        : '',
+    collection_billing_building_v2:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_billing_building || '').substring(0, 32)
+        : '',
+    collection_billing_company1_v2:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_billing_company1 || '').substring(0, 50)
+        : '',
+    collection_billing_company2_v2:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_billing_company2 || '').substring(0, 50)
+        : '',
+    collection_billing_name_kanji:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_billing_name_kanji || '').substring(0, 32)
+        : '',
+    collection_billing_name_kana:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_billing_name_kana || '').substring(0, 50)
+        : '',
+    collection_inquiry_name_kanji:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_inquiry_name_kanji || '').substring(0, 32)
+        : '',
+    collection_inquiry_zip:
+      settings?.enable_kuroneko_collection === 'true'
+        ? formatZip(settings?.collection_inquiry_zip || '')
+        : '',
+    collection_inquiry_address:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_inquiry_address || '').substring(0, 64)
+        : '',
+    collection_inquiry_building:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_inquiry_building || '').substring(0, 32)
+        : '',
+    collection_inquiry_phone:
+      settings?.enable_kuroneko_collection === 'true'
+        ? formatPhone(settings?.collection_inquiry_phone || '')
+        : '',
+    collection_management_number:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_management_number || '').substring(0, 20)
+        : '',
+    collection_item_name_v2:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_item_name || '').substring(0, 50)
+        : '',
+    collection_note_v2:
+      settings?.enable_kuroneko_collection === 'true'
+        ? (settings?.collection_note || '').substring(0, 28)
+        : '',
   };
 }
 
 export async function POST(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     // セッション検証
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       return NextResponse.json({ success: false, message: '認証が必要です' }, { status: 401 });
     }
 
     const sessionData = await validateSession(sessionToken);
     if (!sessionData || !sessionData.user) {
-      return NextResponse.json({ success: false, message: '無効なセッションです' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: '無効なセッションです' },
+        { status: 401 }
+      );
     }
 
     const { orderIds } = await request.json();
-    
+
     if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
-      return NextResponse.json({ 
-        success: false, 
-        message: '注文IDが指定されていません' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: '注文IDが指定されていません',
+        },
+        { status: 400 }
+      );
     }
 
     client = await getDbClient();
-    
+
     // 指定された注文を取得（ユーザー固有）
     const placeholders = orderIds.map((_, index) => `$${index + 2}`).join(',');
-    const ordersResult = await client.query(`
+    const ordersResult = await client.query(
+      `
       SELECT id, order_code, customer_name, phone, address, delivery_date, 
              notes, item_name, price, created_at
       FROM orders 
       WHERE id IN (${placeholders}) AND user_id = $1
       ORDER BY created_at
-    `, [sessionData.user.id, ...orderIds]);
+    `,
+      [sessionData.user.id, ...orderIds]
+    );
 
     if (ordersResult.rows.length === 0) {
-      return NextResponse.json({ 
-        success: false, 
-        message: '指定された注文が見つかりません' 
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: '指定された注文が見つかりません',
+        },
+        { status: 404 }
+      );
     }
 
     // 送信者情報を取得（ユーザー情報から）
-    const userResult = await client.query(`
+    const userResult = await client.query(
+      `
       SELECT username, email FROM users WHERE id = $1
-    `, [sessionData.user.id]);
+    `,
+      [sessionData.user.id]
+    );
 
     // ユーザーの設定を取得
-    const settingsResult = await client.query(`
+    const settingsResult = await client.query(
+      `
       SELECT setting_key, setting_value 
       FROM user_settings 
       WHERE user_id = $1 AND setting_key LIKE 'yamato_%'
-    `, [sessionData.user.id]);
+    `,
+      [sessionData.user.id]
+    );
 
     // 設定をオブジェクトに変換
     const userSettings: any = {};
-    settingsResult.rows.forEach(row => {
+    settingsResult.rows.forEach((row) => {
       const key = row.setting_key.replace('yamato_', '');
       userSettings[key] = row.setting_value;
     });
@@ -334,69 +434,162 @@ export async function POST(request: NextRequest) {
       name: userSettings.sender_name || userResult.rows[0]?.username || '農業事業者',
       phone: userSettings.sender_phone || '03-1234-5678',
       zip: userSettings.sender_zip || '1000001',
-      address: userSettings.sender_address || '東京都千代田区千代田1-1'
+      address: userSettings.sender_address || '東京都千代田区千代田1-1',
     };
 
     // CSVデータを生成
-    const csvRows = ordersResult.rows.map(order => convertOrderToYamatoCsv(order, senderInfo, userSettings));
-    
+    const csvRows = ordersResult.rows.map((order) =>
+      convertOrderToYamatoCsv(order, senderInfo, userSettings)
+    );
+
     // CSVヘッダー（日本語）- 1個目と2個目の項目を結合
     const headers = [
       // 1個目のフォーマット項目
-      'お客様管理番号', '送り状種類', 'クール区分', '伝票番号', '出荷予定日', 'お届け予定日', '配達時間帯',
-      'お届け先コード', 'お届け先電話番号', 'お届け先電話番号枝番', 'お届け先郵便番号', 'お届け先住所',
-      'お届け先アパート・マンション名', 'お届け先会社・部門名1', 'お届け先会社・部門名2', 'お届け先名', 'お届け先名（敬称）',
-      'ご依頼主コード', 'ご依頼主電話番号', 'ご依頼主電話番号枝番', 'ご依頼主郵便番号', 'ご依頼主住所',
-      'ご依頼主住所（ビル・マンション名）', 'ご依頼主名', 'ご依頼主名（敬称）',
-      '品名コード1', '品名1', '品名コード2', '品名2', '品名コード3', '品名3', '品名コード4', '品名4',
-      '荷扱い1', '荷扱い2', '記事', 'コレクト代金引換金額', 'コレクト内消費税額等', '営業所止置き', '営業所コード',
-      '発行枚数', '個数口枠の印字', '請求先顧客コード', '請求先分類コード', '運賃管理番号', '代引き領収書発行',
-      '納品書発行タイプ', '収納代行請求金額', '収納代行内消費税額等', '収納代行請求先郵便番号', '収納代行請求先住所',
-      '収納代行請求先会社・部門名', '収納代行請求先名', '収納代行問合せ先名/電話番号/管理番号', '収納代行品名',
-      '収納代行備考', '投函予定メール（お届け先宛）利用区分', '投函予定メール（お届け先宛）e-mail', 
+      'お客様管理番号',
+      '送り状種類',
+      'クール区分',
+      '伝票番号',
+      '出荷予定日',
+      'お届け予定日',
+      '配達時間帯',
+      'お届け先コード',
+      'お届け先電話番号',
+      'お届け先電話番号枝番',
+      'お届け先郵便番号',
+      'お届け先住所',
+      'お届け先アパート・マンション名',
+      'お届け先会社・部門名1',
+      'お届け先会社・部門名2',
+      'お届け先名',
+      'お届け先名（敬称）',
+      'ご依頼主コード',
+      'ご依頼主電話番号',
+      'ご依頼主電話番号枝番',
+      'ご依頼主郵便番号',
+      'ご依頼主住所',
+      'ご依頼主住所（ビル・マンション名）',
+      'ご依頼主名',
+      'ご依頼主名（敬称）',
+      '品名コード1',
+      '品名1',
+      '品名コード2',
+      '品名2',
+      '品名コード3',
+      '品名3',
+      '品名コード4',
+      '品名4',
+      '荷扱い1',
+      '荷扱い2',
+      '記事',
+      'コレクト代金引換金額',
+      'コレクト内消費税額等',
+      '営業所止置き',
+      '営業所コード',
+      '発行枚数',
+      '個数口枠の印字',
+      '請求先顧客コード',
+      '請求先分類コード',
+      '運賃管理番号',
+      '代引き領収書発行',
+      '納品書発行タイプ',
+      '収納代行請求金額',
+      '収納代行内消費税額等',
+      '収納代行請求先郵便番号',
+      '収納代行請求先住所',
+      '収納代行請求先会社・部門名',
+      '収納代行請求先名',
+      '収納代行問合せ先名/電話番号/管理番号',
+      '収納代行品名',
+      '収納代行備考',
+      '投函予定メール（お届け先宛）利用区分',
+      '投函予定メール（お届け先宛）e-mail',
       '投函予定メール（お届け先宛）メッセージ',
       // 2個目のフォーマット項目
-      '投函完了メール（お届け先宛）利用区分', '投函完了メール（お届け先宛）e-mailアドレス', '投函完了メール（お届け先宛）メッセージ',
-      '投函完了メール（ご依頼主宛）利用区分', '投函完了メール（ご依頼主宛）e-mailアドレス', '投函完了メール（ご依頼主宛）メッセージ',
-      'クロネコwebコレクトデータ登録', 'クロネコwebコレクト加盟店番号', 'クロネコwebコレクト申込受付番号1',
-      'クロネコwebコレクト申込受付番号2', 'クロネコwebコレクト申込受付番号3', '請求先顧客コード（必須）',
-      '請求先分類コード（必須）', '運賃管理番号（必須）', '止置き', '営業所コード（必須）', '発行枚数（特定サービス）',
-      '個数口表示フラグ', '複数口くくりキー', '検索キータイトル1', '検索キー1', '検索キータイトル2', '検索キー2',
-      '検索キータイトル3', '検索キー3', '検索キータイトル4', '検索キー4', '検索キータイトル5', '検索キー5',
-      '予備（1）', '予備（2）',
+      '投函完了メール（お届け先宛）利用区分',
+      '投函完了メール（お届け先宛）e-mailアドレス',
+      '投函完了メール（お届け先宛）メッセージ',
+      '投函完了メール（ご依頼主宛）利用区分',
+      '投函完了メール（ご依頼主宛）e-mailアドレス',
+      '投函完了メール（ご依頼主宛）メッセージ',
+      'クロネコwebコレクトデータ登録',
+      'クロネコwebコレクト加盟店番号',
+      'クロネコwebコレクト申込受付番号1',
+      'クロネコwebコレクト申込受付番号2',
+      'クロネコwebコレクト申込受付番号3',
+      '請求先顧客コード（必須）',
+      '請求先分類コード（必須）',
+      '運賃管理番号（必須）',
+      '止置き',
+      '営業所コード（必須）',
+      '発行枚数（特定サービス）',
+      '個数口表示フラグ',
+      '複数口くくりキー',
+      '検索キータイトル1',
+      '検索キー1',
+      '検索キータイトル2',
+      '検索キー2',
+      '検索キータイトル3',
+      '検索キー3',
+      '検索キータイトル4',
+      '検索キー4',
+      '検索キータイトル5',
+      '検索キー5',
+      '予備（1）',
+      '予備（2）',
       // 3個目のフォーマット項目
-      'お届け予定eメール利用区分', 'お届け予定eメールアドレス', '入力機種', 'お届け予定eメールメッセージ',
-      'お届け完了eメール利用区分', 'お届け完了eメールアドレス', 'お届け完了eメールメッセージ',
-      'クロネコ収納代行利用区分', '収納代行請求金額（税込）', '収納代行内消費税額等', '収納代行請求先郵便番号',
-      '収納代行請求先住所', '収納代行請求先住所（アパート・マンション名）', '収納代行請求先会社・部門名1',
-      '収納代行請求先会社・部門名2', '収納代行請求先名（漢字）', '収納代行請求先名（カナ）',
-      '収納代行問合せ先名（漢字）', '収納代行問合せ先郵便番号', '収納代行問合せ先住所',
-      '収納代行問合せ先住所（アパート・マンション名）', '収納代行問合せ先電話番号', '収納代行管理番号',
-      '収納代行品名', '収納代行備考'
+      'お届け予定eメール利用区分',
+      'お届け予定eメールアドレス',
+      '入力機種',
+      'お届け予定eメールメッセージ',
+      'お届け完了eメール利用区分',
+      'お届け完了eメールアドレス',
+      'お届け完了eメールメッセージ',
+      'クロネコ収納代行利用区分',
+      '収納代行請求金額（税込）',
+      '収納代行内消費税額等',
+      '収納代行請求先郵便番号',
+      '収納代行請求先住所',
+      '収納代行請求先住所（アパート・マンション名）',
+      '収納代行請求先会社・部門名1',
+      '収納代行請求先会社・部門名2',
+      '収納代行請求先名（漢字）',
+      '収納代行請求先名（カナ）',
+      '収納代行問合せ先名（漢字）',
+      '収納代行問合せ先郵便番号',
+      '収納代行問合せ先住所',
+      '収納代行問合せ先住所（アパート・マンション名）',
+      '収納代行問合せ先電話番号',
+      '収納代行管理番号',
+      '収納代行品名',
+      '収納代行備考',
     ];
 
     // CSV文字列を生成
     const csvContent = [
       headers.join(','),
-      ...csvRows.map(row => Object.values(row).map(value => 
-        typeof value === 'string' && value.includes(',') ? `"${value}"` : value
-      ).join(','))
+      ...csvRows.map((row) =>
+        Object.values(row)
+          .map((value) => (typeof value === 'string' && value.includes(',') ? `"${value}"` : value))
+          .join(',')
+      ),
     ].join('\n');
 
     return NextResponse.json({
       success: true,
       csv: csvContent,
       filename: `yamato_b2_${new Date().toISOString().split('T')[0]}_${orderIds.length}orders.csv`,
-      order_count: csvRows.length
+      order_count: csvRows.length,
     });
-
   } catch (error) {
     console.error('Yamato CSV generation error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'CSVの生成に失敗しました',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'CSVの生成に失敗しました',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   } finally {
     if (client) {
       await client.end();

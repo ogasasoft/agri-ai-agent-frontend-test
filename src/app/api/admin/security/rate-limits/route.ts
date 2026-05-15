@@ -8,10 +8,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     // Session validation
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       return createErrorResponse('認証が必要です', 401);
     }
@@ -46,9 +47,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      rateLimits
+      rateLimits,
     });
-
   } catch (error) {
     console.error('Get rate limits error:', error);
     return createErrorResponse('サーバーエラーが発生しました', 500);

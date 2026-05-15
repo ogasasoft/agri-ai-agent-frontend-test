@@ -7,23 +7,26 @@ export async function POST(_request: NextRequest) {
   try {
     // メモリベースのレート制限をクリア
     rateLimitMap.clear();
-    
+
     // グローバルウィンドウからもレート制限データを削除
     if (typeof global !== 'undefined') {
       (global as any).rateLimitMap = new Map();
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       message: 'All rate limits reset successfully',
-      cleared: true
+      cleared: true,
     });
   } catch (error) {
     console.error('Error resetting rate limit:', error);
-    return NextResponse.json({ 
-      success: false,
-      message: 'Internal server error',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Internal server error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }

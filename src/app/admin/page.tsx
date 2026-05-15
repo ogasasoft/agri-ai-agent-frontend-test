@@ -1,9 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Users, Database, ShoppingCart, TrendingUp, 
-  Activity, AlertCircle, CheckCircle, Clock 
+import {
+  Users,
+  Database,
+  ShoppingCart,
+  TrendingUp,
+  Activity,
+  AlertCircle,
+  CheckCircle,
+  Clock,
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -38,7 +44,7 @@ export default function AdminDashboard() {
     try {
       const [statsResponse, activitiesResponse] = await Promise.all([
         fetch('/api/admin/dashboard/stats'),
-        fetch('/api/admin/dashboard/activities')
+        fetch('/api/admin/dashboard/activities'),
       ]);
 
       if (statsResponse.ok) {
@@ -103,9 +109,7 @@ export default function AdminDashboard() {
         <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">
           管理者ダッシュボード
         </h1>
-        <p className="mt-2 text-sm text-gray-700">
-          システム全体の概要と最新の活動状況
-        </p>
+        <p className="mt-2 text-sm text-gray-700">システム全体の概要と最新の活動状況</p>
       </div>
 
       {/* Stats Cards */}
@@ -125,9 +129,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      {card.name}
-                    </dt>
+                    <dt className="text-sm font-medium text-gray-500 truncate">{card.name}</dt>
                     <dd className="flex items-baseline">
                       <div className="text-2xl font-semibold text-gray-900">
                         {card.value.toLocaleString()}
@@ -148,10 +150,8 @@ export default function AdminDashboard() {
         {/* System Health */}
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-              システム状態
-            </h3>
-            
+            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">システム状態</h3>
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
                 </div>
                 <span className="text-sm font-medium text-green-600">正常</span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
@@ -168,7 +168,7 @@ export default function AdminDashboard() {
                 </div>
                 <span className="text-sm font-medium text-green-600">正常</span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <AlertCircle className="h-5 w-5 text-yellow-500 mr-2" />
@@ -176,7 +176,7 @@ export default function AdminDashboard() {
                 </div>
                 <span className="text-sm font-medium text-yellow-600">設定中</span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <Clock className="h-5 w-5 text-blue-500 mr-2" />
@@ -193,41 +193,40 @@ export default function AdminDashboard() {
         {/* Recent Activities */}
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-              最近の活動
-            </h3>
-            
+            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">最近の活動</h3>
+
             <div className="flow-root">
               <ul className="-mb-8 space-y-3">
-                {activities.length > 0 ? activities.map((activity, index) => (
-                  <li key={activity.id}>
-                    <div className="relative">
-                      <div className="flex items-start space-x-3">
-                        <div className={`relative px-1 ${
-                          activity.severity === 'error' ? 'text-red-500' :
-                          activity.severity === 'warning' ? 'text-yellow-500' :
-                          activity.severity === 'success' ? 'text-green-500' :
-                          'text-blue-500'
-                        }`}>
-                          <Activity className="h-5 w-5" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div>
-                            <p className="text-sm text-gray-700">
-                              {activity.message}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {activity.timestamp}
-                            </p>
+                {activities.length > 0 ? (
+                  activities.map((activity, index) => (
+                    <li key={activity.id}>
+                      <div className="relative">
+                        <div className="flex items-start space-x-3">
+                          <div
+                            className={`relative px-1 ${
+                              activity.severity === 'error'
+                                ? 'text-red-500'
+                                : activity.severity === 'warning'
+                                  ? 'text-yellow-500'
+                                  : activity.severity === 'success'
+                                    ? 'text-green-500'
+                                    : 'text-blue-500'
+                            }`}
+                          >
+                            <Activity className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div>
+                              <p className="text-sm text-gray-700">{activity.message}</p>
+                              <p className="text-xs text-gray-500 mt-1">{activity.timestamp}</p>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </li>
-                )) : (
-                  <li className="text-sm text-gray-500 text-center py-4">
-                    最近の活動はありません
-                  </li>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-sm text-gray-500 text-center py-4">最近の活動はありません</li>
                 )}
               </ul>
             </div>
@@ -238,10 +237,8 @@ export default function AdminDashboard() {
       {/* Admin Quick Actions */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            管理者アクション
-          </h3>
-          
+          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">管理者アクション</h3>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <a
               href="/admin/users"
@@ -253,12 +250,8 @@ export default function AdminDashboard() {
                 </span>
               </div>
               <div className="mt-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                  ユーザーID発行
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  お客様用のアカウントを新規発行
-                </p>
+                <h3 className="text-lg font-medium text-gray-900">ユーザーID発行</h3>
+                <p className="mt-2 text-sm text-gray-500">お客様用のアカウントを新規発行</p>
               </div>
             </a>
 
@@ -272,12 +265,8 @@ export default function AdminDashboard() {
                 </span>
               </div>
               <div className="mt-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                  顧客データ管理
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  全顧客のデータを統合管理
-                </p>
+                <h3 className="text-lg font-medium text-gray-900">顧客データ管理</h3>
+                <p className="mt-2 text-sm text-gray-500">全顧客のデータを統合管理</p>
               </div>
             </a>
 
@@ -291,12 +280,8 @@ export default function AdminDashboard() {
                 </span>
               </div>
               <div className="mt-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                  セキュリティ監視
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  システムセキュリティとログ監視
-                </p>
+                <h3 className="text-lg font-medium text-gray-900">セキュリティ監視</h3>
+                <p className="mt-2 text-sm text-gray-500">システムセキュリティとログ監視</p>
               </div>
             </a>
           </div>

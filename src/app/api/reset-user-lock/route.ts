@@ -4,14 +4,15 @@ import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     const { username } = await request.json();
-    
+
     client = await getDbClient();
 
     // Reset user lock status
-    const result = await client.query(`
+    const result = await client.query(
+      `
       UPDATE users 
       SET 
         failed_login_attempts = 0,
@@ -21,12 +22,14 @@ export async function POST(request: NextRequest) {
         last_failed_ip = NULL
       WHERE username = $1 OR email = $1
       RETURNING id, username, email
-    `, [username]);
+    `,
+      [username]
+    );
 
     if (result.rows.length === 0) {
       return NextResponse.json({
         success: false,
-        message: 'User not found'
+        message: 'User not found',
       });
     }
 
@@ -38,17 +41,19 @@ export async function POST(request: NextRequest) {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email
-      }
+        email: user.email,
+      },
     });
-
   } catch (error) {
     console.error('Reset user lock error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'Server error',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Server error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   } finally {
     if (client) {
       await client.end();

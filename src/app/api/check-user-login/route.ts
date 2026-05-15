@@ -5,31 +5,30 @@ import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     const { username, password } = await request.json();
-    
+
     client = await getDbClient();
 
     // Check if user exists
-    const userResult = await client.query(
-      'SELECT * FROM users WHERE username = $1 OR email = $1',
-      [username]
-    );
+    const userResult = await client.query('SELECT * FROM users WHERE username = $1 OR email = $1', [
+      username,
+    ]);
 
     if (userResult.rows.length === 0) {
       return NextResponse.json({
         success: false,
         message: 'User not found',
-        found: false
+        found: false,
       });
     }
 
     const user = userResult.rows[0];
-    
+
     // Check password
     const passwordValid = await bcrypt.compare(password, user.password_hash);
-    
+
     // Check user_passwords table for plain text password
     const plainPasswordResult = await client.query(
       'SELECT plain_password FROM user_passwords WHERE user_id = $1',
@@ -52,17 +51,19 @@ export async function POST(request: NextRequest) {
         provided_password: password,
         stored_plain_password: plainPasswordResult.rows[0]?.plain_password || 'Not found',
         bcrypt_hash_match: passwordValid,
-        stored_hash: user.password_hash.substring(0, 20) + '...'
-      }
+        stored_hash: user.password_hash.substring(0, 20) + '...',
+      },
     });
-
   } catch (error) {
     console.error('Check user login error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'Server error',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Server error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   } finally {
     if (client) {
       await client.end();

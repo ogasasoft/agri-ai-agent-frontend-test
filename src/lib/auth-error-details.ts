@@ -24,7 +24,7 @@ export class AuthErrorBuilder extends ErrorDetailBuilder {
       ip_address: context.ipAddress,
       user_agent: context.userAgent,
       attempt_count: context.attemptCount,
-      lockout_duration: context.lockoutDuration
+      lockout_duration: context.lockoutDuration,
     });
   }
 
@@ -38,16 +38,25 @@ export class AuthErrorBuilder extends ErrorDetailBuilder {
       INVALID_CREDENTIALS: 'ユーザー名またはパスワードが正しくありません',
       USER_NOT_FOUND: 'ユーザーが見つかりません',
       ACCOUNT_LOCKED: 'アカウントが一時的にロックされています',
-      RATE_LIMITED: 'ログイン試行回数が上限に達しました'
+      RATE_LIMITED: 'ログイン試行回数が上限に達しました',
     };
 
     const builder = new AuthErrorBuilder(messages[reason]);
 
     builder
       .setAuthContext({ ...context, username })
-      .addProcessingStep('Username Validation', reason === 'USER_NOT_FOUND' ? 'failed' : 'completed')
-      .addProcessingStep('Password Verification', reason === 'INVALID_CREDENTIALS' ? 'failed' : 'completed')
-      .addProcessingStep('Account Status Check', reason === 'ACCOUNT_LOCKED' ? 'failed' : 'completed')
+      .addProcessingStep(
+        'Username Validation',
+        reason === 'USER_NOT_FOUND' ? 'failed' : 'completed'
+      )
+      .addProcessingStep(
+        'Password Verification',
+        reason === 'INVALID_CREDENTIALS' ? 'failed' : 'completed'
+      )
+      .addProcessingStep(
+        'Account Status Check',
+        reason === 'ACCOUNT_LOCKED' ? 'failed' : 'completed'
+      )
       .addProcessingStep('Rate Limit Check', reason === 'RATE_LIMITED' ? 'failed' : 'completed');
 
     // 攻撃パターンの分析
@@ -65,24 +74,33 @@ export class AuthErrorBuilder extends ErrorDetailBuilder {
     const messages = {
       INVALID_SESSION: 'セッションが無効です',
       EXPIRED_SESSION: 'セッションが期限切れです',
-      CSRF_MISMATCH: 'CSRF検証に失敗しました'
+      CSRF_MISMATCH: 'CSRF検証に失敗しました',
     };
 
     const builder = new AuthErrorBuilder(messages[errorType]);
 
     builder
       .setOperation('SESSION_VALIDATION')
-      .addProcessingStep('Session Token Check', errorType === 'INVALID_SESSION' ? 'failed' : 'completed')
-      .addProcessingStep('Session Expiry Check', errorType === 'EXPIRED_SESSION' ? 'failed' : 'completed')
-      .addProcessingStep('CSRF Token Validation', errorType === 'CSRF_MISMATCH' ? 'failed' : 'completed');
+      .addProcessingStep(
+        'Session Token Check',
+        errorType === 'INVALID_SESSION' ? 'failed' : 'completed'
+      )
+      .addProcessingStep(
+        'Session Expiry Check',
+        errorType === 'EXPIRED_SESSION' ? 'failed' : 'completed'
+      )
+      .addProcessingStep(
+        'CSRF Token Validation',
+        errorType === 'CSRF_MISMATCH' ? 'failed' : 'completed'
+      );
 
     if (sessionInfo) {
       builder.setDetails({
         session_info: {
           token_present: !!sessionInfo.token,
           created_at: sessionInfo.created,
-          user_id: sessionInfo.userId
-        }
+          user_id: sessionInfo.userId,
+        },
       });
     }
 
@@ -93,14 +111,13 @@ export class AuthErrorBuilder extends ErrorDetailBuilder {
     return builder.build();
   }
 
-  private static analyzeAttackPattern(
-    reason: string,
-    context: AuthenticationContext
-  ): string[] {
+  private static analyzeAttackPattern(reason: string, context: AuthenticationContext): string[] {
     const suggestions: string[] = [];
 
     if (context.attemptCount && context.attemptCount > 3) {
-      suggestions.push('短時間での複数回ログイン試行が検出されました。ブルートフォース攻撃の可能性があります');
+      suggestions.push(
+        '短時間での複数回ログイン試行が検出されました。ブルートフォース攻撃の可能性があります'
+      );
     }
 
     if (reason === 'RATE_LIMITED') {
@@ -109,7 +126,9 @@ export class AuthErrorBuilder extends ErrorDetailBuilder {
     }
 
     if (reason === 'USER_NOT_FOUND') {
-      suggestions.push('存在しないユーザー名での試行が検出されました。アカウント列挙攻撃の可能性があります');
+      suggestions.push(
+        '存在しないユーザー名での試行が検出されました。アカウント列挙攻撃の可能性があります'
+      );
     }
 
     if (context.lockoutDuration) {
@@ -155,7 +174,7 @@ export const logAuthAttempt = (
     username,
     ip_address: context.ipAddress,
     user_agent: context.userAgent,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
   if (result === 'SUCCESS') {
@@ -174,6 +193,6 @@ export const logSecurityEvent = (
     event_type: eventType,
     details,
     context,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 };

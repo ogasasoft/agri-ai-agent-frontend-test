@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { create } from "zustand";
+import { create } from 'zustand';
 
 interface Message {
   id: string;
   content: string;
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   timestamp: Date;
 }
 
@@ -25,7 +25,7 @@ interface ChatStore {
   discardToolEvents: () => void;
 }
 
-const STORAGE_KEY = "agri-ai-chat-messages";
+const STORAGE_KEY = 'agri-ai-chat-messages';
 const CACHE_TTL_MS = 60_000; // 1 minute cache TTL
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -39,11 +39,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set((state) => {
       const newMessages = [...state.messages, message];
       // Save to IndexedDB only after hydration and when not executing tools
-      if (
-        typeof window !== "undefined" &&
-        state.isHydrated &&
-        !state.isToolExecuting
-      ) {
+      if (typeof window !== 'undefined' && state.isHydrated && !state.isToolExecuting) {
         saveToIndexedDB(newMessages);
         // Broadcast to other tabs
         broadcastMessage(message);
@@ -54,13 +50,13 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   clearMessages: () => {
     set({ messages: [], lastSyncTimestamp: null });
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       saveToIndexedDB([]);
     }
   },
 
   loadMessages: () => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const state = get();
 
       // Do not reload during tool execution (improvement #1)
@@ -100,7 +96,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   },
 
   saveMessages: () => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const { messages } = get();
       saveToIndexedDB(messages);
     }
@@ -128,7 +124,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       const finalEvent = pending[pending.length - 1];
       const newMessages = [...state.messages, finalEvent];
 
-      if (typeof window !== "undefined" && state.isHydrated) {
+      if (typeof window !== 'undefined' && state.isHydrated) {
         saveToIndexedDB(newMessages);
         broadcastMessage(finalEvent);
       }
@@ -150,15 +146,15 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 // IndexedDB operations
 async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("AgriAIChat", 1);
+    const request = indexedDB.open('AgriAIChat', 1);
 
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve(request.result);
 
     request.onupgradeneeded = () => {
       const db = request.result;
-      if (!db.objectStoreNames.contains("messages")) {
-        db.createObjectStore("messages", { keyPath: "id" });
+      if (!db.objectStoreNames.contains('messages')) {
+        db.createObjectStore('messages', { keyPath: 'id' });
       }
     };
   });
@@ -167,8 +163,8 @@ async function openDB(): Promise<IDBDatabase> {
 async function saveToIndexedDB(messages: Message[]): Promise<void> {
   try {
     const db = await openDB();
-    const transaction = db.transaction(["messages"], "readwrite");
-    const store = transaction.objectStore("messages");
+    const transaction = db.transaction(['messages'], 'readwrite');
+    const store = transaction.objectStore('messages');
 
     store.clear();
 
@@ -179,15 +175,15 @@ async function saveToIndexedDB(messages: Message[]): Promise<void> {
       });
     }
   } catch (error) {
-    console.error("Failed to save messages to IndexedDB:", error);
+    console.error('Failed to save messages to IndexedDB:', error);
   }
 }
 
 async function loadFromIndexedDB(): Promise<Message[]> {
   try {
     const db = await openDB();
-    const transaction = db.transaction(["messages"], "readonly");
-    const store = transaction.objectStore("messages");
+    const transaction = db.transaction(['messages'], 'readonly');
+    const store = transaction.objectStore('messages');
     const request = store.getAll();
 
     return new Promise((resolve, reject) => {
@@ -201,7 +197,7 @@ async function loadFromIndexedDB(): Promise<Message[]> {
       };
     });
   } catch (error) {
-    console.error("Failed to load messages from IndexedDB:", error);
+    console.error('Failed to load messages from IndexedDB:', error);
     return [];
   }
 }
@@ -211,11 +207,11 @@ let broadcastChannel: BroadcastChannel | null = null;
 
 function broadcastMessage(message: Message): void {
   if (!broadcastChannel) {
-    broadcastChannel = new BroadcastChannel("agri-ai-chat");
+    broadcastChannel = new BroadcastChannel('agri-ai-chat');
   }
 
   broadcastChannel.postMessage({
-    type: "NEW_MESSAGE",
+    type: 'NEW_MESSAGE',
     message: {
       ...message,
       timestamp: message.timestamp.toISOString(),
@@ -225,11 +221,11 @@ function broadcastMessage(message: Message): void {
 
 function setupBroadcastListener(onMessage: (message: Message) => void): void {
   if (!broadcastChannel) {
-    broadcastChannel = new BroadcastChannel("agri-ai-chat");
+    broadcastChannel = new BroadcastChannel('agri-ai-chat');
   }
 
   broadcastChannel.onmessage = (event) => {
-    if (event.data.type === "NEW_MESSAGE") {
+    if (event.data.type === 'NEW_MESSAGE') {
       const message = {
         ...event.data.message,
         timestamp: new Date(event.data.message.timestamp),

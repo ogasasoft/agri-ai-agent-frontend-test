@@ -6,26 +6,33 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
-    
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+
     if (!sessionToken) {
-      return NextResponse.json({
-        success: false,
-        message: '認証が必要です。'
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: '認証が必要です。',
+        },
+        { status: 401 }
+      );
     }
 
     const adminUser = await validateAdminSession(sessionToken);
-    
+
     if (!adminUser) {
-      return NextResponse.json({
-        success: false,
-        message: '管理者権限が必要です。'
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: '管理者権限が必要です。',
+        },
+        { status: 403 }
+      );
     }
 
     const client = await getDbClient();
-    
+
     try {
       // Get recent admin activities
       const result = await client.query(`
@@ -44,7 +51,7 @@ export async function GET(request: NextRequest) {
       `);
 
       // Transform activities for frontend
-      const activities = result.rows.map(row => {
+      const activities = result.rows.map((row) => {
         let message = '';
         let severity: 'info' | 'warning' | 'error' | 'success' = 'info';
 
@@ -87,24 +94,25 @@ export async function GET(request: NextRequest) {
           type: row.action,
           message,
           timestamp: new Date(row.created_at).toLocaleString('ja-JP'),
-          severity
+          severity,
         };
       });
 
       return NextResponse.json({
         success: true,
-        activities
+        activities,
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
     console.error('Admin dashboard activities error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'サーバーエラーが発生しました。'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'サーバーエラーが発生しました。',
+      },
+      { status: 500 }
+    );
   }
 }

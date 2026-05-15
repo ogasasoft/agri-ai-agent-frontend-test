@@ -54,24 +54,25 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Orders shipping migration completed successfully',
       changes: [
-        'Added status column (VARCHAR(50), DEFAULT \'pending\')',
+        "Added status column (VARCHAR(50), DEFAULT 'pending')",
         'Added shipped_at column (TIMESTAMP)',
         'Added tracking_number column (VARCHAR(100))',
         'Created index on status',
-        'Created index on user_id and status'
-      ]
+        'Created index on user_id and status',
+      ],
     });
-
   } catch (error: any) {
     console.error('❌ Migration error:', error);
 
-    return NextResponse.json({
-      success: false,
-      message: 'Migration failed',
-      error: error.message,
-      stack: error.stack
-    }, { status: 500 });
-
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Migration failed',
+        error: error.message,
+        stack: error.stack,
+      },
+      { status: 500 }
+    );
   } finally {
     await client.end();
   }
