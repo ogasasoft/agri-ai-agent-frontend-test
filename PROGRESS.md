@@ -1,27 +1,23 @@
 # 進捗記録 - agri-ai-agent-frontend-test
 
-## 状態: COMPLETED
+## 状態: 作業中
 
-## ブランチ: feature/add-swagger-documentation
-
-## 完了日時: 2026-05-15 06:00
+## ブランチ: feature/enable-swagger-ui
 
 ## 完了済み
 
-- [x] ブランチを作成（feature/add-swagger-documentation）
-- [x] swagger-ui-react と @types/swagger-ui-react をインストール
-- [x] /api-docs ページを作成（Swagger UI 実装は一時コメントアウト）
-- [x] OpenAPI 3.0 スキーマを記述
-- [x] README を更新して API ドキュメントセクションを追加
-- [x] package.json に API ドキュメント用スクリプトを追加
-- [x] tsconfig.json から非推奨オプションを削除
-- [x] WIP commit を作成
+- [x] ブランチを作成（feature/enable-swagger-ui）
+- [x] swagger-ui-react と @types/swagger-ui-react をインストール済み
+- [x] /api-docs ページの作成
+- [x] OpenAPI 3.0 スキーマの記述
+- [x] README の更新
+- [x] NextRequest の型定義問題の修正（c570503）
 
 ## 未完了
 
-- [ ] Swagger UI コンポーネントの有効化（NextRequest の型定義問題を修正）
+- [x] Swagger UI コンポーネントの有効化（完了）
 - [ ] Pull Request の作成
 
 ## 次にやること
 
-次の改善タスクを探す。
+コミットして push し、PR を作成する。
