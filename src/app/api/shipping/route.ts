@@ -283,7 +283,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // NOTE: Mock delivery status - replace with actual Yamato API delivery tracking
+    // NOTE: Mock delivery status - this will be replaced with actual Yamato API delivery tracking when API keys are configured
     const mockTrackingInfo = {
       tracking_number,
       status: 'in_transit',

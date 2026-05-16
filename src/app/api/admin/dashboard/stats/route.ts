@@ -60,7 +60,10 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        stats,
+        stats: {
+          ...stats,
+          weeklyGrowth: 0, // TODO: Implement weekly growth calculation logic
+        },
       });
     } finally {
       await client.end();

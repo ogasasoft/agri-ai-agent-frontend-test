@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: '認証が必要です。' }, { status: 401 });
     }
 
-    // **NOTE: Super admin users should use admin APIs instead**
+    // NOTE: Super admin users should use /api/admin/* endpoints for security
     if (sessionData.user.is_super_admin) {
       return NextResponse.json(
         {

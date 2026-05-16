@@ -38,9 +38,9 @@
 ### AI・外部連携
 
 - **OpenAI GPT-3.5-turbo** - AIチャット機能
-- **ヤマト運輸API** - 配送ラベル作成（予定）
-- **カラーミーショップAPI** - 注文同期（予定）
-- **食べチョクAPI** - 注文同期（予定）
+- **ヤマト運輸API** - 配送ラベル作成（開発モック実装済み）
+- **カラーミーショップAPI** - 注文同期（計画中）
+- **食べチョクAPI** - 注文同期（計画中）
 
 ## 🚀 セットアップ
 
@@ -75,12 +75,12 @@ DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
 # OpenAI API
 OPENAI_API_KEY=sk-your-openai-api-key
 
-# ヤマト運輸API（今後実装予定）
+# ヤマト運輸API
 YAMATO_API_KEY=your-yamato-api-key
 YAMATO_API_SECRET=your-yamato-api-secret
 YAMATO_API_BASE_URL=https://api.yamato.co.jp/v1
 
-# API連携（今後実装予定）
+# API連携（計画中）
 COLORMI_API_KEY=your-colormi-api-key
 TABECHOKU_API_KEY=your-tabechoku-api-key
 ```
