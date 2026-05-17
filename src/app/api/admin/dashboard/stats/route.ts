@@ -42,10 +42,38 @@ export async function GET(request: NextRequest) {
           client.query('SELECT COUNT(DISTINCT customer_name) FROM orders'),
           client.query('SELECT COUNT(*) FROM api_integrations WHERE is_active = true'),
           client.query(`
-          SELECT COUNT(*) FROM orders 
+          SELECT COUNT(*) FROM orders
           WHERE DATE(created_at) = CURRENT_DATE
         `),
         ]);
+
+      // Calculate weekly growth (last 7 days vs previous 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const previousSevenDaysAgo = new Date(sevenDaysAgo);
+      previousSevenDaysAgo.setDate(previousSevenDaysAgo.getDate() - 7);
+
+      const [currentWeekOrdersResult, previousWeekOrdersResult] = await Promise.all([
+        client.query('SELECT COUNT(*) FROM orders WHERE created_at >= $1 AND created_at < $2', [
+          sevenDaysAgo,
+          previousSevenDaysAgo,
+        ]),
+        client.query('SELECT COUNT(*) FROM orders WHERE created_at >= $1 AND created_at < $2', [
+          previousSevenDaysAgo,
+          new Date(sevenDaysAgo),
+        ]),
+      ]);
+
+      const currentWeekOrders = parseInt(currentWeekOrdersResult.rows[0].count);
+      const previousWeekOrders = parseInt(previousWeekOrdersResult.rows[0].count);
+
+      let weeklyGrowth = 0;
+      if (previousWeekOrders > 0) {
+        weeklyGrowth = Math.round(
+          ((currentWeekOrders - previousWeekOrders) / previousWeekOrders) * 100
+        );
+      }
 
       const stats = {
         totalUsers: parseInt(usersResult.rows[0].count),
@@ -53,7 +81,7 @@ export async function GET(request: NextRequest) {
         totalCustomers: parseInt(customersResult.rows[0].count),
         activeIntegrations: parseInt(integrationsResult.rows[0].count),
         todayOrders: parseInt(todayOrdersResult.rows[0].count),
-        weeklyGrowth: 0, // NOTE: Weekly growth calculation not yet implemented
+        weeklyGrowth,
         systemHealth: 'healthy',
         lastBackup: new Date().toISOString(),
       };
@@ -62,7 +90,7 @@ export async function GET(request: NextRequest) {
         success: true,
         stats: {
           ...stats,
-          weeklyGrowth: 0, // TODO: Implement weekly growth calculation logic
+          weeklyGrowth,
         },
       });
     } finally {

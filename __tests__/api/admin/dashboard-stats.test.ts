@@ -274,6 +274,11 @@ describe('/api/admin/dashboard/stats', () => {
       const mockAdminUser = createMockUser({ is_super_admin: true })
       validateAdminSession.mockResolvedValue(mockAdminUser)
 
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const previousSevenDaysAgo = new Date(sevenDaysAgo);
+      previousSevenDaysAgo.setDate(previousSevenDaysAgo.getDate() - 7);
+
       // Mock large count values
       mockClient.query = jest.fn()
         .mockResolvedValueOnce({ rows: [{ count: '999999' }] }) // users
@@ -281,6 +286,8 @@ describe('/api/admin/dashboard/stats', () => {
         .mockResolvedValueOnce({ rows: [{ count: '100000' }] }) // customers
         .mockResolvedValueOnce({ rows: [{ count: '50' }] }) // integrations
         .mockResolvedValueOnce({ rows: [{ count: '1500' }] }) // today orders
+        .mockResolvedValueOnce({ rows: [{ count: '50000' }] }) // current week orders
+        .mockResolvedValueOnce({ rows: [{ count: '48000' }] }) // previous week orders
 
       const request = createMockRequest({
         method: 'GET',
@@ -298,6 +305,46 @@ describe('/api/admin/dashboard/stats', () => {
       expect(data.stats.totalCustomers).toBe(100000)
       expect(data.stats.activeIntegrations).toBe(50)
       expect(data.stats.todayOrders).toBe(1500)
+      expect(data.stats.weeklyGrowth).toBe(4) // (50000 - 48000) / 48000 * 100 = 4.166... -> 4
+    })
+
+    it('should return 0 for weekly growth when no previous week orders', async () => {
+      // Arrange
+      const mockAdminUser = createMockUser({ is_super_admin: true })
+      validateAdminSession.mockResolvedValue(mockAdminUser)
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const previousSevenDaysAgo = new Date(sevenDaysAgo);
+      previousSevenDaysAgo.setDate(previousSevenDaysAgo.getDate() - 7);
+
+      // Mock count values with 0 previous week orders
+      mockClient.query = jest.fn()
+        .mockResolvedValueOnce({ rows: [{ count: '10' }] }) // users
+        .mockResolvedValueOnce({ rows: [{ count: '20' }] }) // orders
+        .mockResolvedValueOnce({ rows: [{ count: '10' }] }) // customers
+        .mockResolvedValueOnce({ rows: [{ count: '3' }] }) // integrations
+        .mockResolvedValueOnce({ rows: [{ count: '5' }] }) // today orders
+        .mockResolvedValueOnce({ rows: [{ count: '10' }] }) // current week orders
+        .mockResolvedValueOnce({ rows: [{ count: '0' }] }) // previous week orders
+
+      const request = createMockRequest({
+        method: 'GET',
+        headers: { 'x-session-token': 'admin-session' }
+      })
+
+      // Act
+      const response = await GET(request)
+      const data = await response.json()
+
+      // Assert
+      expect(response.status).toBe(200)
+      expect(data.stats.totalUsers).toBe(10)
+      expect(data.stats.totalOrders).toBe(20)
+      expect(data.stats.totalCustomers).toBe(10)
+      expect(data.stats.activeIntegrations).toBe(3)
+      expect(data.stats.todayOrders).toBe(5)
+      expect(data.stats.weeklyGrowth).toBe(0) // Should be 0 when previous week has 0 orders
     })
 
     it('should validate admin session token from cookies', async () => {
