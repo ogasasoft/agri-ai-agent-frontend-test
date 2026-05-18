@@ -4,53 +4,72 @@
 
 ## 完了済み
 
-- [x] ブランチ作成: `feature/update-dependencies-v3`
-- [x] 依存関係アップデート（6パッケージ）
-- [x] @hookform/resolvers: 3.10.0 → 5.2.2
-- [x] @tailwindcss/forms: 0.5.10 → 0.5.11
-- [x] @testing-library/jest-dom: 6.6.4 → 6.9.1
-- [x] @testing-library/react: 14.3.1 → 16.3.2
-- [x] @types/jest: 29.5.14 → 30.0.0
-- [x] @types/node: 20.19.8 → 25.8.0
-- [x] テスト実行（199 passed）
-- [x] ビルド成功
-- [x] 型チェッククリア
-- [x] next.config.js 修正（非推奨設定削除）
-- [x] グローバル PROGRESS.md 更新
-- [x] WIP commit & push
+- [x] ブランチ作成: `update/packages-to-latest`
+- [x] パッケージ全て最新版へ更新
+- [x] TypeScript 5.4.0 → 5.9.3
+- [x] Next.js 16.2.1 → 16.2.6
+- [x] Postgres 8.16.3 → 8.21.0
+- [x] lucide-react 0.376.0 → 1.16.0
+- [x] react-dropzone 14.2.1 → 15.0.0
+- [x] zustand 4.5.7 → 5.0.13
+- [x] zod 3.25.76 → 4.4.3
+- [x] date-fns 3.6.0 → 4.2.1
+- [x] eslint 8.57.1 → 10.4.0
+- [x] autoprefixer 10.4.21 → 10.5.0
+- [x] prettier 3.6.2 → 3.8.3
+- [x] テスト実行（198 passed）
+- [x] 2つのAPIテストが失敗（dashboard-statsエンドポイントに関連）
+- [x] コミット & push 完了
 
-## 依存関係の更新
+## パッケージ更新詳細
 
-- @hookform/resolvers: 3.10.0 → 5.2.2
-- @tailwindcss/forms: 0.5.10 → 0.5.11
-- @testing-library/jest-dom: 6.6.4 → 6.9.1
-- @testing-library/react: 14.3.1 → 16.3.2
-- @types/jest: 29.5.14 → 30.0.0
-- @types/node: 20.19.8 → 25.8.0
+### フロントエンド
+
+- Next.js: 16.2.1 → 16.2.6
+- TypeScript: 5.4.0 → 5.9.3
+- react-dropzone: 14.2.1 → 15.0.0
+- zustand: 4.5.7 → 5.0.13
+- zod: 3.25.76 → 4.4.3
+- date-fns: 3.6.0 → 4.2.1
+- eslint: 8.57.1 → 10.4.0
+- prettier: 3.6.2 → 3.8.3
+
+### バックエンド
+
+- Postgres: 8.16.3 → 8.21.0
+- bcryptjs: 3.0.2 → 3.0.3
+
+### アイコン
+
+- lucide-react: 0.376.0 → 1.16.0
 
 ## テスト結果
 
-- Test Suites: 16 passed
-- Tests: 199 passed
+- Test Suites: 15 passed, 1 failed
+- Tests: 198 passed, 2 failed
+
+### 失敗したテスト
+
+- `/api/admin/dashboard/stats` - 2つのテスト失敗
+
+### 次のステップ
+
+- dashboard-statsエンドポイントの調査と修正
 
 ## ビルド結果
 
-✓ Compiled successfully in 608ms
+✓ Compiled successfully
 
-- No warnings or errors
-- TypeScript check passed
-
-## next.config.js の修正
-
-- experimental.serverComponentsExternalPackages → serverExternalPackages（Next.js 16）
-- swcMinify 削除（Next.js 16 ではデフォルト true）
+- テスト2つ失敗（APIエンドポイント）
+- その他すべて正常
 
 ## 注意点
 
-- TypeScript 型チェッククリア
-- ビルド警告なし
-- テスト全て合格
+- テストは大部分成功
+- 2つのAPIテストが失敗しているため、次はこれらを修正する必要がある
+- エンドポイント: `/api/admin/dashboard/stats`
 
 ## 次にやること
 
-なし（作業完了）
+- dashboard-statsエンドポイントの調査と修正
+- TypeScript互換性の問題の解決（日付クエリなど）
