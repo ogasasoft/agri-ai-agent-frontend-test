@@ -3,6 +3,7 @@
  * Tests for the main page redirection
  */
 
+import { render } from '@testing-library/react';
 import { redirect } from 'next/navigation';
 
 // Mock redirect function
