@@ -41,10 +41,7 @@ export async function GET(request: NextRequest) {
           client.query('SELECT COUNT(*) FROM orders'),
           client.query('SELECT COUNT(DISTINCT customer_name) FROM orders'),
           client.query('SELECT COUNT(*) FROM api_integrations WHERE is_active = true'),
-          client.query(`
-          SELECT COUNT(*) FROM orders
-          WHERE DATE(created_at) = CURRENT_DATE
-        `),
+          client.query('SELECT COUNT(*) FROM orders WHERE created_at::date = CURRENT_DATE'),
         ]);
 
       // Calculate weekly growth (last 7 days vs previous 7 days)
