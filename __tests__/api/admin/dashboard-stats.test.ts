@@ -31,7 +31,7 @@ describe('/api/admin/dashboard/stats', () => {
 
       validateAdminSession.mockResolvedValue(mockAdminUser)
 
-      // Mock query results for statistics
+      // Mock query results for statistics (7 total: 5 stats + 2 for weekly growth)
       mockClient.query = jest.fn()
         .mockResolvedValueOnce({ rows: [{ count: '25' }] }) // users
         .mockResolvedValueOnce({ rows: [{ count: '150' }] }) // orders
@@ -59,17 +59,22 @@ describe('/api/admin/dashboard/stats', () => {
         totalCustomers: 75,
         activeIntegrations: 3,
         todayOrders: 12,
-        weeklyGrowth: 0,
+        weeklyGrowth: 25, // (10 - 8) / 8 * 100 = 25
         systemHealth: 'healthy',
         lastBackup: expect.any(String)
       })
 
-      // Verify all stat queries were executed
+      // Verify all stat queries were executed (7 total: 5 for stats + 2 for weekly growth)
       expect(mockClient.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM users WHERE is_active = true')
       expect(mockClient.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM orders')
       expect(mockClient.query).toHaveBeenCalledWith('SELECT COUNT(DISTINCT customer_name) FROM orders')
       expect(mockClient.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM api_integrations WHERE is_active = true')
-      expect(mockClient.query).toHaveBeenCalledWith(expect.stringContaining('SELECT COUNT(*) FROM orders'))
+      expect(mockClient.query).toHaveBeenCalledWith('SELECT COUNT(*) FROM orders WHERE created_at::date = CURRENT_DATE')
+
+      // Check that the weekly growth queries were called with the same SQL
+      const calls = mockClient.query.mock.calls
+      const weeklyGrowthQueries = calls.filter(call => call[0].includes('WHERE created_at >= $1 AND created_at < $2'))
+      expect(weeklyGrowthQueries.length).toBe(2)
     })
 
     it('should handle zero counts gracefully', async () => {
@@ -236,8 +241,13 @@ describe('/api/admin/dashboard/stats', () => {
       // Assert
       expect(response.status).toBe(200)
       
-      // Should execute 5 queries in parallel
-      expect(mockClient.query).toHaveBeenCalledTimes(5)
+      // Should execute 7 queries in parallel (5 for stats + 2 for weekly growth)
+      expect(mockClient.query).toHaveBeenCalledTimes(7)
+
+      // Verify the weekly growth queries (both have the same SQL pattern)
+      const queryCalls = mockClient.query.mock.calls
+      const weeklyGrowthQueries = queryCalls.filter(call => call[0].includes('WHERE created_at >= $1 AND created_at < $2'))
+      expect(weeklyGrowthQueries.length).toBe(2)
       
       // Should be faster than sequential execution (less than 100ms for mocked queries)
       expect(endTime - startTime).toBeLessThan(100)
