@@ -38,6 +38,8 @@ describe('/api/admin/dashboard/stats', () => {
         .mockResolvedValueOnce({ rows: [{ count: '75' }] }) // customers
         .mockResolvedValueOnce({ rows: [{ count: '3' }] }) // integrations
         .mockResolvedValueOnce({ rows: [{ count: '12' }] }) // today orders
+        .mockResolvedValueOnce({ rows: [{ count: '10' }] }) // current week orders
+        .mockResolvedValueOnce({ rows: [{ count: '8' }] }) // previous week orders
 
       const request = createMockRequest({
         method: 'GET',
@@ -325,6 +327,8 @@ describe('/api/admin/dashboard/stats', () => {
         .mockResolvedValueOnce({ rows: [{ count: '10' }] }) // customers
         .mockResolvedValueOnce({ rows: [{ count: '3' }] }) // integrations
         .mockResolvedValueOnce({ rows: [{ count: '5' }] }) // today orders
+        .mockResolvedValueOnce({ rows: [{ count: '1' }] }) // current week orders
+        .mockResolvedValueOnce({ rows: [{ count: '0' }] }) // previous week orders
         .mockResolvedValueOnce({ rows: [{ count: '10' }] }) // current week orders
         .mockResolvedValueOnce({ rows: [{ count: '0' }] }) // previous week orders
 
