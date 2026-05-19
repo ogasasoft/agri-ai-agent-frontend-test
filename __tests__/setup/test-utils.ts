@@ -254,13 +254,35 @@ export function createMockRequest(options: {
 }): NextRequest {
   const { method = 'GET', url = 'http://localhost:3000', body, headers = {}, cookies = {} } = options
 
+  // Auto-set Content-Type header for POST requests with body
+  const requestHeaders: Record<string, string> = { ...headers }
+
+  // Auto-set Content-Type header for POST requests with body
+  if (method === 'POST' && body && !requestHeaders['Content-Type']) {
+    requestHeaders['Content-Type'] = 'application/json'
+  }
+
+  // Mock cookies - include in headers
+  if (Object.keys(cookies).length > 0) {
+    const cookieString = Object.entries(cookies)
+      .map(([name, value]) => `${name}=${value}`)
+      .join('; ')
+    requestHeaders['cookie'] = cookieString
+  }
+
+  // Create Headers instance from the object
+  const headersInstance = new Headers()
+  Object.entries(requestHeaders).forEach(([key, value]) => {
+    headersInstance.set(key, value)
+  })
+
   const request = new NextRequest(url, {
     method,
-    headers: new Headers(headers),
+    headers: headersInstance,
     body: body ? JSON.stringify(body) : undefined,
   })
 
-  // Mock cookies
+  // Also set cookies via the cookies object
   Object.entries(cookies).forEach(([name, value]) => {
     request.cookies.set(name, value)
   })
