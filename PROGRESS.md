@@ -73,3 +73,9 @@
 
 - dashboard-statsエンドポイントの調査と修正
 - TypeScript互換性の問題の解決（日付クエリなど）
+
+---
+
+- [x] ブランチ作成: `feature/add-changelog`
+- [x] CHANGELOG.md追加 (v0.1.0 + セキュリティアドバイザリ)
+- [x] コミット & push 完了
