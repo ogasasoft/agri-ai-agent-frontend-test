@@ -29,28 +29,22 @@ export async function POST(request: NextRequest) {
     },
     {
       status: 200,
-      headers: {
-        'Set-Cookie': [
-          'session_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax',
-          'csrf_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax',
-          'remember_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax',
-        ],
-      },
     }
   );
 
-  // Fix headers to be Map-like for tests
-  const headers = response.headers;
-  if (headers && typeof headers.get === 'undefined') {
-    response.headers = new Map();
-    if (Array.isArray(headers['Set-Cookie'])) {
-      headers['Set-Cookie'].forEach((cookie) => {
-        response.headers.set('Set-Cookie', cookie);
-      });
-    } else if (headers['Set-Cookie']) {
-      response.headers.set('Set-Cookie', headers['Set-Cookie']);
-    }
-  }
+  // Set cookies directly on the response
+  response.headers.set(
+    'Set-Cookie',
+    'session_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax'
+  );
+  response.headers.set(
+    'Set-Cookie',
+    'csrf_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax'
+  );
+  response.headers.set(
+    'Set-Cookie',
+    'remember_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax'
+  );
 
   return response;
 }
