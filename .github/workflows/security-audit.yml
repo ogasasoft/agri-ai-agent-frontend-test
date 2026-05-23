@@ -1,0 +1,116 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  npm-audit:
+    name: npm audit check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Check for high severity vulnerabilities
+        if: failure()
+        run: |
+          echo "::warning::High severity vulnerabilities found. Please review."
+
+  npm-outdated:
+    name: Check for outdated dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for outdated packages
+        run: npm outdated --json
+        continue-on-error: true
+
+      - name: Generate dependency report
+        if: always()
+        run: npm outdated --json > dependency-report.json
+        continue-on-error: true
+
+      - name: Upload dependency report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-report
+          path: dependency-report.json
+          retention-days: 7
+
+  snyk:
+    name: Snyk security scan
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install Snyk
+        run: npm install -g snyk
+
+      - name: Run Snyk
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk test --severity-threshold=high
+
+  # Pre-commit security checks
+  pre-commit-security:
+    name: Pre-commit security checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for dangerous files
+        run: |
+          echo "Checking for files that may contain secrets..."
+          if [ -f ".env.local" ] || [ -f ".env.development" ]; then
+            echo "::warning::.env.local or .env.development file found. Ensure it's in .gitignore."
+          fi

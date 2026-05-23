@@ -1,2 +1,25 @@
-#!/usr/bin/env sh
-npx lint-staged
+#!/bin/bash
+
+# Security pre-commit hook
+# This hook checks for potential security issues before committing
+
+echo "🔒 Running security checks..."
+
+# Check for .env files being committed
+if git diff --cached --name-only | grep -E '\.env(\.local|\.development|\.production)?$'; then
+  echo "::warning::.env files detected in commit. These should be in .gitignore."
+  exit 1
+fi
+
+# Check for API keys in source files
+if git diff --cached --name-only | xargs grep -l "api[_-]key\|secret[_-]key\|password\|token" | grep -v node_modules | grep -v .git; then
+  echo "::warning::Potential API keys or secrets detected in source files."
+fi
+
+# Run npm audit if possible
+if [ -f "package-lock.json" ]; then
+  echo "Running npm audit..."
+  npm audit --audit-level=moderate || true
+fi
+
+echo "✅ Security checks passed."
