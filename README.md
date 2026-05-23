@@ -414,3 +414,16 @@ npm run dev
 ---
 
 **Agri AI Agent Frontend** - 農業ECビジネスのためのインテリジェントな統合管理システム
+
+---
+
+## Test Environment
+
+### Test Status
+- **Build Status:** ✅ Successful
+- **Tests:** 95 passed, 111 failed, 3 skipped
+- **TypeScript:** ✅ 0 errors (logout route fixed)
+- **ESLint:** ✅ No errors
+
+### Test Documentation
+See [TESTS_DOCUMENTATION.md](./TESTS_DOCUMENTATION.md) for detailed test setup and status information.
