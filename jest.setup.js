@@ -20,73 +20,92 @@ jest.mock('next/navigation', () => ({
   },
 }));
 
-// Mock Next.js server utilities
+// Mock Next.js server utilities BEFORE importing route files
 jest.mock('next/server', () => {
-  const mockResponse = () => {
-    const headers = new Map();
-    const body = [];
-    let responseStatus = 200;
-    let responseData = null;
+  const mockNextResponse = {
+    json: jest.fn((data, init) => {
+      const status = init?.status || 200;
 
-    const jsonResponse = jest.fn(async (data, init) => {
-      const headersObj = new Map(headers);
+      // Convert headers to a plain object if it's not one
+      let headersObj = {};
       if (init?.headers) {
-        Object.entries(init.headers).forEach(([key, value]) => {
-          headersObj.set(key, value);
-        });
+        if (typeof init.headers === 'object' && init.headers !== null) {
+          headersObj = init.headers;
+        } else if (init.headers instanceof Headers) {
+          init.headers.forEach((value, key) => {
+            headersObj[key] = value;
+          });
+        }
       }
-      responseData = data;
+      // Ensure content-type is set
+      if (!headersObj['content-type']) {
+        headersObj['content-type'] = 'application/json';
+      }
+
+      // If Set-Cookie is an array, join them into a single string
+      if (Array.isArray(headersObj['Set-Cookie'])) {
+        headersObj['Set-Cookie'] = headersObj['Set-Cookie'].join(', ');
+      }
+
       return {
-        status: init?.status || responseStatus,
+        status: status,
         headers: headersObj,
-        json: jsonResponse,
+        json: jest.fn(async () => data),
         text: jest.fn(async () => JSON.stringify(data)),
-        ok: (init?.status || responseStatus) >= 200 && (init?.status || responseStatus) < 300,
+        ok: status >= 200 && status < 300,
         redirected: false,
       };
-    });
+    }),
+    redirect: jest.fn((url, init) => {
+      const status = init?.status || 307; // Default for temporary redirect
 
-    const response = {
-      status: jest.fn((status) => {
-        responseStatus = status;
-        return response;
-      }),
-      headers: headers,
-      json: jsonResponse,
-      text: jest.fn(async () => {
-        return headers.get('content-type')?.includes('json')
-          ? JSON.stringify(responseData || {})
-          : '';
-      }),
-      setHeader: jest.fn((key, value) => {
-        headers.set(key, value);
-      }),
-      getHeader: jest.fn((key) => headers.get(key)),
-      body,
-    };
+      let headersObj = {};
+      if (init?.headers) {
+        if (typeof init.headers === 'object' && init.headers !== null) {
+          headersObj = init.headers;
+        } else if (init.headers instanceof Headers) {
+          init.headers.forEach((value, key) => {
+            headersObj[key] = value;
+          });
+        }
+      }
+      headersObj['Location'] = url;
 
-    return response;
+      return {
+        status: status,
+        headers: headersObj,
+        json: jest.fn(async () => ({ message: `Redirected to ${url}` })),
+        text: jest.fn(async () => `Redirecting to ${url}`),
+        ok: status >= 300 && status < 400,
+        redirected: true,
+      };
+    }),
+    // Add other static methods if needed, e.g., NextResponse.next()
+    next: jest.fn(() => ({
+      status: 200,
+      headers: {},
+      json: jest.fn(async () => ({})),
+      text: jest.fn(async () => ''),
+      ok: true,
+      redirected: false,
+    })),
   };
 
   const mockNextRequest = jest.fn().mockImplementation((url, requestInit = {}) => {
-    const headers = new Map();
+    let headersObj = {};
     if (requestInit.headers) {
       if (requestInit.headers instanceof Headers) {
-        // If it's a Headers object, copy all entries
         requestInit.headers.forEach((value, key) => {
-          headers.set(key, value);
+          headersObj[key] = value;
         });
       } else if (typeof requestInit.headers === 'object' && requestInit.headers !== null) {
-        // If it's a plain object, copy all entries
-        Object.entries(requestInit.headers).forEach(([key, value]) => {
-          headers.set(key, value);
-        });
+        headersObj = { ...requestInit.headers };
       }
     }
 
     // Auto-set Content-Type for POST requests with body
-    if (requestInit.method === 'POST' && requestInit.body && !headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/json');
+    if (requestInit.method === 'POST' && requestInit.body && !headersObj['Content-Type']) {
+      headersObj['Content-Type'] = 'application/json';
     }
 
     // Build cookies map
@@ -97,23 +116,19 @@ jest.mock('next/server', () => {
       });
     }
 
-    const headersMap = new Map(headers);
-
-    const cookiesSet = jest.fn((name, value) => {
-      cookies.set(name, value);
-    });
-    const cookiesGet = jest.fn((name) => cookies.get(name));
-    const cookiesDelete = jest.fn((name) => cookies.delete(name));
-
     return {
       url,
       method: requestInit.method || 'GET',
-      headers: headersMap,
+      headers: headersObj,
       body: requestInit.body || null,
       cookies: {
-        get: cookiesGet,
-        set: cookiesSet,
-        delete: cookiesDelete,
+        get: jest.fn((name) => cookies.get(name)),
+        set: jest.fn((name, value) => {
+          cookies.set(name, value);
+        }),
+        delete: jest.fn((name) => {
+          cookies.delete(name);
+        }),
       },
       json: jest.fn(async () => {
         if (requestInit.body) {
@@ -128,7 +143,7 @@ jest.mock('next/server', () => {
   });
 
   return {
-    NextResponse: mockResponse,
+    NextResponse: mockNextResponse,
     NextRequest: mockNextRequest,
   };
 });

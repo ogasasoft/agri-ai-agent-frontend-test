@@ -1,5 +1,8 @@
 import { Client } from 'pg'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+
+// Mock NextResponse for Next.js 16 API routes
+export const NextResponseMock = NextResponse
 
 // Factory function to create mock DB client
 export function createMockDbClient(): MockDbClient {
@@ -286,6 +289,14 @@ export function createMockRequest(options: {
   Object.entries(cookies).forEach(([name, value]) => {
     request.cookies.set(name, value)
   })
+
+  // Fix for Next.js 16: Make cookies.get() work properly
+  // We need to mock the cookies.get() method
+  const originalGet = request.cookies.get.bind(request.cookies)
+  request.cookies.get = (name: string) => {
+    // Try to get from the cookies object directly
+    return request.cookies.get(name) || undefined
+  }
 
   return request
 }
