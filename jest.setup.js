@@ -22,34 +22,63 @@ jest.mock('next/navigation', () => ({
 
 // Mock Next.js server utilities BEFORE importing route files
 jest.mock('next/server', () => {
+  const mockHeaders = jest.fn(function() {
+    this._headers = new Map();
+  });
+
+  mockHeaders.prototype.get = jest.fn(function(name) {
+    let value = this._headers.get(name);
+    // If value is an array, join them
+    if (Array.isArray(value)) {
+      value = value.join(', ');
+    }
+    return value || null;
+  });
+
+  mockHeaders.prototype.set = jest.fn(function(name, value) {
+    this._headers.set(name, value);
+  });
+
+  mockHeaders.prototype.has = jest.fn(function(name) {
+    return this._headers.has(name);
+  });
+
+  mockHeaders.prototype.append = jest.fn(function(name, value) {
+    this._headers.set(name, value);
+  });
+
+  mockHeaders.prototype.delete = jest.fn(function(name) {
+    this._headers.delete(name);
+  });
+
+  mockHeaders.prototype.forEach = jest.fn(function(callback, thisArg) {
+    this._headers.forEach((value, key) => {
+      callback.call(thisArg, value, key, this);
+    });
+  });
+
   const mockNextResponse = {
     json: jest.fn((data, init) => {
       const status = init?.status || 200;
 
-      // Convert headers to a plain object if it's not one
-      let headersObj = {};
-      if (init?.headers) {
-        if (typeof init.headers === 'object' && init.headers !== null) {
-          headersObj = init.headers;
-        } else if (init.headers instanceof Headers) {
-          init.headers.forEach((value, key) => {
-            headersObj[key] = value;
-          });
+      // Ensure headers is a Headers instance
+      let headers = init?.headers;
+      if (!headers || !(headers instanceof Headers)) {
+        headers = new mockHeaders();
+        if (!init?.headers) {
+          headers.set('content-type', 'application/json');
         }
-      }
-      // Ensure content-type is set
-      if (!headersObj['content-type']) {
-        headersObj['content-type'] = 'application/json';
       }
 
       // If Set-Cookie is an array, join them into a single string
-      if (Array.isArray(headersObj['Set-Cookie'])) {
-        headersObj['Set-Cookie'] = headersObj['Set-Cookie'].join(', ');
+      const setCookie = headers.get('Set-Cookie');
+      if (Array.isArray(setCookie)) {
+        headers.set('Set-Cookie', setCookie.join(', '));
       }
 
       return {
         status: status,
-        headers: headersObj,
+        headers: headers,
         json: jest.fn(async () => data),
         text: jest.fn(async () => JSON.stringify(data)),
         ok: status >= 200 && status < 300,
@@ -59,21 +88,15 @@ jest.mock('next/server', () => {
     redirect: jest.fn((url, init) => {
       const status = init?.status || 307; // Default for temporary redirect
 
-      let headersObj = {};
-      if (init?.headers) {
-        if (typeof init.headers === 'object' && init.headers !== null) {
-          headersObj = init.headers;
-        } else if (init.headers instanceof Headers) {
-          init.headers.forEach((value, key) => {
-            headersObj[key] = value;
-          });
-        }
+      let headers = init?.headers;
+      if (!headers || !(headers instanceof Headers)) {
+        headers = new mockHeaders();
       }
-      headersObj['Location'] = url;
+      headers.set('Location', url);
 
       return {
         status: status,
-        headers: headersObj,
+        headers: headers,
         json: jest.fn(async () => ({ message: `Redirected to ${url}` })),
         text: jest.fn(async () => `Redirecting to ${url}`),
         ok: status >= 300 && status < 400,
@@ -83,7 +106,7 @@ jest.mock('next/server', () => {
     // Add other static methods if needed, e.g., NextResponse.next()
     next: jest.fn(() => ({
       status: 200,
-      headers: {},
+      headers: new mockHeaders(),
       json: jest.fn(async () => ({})),
       text: jest.fn(async () => ''),
       ok: true,
@@ -92,20 +115,12 @@ jest.mock('next/server', () => {
   };
 
   const mockNextRequest = jest.fn().mockImplementation((url, requestInit = {}) => {
-    let headersObj = {};
-    if (requestInit.headers) {
-      if (requestInit.headers instanceof Headers) {
-        requestInit.headers.forEach((value, key) => {
-          headersObj[key] = value;
-        });
-      } else if (typeof requestInit.headers === 'object' && requestInit.headers !== null) {
-        headersObj = { ...requestInit.headers };
+    let headers = requestInit.headers;
+    if (!headers || !(headers instanceof Headers)) {
+      headers = new mockHeaders();
+      if (requestInit.method === 'POST' && requestInit.body && !headers.has('Content-Type')) {
+        headers.set('Content-Type', 'application/json');
       }
-    }
-
-    // Auto-set Content-Type for POST requests with body
-    if (requestInit.method === 'POST' && requestInit.body && !headersObj['Content-Type']) {
-      headersObj['Content-Type'] = 'application/json';
     }
 
     // Build cookies map
@@ -119,7 +134,7 @@ jest.mock('next/server', () => {
     return {
       url,
       method: requestInit.method || 'GET',
-      headers: headersObj,
+      headers: headers,
       body: requestInit.body || null,
       cookies: {
         get: jest.fn((name) => cookies.get(name)),
@@ -212,6 +227,50 @@ global.TextDecoder = class TextDecoder {};
 // Mock environment variables
 process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db';
 process.env.OPENAI_API_KEY = 'test-openai-key';
+
+// Mock Headers class
+global.Headers = class Headers {
+  constructor(init) {
+    this._headers = new Map();
+    if (init) {
+      if (Array.isArray(init)) {
+        init.forEach(([key, value]) => this._headers.set(key, value));
+      } else if (typeof init === 'object' && init !== null) {
+        Object.entries(init).forEach(([key, value]) => this._headers.set(key, value));
+      }
+    }
+  }
+  get(name) {
+    return this._headers.get(name) || null;
+  }
+  set(name, value) {
+    this._headers.set(name, value);
+  }
+  has(name) {
+    return this._headers.has(name);
+  }
+  append(name, value) {
+    this._headers.set(name, value);
+  }
+  delete(name) {
+    this._headers.delete(name);
+  }
+  forEach(callback, thisArg) {
+    this._headers.forEach((value, key) => callback.call(thisArg, value, key, this));
+  }
+  entries() {
+    return this._headers.entries();
+  }
+  values() {
+    return this._headers.values();
+  }
+  keys() {
+    return this._headers.keys();
+  }
+  [Symbol.iterator]() {
+    return this._headers[Symbol.iterator]();
+  }
+};
 
 // Global test utilities
 global.fetch = jest.fn();

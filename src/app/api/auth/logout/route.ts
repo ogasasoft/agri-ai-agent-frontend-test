@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Clear cookies with Max-Age=0 (Next.js v14 compatible)
+  // Clear cookies with Max-Age=0
   const response = NextResponse.json(
     {
       success: true,
