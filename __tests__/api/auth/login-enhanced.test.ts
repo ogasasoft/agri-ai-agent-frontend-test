@@ -1,11 +1,7 @@
 import { POST } from '@/app/api/auth/login/route'
-import { createMockRequest, MockDbClient, createMockUser, resetTestDatabase } from '../../setup/test-utils'
+import { createMockRequest, MockDbClient, createMockUser, resetTestDatabase, getDbClient } from '../../setup/test-utils'
 
 // Mock dependencies
-jest.mock('pg', () => ({
-  Client: jest.fn().mockImplementation(() => MockDbClient.getInstance())
-}))
-
 jest.mock('@/lib/auth-enhanced', () => ({
   authenticateUserEnhanced: jest.fn(),
   getClientInfo: jest.fn().mockReturnValue({
@@ -14,9 +10,28 @@ jest.mock('@/lib/auth-enhanced', () => ({
   })
 }))
 
+// Mock pg module
+jest.mock('pg', () => ({
+  Client: jest.fn().mockImplementation(() => MockDbClient.getInstance())
+}))
+
+// Mock the db module which creates pg.Client instances
+jest.mock('@/lib/db', () => ({
+  getDbClient: jest.fn(() => MockDbClient.getInstance()),
+  withDatabase: jest.fn()
+}))
+
 describe('/api/auth/login', () => {
   let mockClient: MockDbClient
   const { authenticateUserEnhanced } = require('@/lib/auth-enhanced')
+
+  beforeEach(async () => {
+    await resetTestDatabase()
+    mockClient = MockDbClient.getInstance()
+    authenticateUserEnhanced.mockClear()
+    // Clear the getDbClient mock
+    jest.clearAllMocks()
+  })
 
   beforeEach(async () => {
     await resetTestDatabase()
@@ -31,7 +46,7 @@ describe('/api/auth/login', () => {
         id: 1,
         username: 'testuser'
       })
-      
+
       // Mock successful authentication
       authenticateUserEnhanced.mockResolvedValue({
         success: true,
@@ -54,11 +69,18 @@ describe('/api/auth/login', () => {
         }
       })
 
+      // Debug: Check if request body is set
+      console.log('Request body (via text):', await request.text())
+      console.log('Request headers:', request.headers.get('content-type'))
+
       // Act
       const response = await POST(request)
       const data = await response.json()
 
       // Assert
+      if (response.status !== 200) {
+        console.log('Failed to login. Response:', JSON.stringify(data, null, 2))
+      }
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
       expect(data.user).toEqual(

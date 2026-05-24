@@ -6,6 +6,9 @@ import { NextRequest, NextResponse } from 'next/server'
 // This is exported for documentation purposes
 export const NextResponseMock = NextResponse
 
+// Mock the db module
+export const getDbClient = jest.fn(async () => MockDbClient.getInstance())
+
 // Factory function to create mock DB client
 export function createMockDbClient(): MockDbClient {
   return MockDbClient.getInstance()
@@ -275,15 +278,9 @@ export function createMockRequest(options: {
     requestHeaders['cookie'] = cookieString
   }
 
-  // Create Headers instance from the object
-  const headersInstance = new Headers()
-  Object.entries(requestHeaders).forEach(([key, value]) => {
-    headersInstance.set(key, value)
-  })
-
   const request = new NextRequest(url, {
     method,
-    headers: headersInstance,
+    headers: requestHeaders,
     body: body ? JSON.stringify(body) : undefined,
   })
 
@@ -301,6 +298,21 @@ export function createMockRequest(options: {
   request.cookies.get = (name: string) => {
     return cookieMap.get(name)
   }
+
+  // Fix for auth-enhanced.ts getClientInfo: Add ip property if missing
+  (request as any).ip = requestHeaders['x-forwarded-for']?.split(',')[0] || requestHeaders['x-real-ip'] || '127.0.0.1'
+
+  // Fix for auth-enhanced.ts getClientInfo: Add headers property with a proper getter
+  Object.defineProperty(request, 'headers', {
+    get: () => {
+      const headersObj: any = {}
+      Object.keys(requestHeaders).forEach(key => {
+        headersObj[key.toLowerCase()] = requestHeaders[key]
+      })
+      headersObj.get = (key: string) => headersObj[key.toLowerCase()]
+      return headersObj
+    }
+  })
 
   return request
 }

@@ -10,6 +10,8 @@ export async function POST(request: NextRequest) {
     const { username, password, rememberMe } = await request.json();
     const { ipAddress, userAgent } = getClientInfo(request);
 
+    console.log('Login attempt - username:', username);
+
     if (!username || !password) {
       return NextResponse.json(
         {
