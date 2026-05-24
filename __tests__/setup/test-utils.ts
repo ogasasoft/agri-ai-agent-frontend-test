@@ -2,6 +2,8 @@ import { Client } from 'pg'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Mock NextResponse for Next.js 16 API routes
+// Note: Use NextResponse from 'next/server' directly in route files
+// This is exported for documentation purposes
 export const NextResponseMock = NextResponse
 
 // Factory function to create mock DB client
@@ -292,10 +294,12 @@ export function createMockRequest(options: {
 
   // Fix for Next.js 16: Make cookies.get() work properly
   // We need to mock the cookies.get() method
-  const originalGet = request.cookies.get.bind(request.cookies)
+  const cookieMap = new Map()
+  Object.entries(cookies).forEach(([name, value]) => {
+    cookieMap.set(name, value)
+  })
   request.cookies.get = (name: string) => {
-    // Try to get from the cookies object directly
-    return request.cookies.get(name) || undefined
+    return cookieMap.get(name)
   }
 
   return request

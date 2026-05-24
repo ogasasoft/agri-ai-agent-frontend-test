@@ -1,7 +1,6 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { validateSession, invalidateSession } from '@/lib/auth';
 import { logAuthAttempt } from '@/lib/auth-error-details';
-import { NextResponseMock as NextResponse } from '../../../../../__tests__/setup/test-utils';
 
 export async function POST(request: NextRequest) {
   // Get session token from cookies object
@@ -29,21 +28,14 @@ export async function POST(request: NextRequest) {
     },
     {
       status: 200,
+      headers: {
+        'Set-Cookie': [
+          'session_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax',
+          'csrf_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax',
+          'remember_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax',
+        ].join(', '),
+      },
     }
-  );
-
-  // Set cookies directly on the response
-  response.headers.set(
-    'Set-Cookie',
-    'session_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax'
-  );
-  response.headers.set(
-    'Set-Cookie',
-    'csrf_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax'
-  );
-  response.headers.set(
-    'Set-Cookie',
-    'remember_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax'
   );
 
   return response;
