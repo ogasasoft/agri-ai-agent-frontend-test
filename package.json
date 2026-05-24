@@ -12,6 +12,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:setup": "node scripts/setup-test-db.sh",
+    "test:db": "DATABASE_URL=\"postgresql://postgres:postgres@localhost:5432/agri_ai_test\" npm test",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "open-api-docs": "npm run dev"
   },
