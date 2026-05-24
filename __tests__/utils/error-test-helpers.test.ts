@@ -289,13 +289,15 @@ describe('エラーハンドリングヘルパー', () => {
       const request = createMockRequest('GET', {
         cookies: { session: 'test_session', csrf: 'test_csrf' }
       })
-      expect((request.headers as any).cookie).toBe('session=test_session; csrf=test_csrf')
+      expect(request.headers.get('cookie')).toBe('session=test_session; csrf=test_csrf')
     })
 
     it('リクエストボディを設定する', () => {
       const body = { test: 'data' }
       const request = createMockRequest('POST', { body })
-      expect((request.headers as any)['content-type']).toBe('application/json')
+      const contentType = request.headers.get('content-type')
+      // Next.js Headers.get() returns null for missing keys
+      expect(contentType).toBe('application/json')
     })
   })
 

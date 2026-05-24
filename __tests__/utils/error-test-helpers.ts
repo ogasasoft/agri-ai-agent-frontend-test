@@ -132,21 +132,27 @@ export const createMockRequest = (
   } = {}
 ): NextRequest => {
   const url = 'http://localhost:3000/api/test';
-  const headers = new Headers(options.headers || {});
+
+  // Content-Type の設定（必須）
+  if (!options.headers?.['Content-Type']) {
+    options.headers = {
+      ...options.headers,
+      'Content-Type': 'application/json'
+    };
+  }
 
   // Cookieヘッダーの設定
   if (options.cookies) {
     const cookieString = Object.entries(options.cookies)
       .map(([key, value]) => `${key}=${value}`)
       .join('; ');
-    headers.set('cookie', cookieString);
+    options.headers = {
+      ...options.headers,
+      'cookie': cookieString
+    };
   }
 
-  if (options.body) {
-    if (!headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/json');
-    }
-  }
+  const headers = new Headers(options.headers || {});
 
   const requestInit: any = {
     method,
