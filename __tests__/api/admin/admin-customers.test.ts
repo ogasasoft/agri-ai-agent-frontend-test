@@ -1,5 +1,6 @@
 import { GET, POST } from '@/app/api/admin/customers/route'
 import { createMockRequest, MockDbClient, createMockUser, createMockOrder, resetTestDatabase, seedTestData } from '../../setup/test-utils'
+import pg from 'pg'
 
 // Mock dependencies
 jest.mock('pg', () => ({
@@ -72,6 +73,19 @@ describe('/api/admin/customers', () => {
       // Act
       const response = await GET(request)
       const data = await response.json()
+
+      // Debug: Log error if 500 or 401
+      if (response.status === 401 || response.status === 500) {
+        console.error('=== AUTH/500 ERROR ===')
+        console.error('Status:', response.status)
+        console.error('Response:', JSON.stringify(data, null, 2))
+        console.error('Response text:', await response.text())
+        console.error('validateAdminSession.mock.calls:', validateAdminSession.mock.calls)
+        console.error('MockClient:', mockClient)
+        console.error('MockClient.query type:', typeof mockClient.query)
+        console.error('MockClient.query mock.calls:', mockClient.query.mock.calls)
+        console.error('MockClient.query.mock.results:', mockClient.query.mock.results)
+      }
 
       // Assert
       expect(response.status).toBe(200)
@@ -422,6 +436,20 @@ describe('/api/admin/customers', () => {
       // Act
       const response1 = await POST(request1)
       const response2 = await POST(request2)
+
+      // Debug
+      if (response1.status !== 200) {
+        console.error('=== Response 1 Error ===')
+        console.error('Status:', response1.status)
+        const data = await response1.json()
+        console.error('Data:', JSON.stringify(data, null, 2))
+      }
+      if (response2.status !== 200) {
+        console.error('=== Response 2 Error ===')
+        console.error('Status:', response2.status)
+        const data = await response2.json()
+        console.error('Data:', JSON.stringify(data, null, 2))
+      }
 
       // Assert
       expect(response1.status).toBe(200)

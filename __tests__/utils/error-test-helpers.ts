@@ -154,6 +154,16 @@ export const createMockRequest = (
 
   const headers = new Headers(options.headers || {});
 
+  // 明示的に Content-Type を設定
+  if (options.body && !headers.has('content-type')) {
+    headers.set('content-type', 'application/json');
+  }
+
+  // Content-Type を明示的に設定（テストの整合性のため）
+  if (options.body && !headers.has('content-type') && !headers.has('Content-Type')) {
+    headers.set('content-type', 'application/json');
+  }
+
   const requestInit: any = {
     method,
     headers,

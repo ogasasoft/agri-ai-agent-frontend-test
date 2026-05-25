@@ -49,6 +49,47 @@ export class MockDbClient {
     if (text.includes('SELECT') && text.includes('users')) {
       return { rows: this.mockData.users || [] }
     }
+    if (text.includes('customers')) {
+      if (text.includes('JOIN users u ON c.user_id = u.id')) {
+        // Return customers with user joins
+        if (!this.mockData.customers) {
+          this.mockData.customers = []
+        }
+        return { rows: this.mockData.customers }
+      }
+      if (text.includes('INSERT INTO customers')) {
+        const [customer_name, phone, address, email, user_id] = params || []
+        if (!this.mockData.customers) {
+          this.mockData.customers = []
+        }
+        const newCustomer = {
+          id: 1,
+          customer_name,
+          phone,
+          address,
+          email,
+          user_id,
+          total_orders: 0,
+          total_spent: 0
+        }
+        this.mockData.customers.push(newCustomer)
+        return { rows: [newCustomer] }
+      }
+      if (text.includes('SELECT') && text.includes('customers') && text.includes('GROUP BY')) {
+        // Return customers with statistics
+        if (!this.mockData.customers) {
+          this.mockData.customers = []
+        }
+        return { rows: this.mockData.customers }
+      }
+      if (text.includes('FROM customers') && !text.includes('JOIN')) {
+        // Simple SELECT from customers
+        if (!this.mockData.customers) {
+          this.mockData.customers = []
+        }
+        return { rows: this.mockData.customers }
+      }
+    }
 
     // Categories queries - must be before orders since GET categories has a subquery mentioning orders
     if (text.includes('categories')) {
