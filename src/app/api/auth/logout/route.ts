@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
     {
       status: 200,
       headers: {
+        'Content-Type': 'application/json',
         'Set-Cookie': [
           'session_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax',
           'csrf_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax',

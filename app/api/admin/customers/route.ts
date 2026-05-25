@@ -2,12 +2,16 @@ import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
 import { validateAdminSession, logAdminAction, getClientInfo } from '@/lib/admin-auth'
 
-// Get the real db client (not mocked in this context)
-import pg from 'pg'
-const { Client: PgClient } = pg
-
-// In test environment, use mocked client
-let useMockClient = process.env.NODE_ENV === 'test'
+// In test environment, import mock client
+let MockDbClient: any
+if (process.env.NODE_ENV === 'test') {
+  // Dynamically import only in test environment
+  import('../../__tests__/setup/test-utils').then(module => {
+    MockDbClient = module.MockDbClient
+  }).catch(err => {
+    console.warn('Failed to import MockDbClient:', err)
+  })
+}
 
 export async function GET(request: NextRequest) {
   try {
