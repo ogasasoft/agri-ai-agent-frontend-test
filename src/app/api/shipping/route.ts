@@ -279,7 +279,7 @@ export async function POST(request: NextRequest) {
             success: false,
             message: `${errors.length}件の注文の更新に失敗しました`,
             errors: errors,
-            message: `${successfulOrders.length}件の注文は正常に更新されました`
+            updatedMessage: `${successfulOrders.length}件の注文は正常に更新されました`
           },
           { status: 500 }
         );

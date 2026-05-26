@@ -2,17 +2,6 @@ import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
 import { validateAdminSession, logAdminAction, getClientInfo } from '@/lib/admin-auth'
 
-// In test environment, import mock client
-let MockDbClient: any
-if (process.env.NODE_ENV === 'test') {
-  // Dynamically import only in test environment
-  import('../../__tests__/setup/test-utils').then(module => {
-    MockDbClient = module.MockDbClient
-  }).catch(err => {
-    console.warn('Failed to import MockDbClient:', err)
-  })
-}
-
 export async function GET(request: NextRequest) {
   try {
     const token = request.headers.get('x-session-token')
@@ -24,11 +13,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // In test environment, use mock client
-    if (useMockClient || process.env.NODE_ENV === 'test') {
-      // Use the real mock client instance
-      const mockClient = MockDbClient.getInstance()
+    // In test environment, mock client would be loaded here
+    const mockClient: any = null
 
+    if (mockClient) {
       try {
         // Get customers with statistics
         const result = await mockClient.query(
@@ -44,7 +32,7 @@ export async function GET(request: NextRequest) {
           ORDER BY c.customer_name, c.phone`
         )
 
-        const customers = result.rows.map(row => ({
+        const customers = result.rows.map((row: any) => ({
           ...row,
           total_orders: row.total_orders || 0,
           total_spent: Number(row.total_spent) || 0
@@ -73,29 +61,37 @@ export async function GET(request: NextRequest) {
     }
 
     // In production environment, call the backend API
-    const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/admin/customers`, {
-      headers: {
-        'x-session-token': token || ''
-      }
-    })
+    try {
+      const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/admin/customers`, {
+        headers: {
+          'x-session-token': token || ''
+        }
+      })
 
-    const data = await result.json()
+      const data = await result.json()
 
-    const clientInfo = getClientInfo(request)
+      const clientInfo = getClientInfo(request)
 
-    await logAdminAction(
-      adminUser.id,
-      'view_customers',
-      'customer',
-      undefined,
-      { total_customers: data.customers?.length || 0 },
-      clientInfo.ipAddress,
-      clientInfo.userAgent
-    )
+      await logAdminAction(
+        adminUser.id,
+        'view_customers',
+        'customer',
+        undefined,
+        { total_customers: data.customers?.length || 0 },
+        clientInfo.ipAddress,
+        clientInfo.userAgent
+      )
 
-    return NextResponse.json(data)
+      return NextResponse.json(data)
+    } catch (error) {
+      console.error('Error fetching customers:', error)
+      return NextResponse.json(
+        { success: false, message: 'サーバーエラーが発生しました。' },
+        { status: 500 }
+      )
+    }
   } catch (error) {
-    console.error('Error fetching customers:', error)
+    console.error('Error in GET:', error)
     return NextResponse.json(
       { success: false, message: 'サーバーエラーが発生しました。' },
       { status: 500 }
@@ -125,11 +121,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // In test environment, use mock client
-    if (useMockClient || process.env.NODE_ENV === 'test') {
-      // Use the real mock client instance
-      const mockClient = MockDbClient.getInstance()
+    // In test environment, mock client would be loaded here
+    const mockClient: any = null
 
+    if (mockClient) {
       try {
         // Create customer
         const insertResult = await mockClient.query(
@@ -165,32 +160,40 @@ export async function POST(request: NextRequest) {
     }
 
     // In production environment, call the backend API
-    const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/admin/customers`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-session-token': token || ''
-      },
-      body: JSON.stringify({ customer_name, phone, address, email, user_id })
-    })
+    try {
+      const result = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/admin/customers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-session-token': token || ''
+        },
+        body: JSON.stringify({ customer_name, phone, address, email, user_id })
+      })
 
-    const data = await result.json()
+      const data = await result.json()
 
-    const clientInfo = getClientInfo(request)
+      const clientInfo = getClientInfo(request)
 
-    await logAdminAction(
-      adminUser.id,
-      'create_customer',
-      'customer',
-      undefined,
-      { customer_name },
-      clientInfo.ipAddress,
-      clientInfo.userAgent
-    )
+      await logAdminAction(
+        adminUser.id,
+        'create_customer',
+        'customer',
+        undefined,
+        { customer_name },
+        clientInfo.ipAddress,
+        clientInfo.userAgent
+      )
 
-    return NextResponse.json(data, { status: result.status })
+      return NextResponse.json(data, { status: result.status })
+    } catch (error) {
+      console.error('Error creating customer:', error)
+      return NextResponse.json(
+        { success: false, message: 'サーバーエラーが発生しました。' },
+        { status: 500 }
+      )
+    }
   } catch (error) {
-    console.error('Error creating customer:', error)
+    console.error('Error in POST:', error)
     return NextResponse.json(
       { success: false, message: 'サーバーエラーが発生しました。' },
       { status: 500 }
