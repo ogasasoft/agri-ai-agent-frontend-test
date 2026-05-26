@@ -181,13 +181,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate delivery_type
+    const validDeliveryTypes = ['normal', 'express', 'cod', 'neko_pos', 'compact'];
+    if (delivery_type && !validDeliveryTypes.includes(delivery_type)) {
+      return NextResponse.json(
+        { success: false, message: '配送タイプが無効です' },
+        { status: 400 }
+      );
+    }
+
     const client = await getDbClient();
 
     try {
       // Get selected orders directly from database
       const result = await client.query(
         `
-        SELECT 
+        SELECT
           o.id,
           o.order_code,
           o.customer_name,
@@ -212,9 +221,22 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Validate order data
+      const invalidOrders = selectedOrders.filter(order => {
+        return !order.order_code || !order.customer_name || !order.address;
+      });
+
+      if (invalidOrders.length > 0) {
+        return NextResponse.json(
+          { success: false, message: '一部の注文データに不足があります' },
+          { status: 400 }
+        );
+      }
+
       // Generate tracking numbers and update orders to 'shipped' status
       const successfulOrders: any[] = [];
       const shippedAt = new Date().toISOString();
+      const errors: any[] = [];
 
       for (let i = 0; i < selectedOrders.length; i++) {
         const order = selectedOrders[i];
@@ -239,9 +261,28 @@ export async function POST(request: NextRequest) {
             status: 'shipped',
             shipped_at: shippedAt,
           });
-        } catch {
+        } catch (error: any) {
+          console.error(`Failed to update order ${order.id}:`, error);
+          errors.push({
+            order_id: order.id,
+            order_code: order.order_code,
+            error: error.message || 'Unknown error'
+          });
           // Continue with other orders if one update fails
         }
+      }
+
+      // Check if any orders failed
+      if (errors.length > 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `${errors.length}件の注文の更新に失敗しました`,
+            errors: errors,
+            message: `${successfulOrders.length}件の注文は正常に更新されました`
+          },
+          { status: 500 }
+        );
       }
 
       // Generate Yamato B2 Cloud CSV with tracking numbers
@@ -256,15 +297,26 @@ export async function POST(request: NextRequest) {
         filename: filename,
         download_ready: true,
       });
+    } catch (error: any) {
+      console.error('Shipping API database error:', error);
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'データベースエラーが発生しました',
+          error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        },
+        { status: 500 }
+      );
     } finally {
       await client.end();
     }
-  } catch (error) {
-    console.error('Shipping API error:', error);
+  } catch (error: any) {
+    console.error('Shipping API unexpected error:', error);
     return NextResponse.json(
       {
         success: false,
         message: '発送処理中にエラーが発生しました',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
       },
       { status: 500 }
     );
@@ -279,6 +331,14 @@ export async function GET(request: NextRequest) {
     if (!tracking_number) {
       return NextResponse.json(
         { success: false, message: '追跡番号が指定されていません' },
+        { status: 400 }
+      );
+    }
+
+    // Validate tracking_number format
+    if (tracking_number.length < 10 || tracking_number.length > 20) {
+      return NextResponse.json(
+        { success: false, message: '追跡番号の形式が無効です' },
         { status: 400 }
       );
     }
@@ -307,12 +367,13 @@ export async function GET(request: NextRequest) {
       success: true,
       tracking_info: mockTrackingInfo,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Tracking API error:', error);
     return NextResponse.json(
       {
         success: false,
         message: error instanceof Error ? error.message : '配送状況の取得中にエラーが発生しました',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
       },
       { status: 500 }
     );

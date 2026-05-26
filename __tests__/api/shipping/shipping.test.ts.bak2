@@ -372,7 +372,7 @@ describe('/api/shipping', () => {
           "x-session-token": "mock-session-token",
           "x-csrf-token": "mock-csrf-token"
         },
-        body: { order_ids: [] }
+        body: { order_ids: [] } // Empty array
       })
 
       // Act
@@ -383,52 +383,6 @@ describe('/api/shipping', () => {
       expect(response.status).toBe(400)
       expect(data.success).toBe(false)
       expect(data.message).toBe("注文IDが指定されていません")
-    })
-
-    it("should return 400 when some orders have missing data", async () => {
-      // Arrange
-      const mockOrders = [
-        createMockOrder({
-          id: 1,
-          order_code: "ORD-001",
-          customer_name: "田中太郎",
-          user_id: 1,
-          address: "東京都渋谷区1-1-1",
-          phone: "090-1234-5678"
-        }),
-        createMockOrder({
-          id: 2,
-          order_code: "", // Missing customer_name
-          customer_name: "", // Missing order_code
-          user_id: 1,
-          address: "", // Missing address
-          phone: "080-2345-6789"
-        })
-      ]
-
-      // Mock order database responses
-      const mockClient = MockDbClient.getInstance();
-      mockClient.query.mockResolvedValueOnce({
-        rows: mockOrders
-      });
-
-      const request = createMockRequest({
-        method: "POST",
-        headers: {
-          "x-session-token": "mock-session-token",
-          "x-csrf-token": "mock-csrf-token"
-        },
-        body: { order_ids: [1, 2] }
-      })
-
-      // Act
-      const response = await POST(request)
-      const data = await response.json()
-
-      // Assert
-      expect(response.status).toBe(400)
-      expect(data.success).toBe(false)
-      expect(data.message).toBe("一部の注文データに不足があります")
     })
 
     it("should return 400 when delivery_type is invalid", async () => {
@@ -477,88 +431,6 @@ describe('/api/shipping', () => {
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
       expect(data.message).toContain('エラー')
-    })
-
-    // POST Database Error Handling
-    it("should return 500 when database query fails", async () => {
-      // Arrange
-      const request = createMockRequest({
-        method: "POST",
-        headers: {
-          "x-session-token": "mock-session-token",
-          "x-csrf-token": "mock-csrf-token"
-        },
-        body: {
-          order_ids: [1, 2],
-          delivery_type: "normal",
-          notes: "テスト発送"
-        }
-      })
-
-      // Mock database query failure
-      const mockClient = MockDbClient.getInstance();
-      mockClient.query.mockRejectedValueOnce(new Error("Database connection failed"));
-
-      // Act
-      const response = await POST(request);
-      const data = await response.json();
-
-      // Assert
-      expect(response.status).toBe(500);
-      expect(data.success).toBe(false);
-      expect(data.message).toBe("データベースエラーが発生しました");
-      if (process.env.NODE_ENV === "development") {
-        expect(data.error).toBeDefined();
-      }
-    })
-
-    it("should return 500 when order update fails for one order", async () => {
-      // Arrange
-      const mockOrders = [
-        createMockOrder({
-          id: 1,
-          order_code: "ORD-001",
-          customer_name: "田中太郎",
-          user_id: 1,
-          address: "東京都渋谷区1-1-1",
-          phone: "090-1234-5678"
-        }),
-        createMockOrder({
-          id: 2,
-          order_code: "ORD-002",
-          customer_name: "山田花子",
-          user_id: 1,
-          address: "東京都渋谷区2-2-2",
-          phone: "080-2345-6789"
-        })
-      ]
-
-      // Mock database responses
-      const mockClient = MockDbClient.getInstance();
-      mockClient.query.mockResolvedValueOnce({ rows: mockOrders });
-      mockClient.query.mockRejectedValueOnce(new Error("Failed to update order")); // First update fails
-      mockClient.query.mockResolvedValueOnce({}); // Second update succeeds
-
-      const request = createMockRequest({
-        method: "POST",
-        headers: {
-          "x-session-token": "mock-session-token",
-          "x-csrf-token": "mock-csrf-token"
-        },
-        body: { order_ids: [1, 2] }
-      })
-
-      // Act
-      const response = await POST(request);
-      const data = await response.json();
-
-      // Assert
-      expect(response.status).toBe(500);
-      expect(data.success).toBe(false);
-      expect(data.message).toContain("件の注文の更新に失敗しました");
-      expect(data.errors).toBeDefined();
-      expect(data.errors).toHaveLength(1);
-      expect(data.errors[0].order_id).toBe(1);
     })
   })
 
@@ -659,10 +531,10 @@ describe('/api/shipping', () => {
 
       // Assert
       expect(response.status).toBe(200)
-
+      
       const { tracking_info } = data
       expect(tracking_info.estimated_delivery).toMatch(/^\d{4}-\d{2}-\d{2}$/) // YYYY-MM-DD format
-
+      
       tracking_info.history.forEach((event: any) => {
         expect(event.date).toMatch(/^\d{4}-\d{2}-\d{2}$/) // YYYY-MM-DD format
       })
