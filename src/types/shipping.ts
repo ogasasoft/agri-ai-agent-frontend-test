@@ -17,7 +17,7 @@ export interface YamatoApiResponse {
 
 export interface ShippingRequest {
   order_ids: number[];
-  delivery_type: 'normal' | 'cool' | 'frozen';
+  delivery_type?: 'normal' | 'cool' | 'frozen';
   notes?: string;
 }
 

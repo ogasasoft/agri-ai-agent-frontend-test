@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate delivery_type
-    const validDeliveryTypes = ['normal', 'express', 'cod', 'neko_pos', 'compact'];
+    const validDeliveryTypes = ['normal', 'cool', 'frozen'];
     if (delivery_type && !validDeliveryTypes.includes(delivery_type)) {
       return NextResponse.json(
         { success: false, message: '配送タイプが無効です' },

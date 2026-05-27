@@ -81,10 +81,6 @@ describe('/api/shipping', () => {
       const data = await response.json()
 
       // Debug
-      if (response.status !== 200) {
-        console.log('[TEST ERROR] Status:', response.status)
-        console.log('[TEST ERROR] Data:', data)
-      }
 
       // Assert
       expect(response.status).toBe(200)
@@ -229,10 +225,6 @@ describe('/api/shipping', () => {
       const data = await response.json()
 
       // Debug
-      if (response.status !== 200) {
-        console.log('[TEST ERROR] Status:', response.status)
-        console.log('[TEST ERROR] Data:', data)
-      }
 
       // Assert
       expect(response.status).toBe(200)
@@ -308,6 +300,10 @@ describe('/api/shipping', () => {
       // Act
       const response = await POST(request)
       const data = await response.json()
+
+      // Debug
+      console.log('[DEBUG] Status:', response.status)
+      console.log('[DEBUG] Data:', JSON.stringify(data, null, 2))
 
       // Assert
       expect(response.status).toBe(200)
