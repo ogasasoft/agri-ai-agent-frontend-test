@@ -6,6 +6,10 @@ jest.mock('pg', () => ({
   Client: jest.fn().mockImplementation(() => MockDbClient.getInstance())
 }))
 
+jest.mock('@/lib/db', () => ({
+  getDbClient: jest.fn(async () => MockDbClient.getInstance())
+}))
+
 jest.mock('@/lib/auth', () => ({
   validateSession: jest.fn(),
 }))
@@ -75,6 +79,12 @@ describe('/api/shipping', () => {
       // Act
       const response = await POST(request)
       const data = await response.json()
+
+      // Debug
+      if (response.status !== 200) {
+        console.log('[TEST ERROR] Status:', response.status)
+        console.log('[TEST ERROR] Data:', data)
+      }
 
       // Assert
       expect(response.status).toBe(200)
@@ -169,6 +179,12 @@ describe('/api/shipping', () => {
       const response = await POST(request)
       const data = await response.json()
 
+      // Debug
+      if (response.status !== 404) {
+        console.log('[TEST ERROR] Status:', response.status)
+        console.log('[TEST ERROR] Data:', data)
+      }
+
       // Assert
       expect(response.status).toBe(404)
       expect(data.success).toBe(false)
@@ -211,6 +227,12 @@ describe('/api/shipping', () => {
       // Act
       const response = await POST(request)
       const data = await response.json()
+
+      // Debug
+      if (response.status !== 200) {
+        console.log('[TEST ERROR] Status:', response.status)
+        console.log('[TEST ERROR] Data:', data)
+      }
 
       // Assert
       expect(response.status).toBe(200)

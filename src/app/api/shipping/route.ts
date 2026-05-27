@@ -134,9 +134,13 @@ const generateYamatoB2CSV = (orders: any[]): string => {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('[DEBUG] Shipping POST called')
+
     // Session validation
     const sessionToken =
       request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    console.log('[DEBUG] Session token:', sessionToken ? 'present' : 'missing')
+
     if (!sessionToken) {
       return NextResponse.json(
         {
@@ -148,6 +152,7 @@ export async function POST(request: NextRequest) {
     }
 
     const sessionData = await validateSession(sessionToken);
+    console.log('[DEBUG] Session data:', sessionData ? 'valid' : 'invalid')
     if (!sessionData || !sessionData.user) {
       return NextResponse.json(
         {
@@ -173,6 +178,7 @@ export async function POST(request: NextRequest) {
     const userId = sessionData.user.id.toString();
     const body: ShippingRequest = await request.json();
     const { order_ids, delivery_type = 'normal', notes } = body;
+    console.log('[DEBUG] Request body:', { order_ids, delivery_type, notes })
 
     if (!order_ids || order_ids.length === 0) {
       return NextResponse.json(
@@ -194,6 +200,7 @@ export async function POST(request: NextRequest) {
 
     try {
       // Get selected orders directly from database
+      console.log('[DEBUG] Querying orders for user_id:', userId, 'order_ids:', order_ids)
       const result = await client.query(
         `
         SELECT
@@ -213,6 +220,7 @@ export async function POST(request: NextRequest) {
       );
 
       const selectedOrders = result.rows;
+      console.log('[DEBUG] Selected orders:', selectedOrders)
 
       if (selectedOrders.length === 0) {
         return NextResponse.json(
