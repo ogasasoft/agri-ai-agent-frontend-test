@@ -26,7 +26,7 @@ export async function validateAdminSession(sessionToken: string): Promise<AdminU
       const result = await client.query(
         `
         SELECT id, username, email, role, is_super_admin, is_active, created_at
-        FROM users 
+        FROM users
         WHERE id = $1 AND is_active = true AND (role = 'admin' OR role = 'super_admin' OR is_super_admin = true)
       `,
         [sessionData.user.id]
@@ -37,8 +37,15 @@ export async function validateAdminSession(sessionToken: string): Promise<AdminU
       }
 
       return result.rows[0] as AdminUser;
+    } catch (dbError: any) {
+      console.error('Database error during admin validation:', dbError.message);
+      return null;
     } finally {
-      await client.end();
+      try {
+        await client.end();
+      } catch (endError) {
+        console.error('Error closing client:', endError);
+      }
     }
   } catch (error) {
     console.error('Admin session validation error:', error);

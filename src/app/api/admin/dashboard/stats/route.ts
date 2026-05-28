@@ -90,8 +90,21 @@ export async function GET(request: NextRequest) {
           weeklyGrowth,
         },
       });
+    } catch (dbError: any) {
+      console.error('Database error in admin dashboard stats:', dbError.message);
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'データベースエラーが発生しました。',
+        },
+        { status: 500 }
+      );
     } finally {
-      await client.end();
+      try {
+        await client.end();
+      } catch (endError) {
+        console.error('Error closing client:', endError);
+      }
     }
   } catch (error: any) {
     console.error('Admin dashboard stats error:', error);

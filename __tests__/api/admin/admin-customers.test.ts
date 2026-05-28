@@ -34,6 +34,10 @@ describe('/api/admin/customers', () => {
       const mockAdminUser = createMockUser({ id: 1, is_super_admin: true })
       validateAdminSession.mockResolvedValue(mockAdminUser)
 
+      console.log('[TEST DEBUG] mockAdminUser:', mockAdminUser)
+      console.log('[TEST DEBUG] validateAdminSession.mock.calls:', validateAdminSession.mock.calls)
+      console.log('[TEST DEBUG] mockClient.query.mock.calls:', mockClient.query.mock.calls)
+
       const mockCustomerData = [
         {
           customer_name: '田中太郎',
@@ -81,10 +85,20 @@ describe('/api/admin/customers', () => {
         console.error('Response:', JSON.stringify(data, null, 2))
         console.error('Response text:', await response.text())
         console.error('validateAdminSession.mock.calls:', validateAdminSession.mock.calls)
+        console.error('validateAdminSession.mock.results:', validateAdminSession.mock.results)
         console.error('MockClient:', mockClient)
         console.error('MockClient.query type:', typeof mockClient.query)
         console.error('MockClient.query mock.calls:', mockClient.query.mock.calls)
         console.error('MockClient.query.mock.results:', mockClient.query.mock.results)
+        console.error('Full error details:', JSON.stringify(data, null, 2))
+      }
+
+      // Additional debug for 500 errors
+      if (response.status === 500) {
+        console.error('=== FULL TEST DEBUG ===')
+        console.error('GET request details:', request)
+        console.error('Headers:', request.headers)
+        console.error('Cookies:', request.cookies)
       }
 
       // Assert

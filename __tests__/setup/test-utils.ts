@@ -151,6 +151,50 @@ export class MockDbClient {
         const orderIds = params.slice(1) // Skip user_id parameter
         orders = orders.filter((order: any) => orderIds.includes(order.id))
       }
+      // Filter by order_id if specified
+      if (params && text.includes('WHERE') && text.includes('order_id')) {
+        const orderId = params[0]
+        orders = orders.filter((o: any) => o.id === orderId || o.id === Number(orderId))
+      }
+      // Get distinct orders with user join for admin customers API
+      if (text.includes('DISTINCT o.') && text.includes('JOIN users u')) {
+        const joinedOrders: any[] = []
+        orders.forEach((order: any) => {
+          const user = this.mockData.users?.find((u: any) => u.id === order.user_id) || {
+            id: order.user_id,
+            username: `user_${order.user_id}`
+          }
+          joinedOrders.push({
+            customer_name: order.customer_name,
+            phone: order.phone,
+            address: order.address,
+            user_id: order.user_id,
+            username: user.username,
+            id: order.id,
+            total_orders: '1', // Default value
+            total_spent: (order.price || 0).toString(),
+            last_order_date: order.order_date,
+            created_at: order.created_at
+          })
+        })
+        // Order by created_at
+        if (text.includes('ORDER BY') && text.includes('created_at')) {
+          joinedOrders.sort((a: any, b: any) => {
+            const dateA = new Date(a.created_at || a.order_date).getTime()
+            const dateB = new Date(b.created_at || b.order_date).getTime()
+            return dateB - dateA
+          })
+        }
+        return { rows: joinedOrders }
+      }
+      // Order by created_at for other queries
+      if (text.includes('ORDER BY') && text.includes('created_at')) {
+        orders = orders.sort((a: any, b: any) => {
+          const dateA = new Date(a.created_at || a.order_date).getTime()
+          const dateB = new Date(b.created_at || b.order_date).getTime()
+          return dateB - dateA
+        })
+      }
       return { rows: orders }
     }
     if (text.includes('INSERT INTO orders')) {
@@ -257,6 +301,50 @@ export class MockDbClient {
         if (params && params.length > 0 && text.includes('IN')) {
           const orderIds = params.slice(1)
           orders = orders.filter((order: any) => orderIds.includes(order.id))
+        }
+        // Filter by order_id if specified
+        if (params && text.includes('WHERE') && text.includes('order_id')) {
+          const orderId = params[0]
+          orders = orders.filter((o: any) => o.id === orderId || o.id === Number(orderId))
+        }
+        // Get distinct orders with user join for admin customers API
+        if (text.includes('DISTINCT o.') && text.includes('JOIN users u')) {
+          const joinedOrders: any[] = []
+          orders.forEach((order: any) => {
+            const user = this.mockData.users?.find((u: any) => u.id === order.user_id) || {
+              id: order.user_id,
+              username: `user_${order.user_id}`
+            }
+            joinedOrders.push({
+              customer_name: order.customer_name,
+              phone: order.phone,
+              address: order.address,
+              user_id: order.user_id,
+              username: user.username,
+              id: order.id,
+              total_orders: '1',
+              total_spent: (order.price || 0).toString(),
+              last_order_date: order.order_date,
+              created_at: order.created_at
+            })
+          })
+          // Order by created_at
+          if (text.includes('ORDER BY') && text.includes('created_at')) {
+            joinedOrders.sort((a: any, b: any) => {
+              const dateA = new Date(a.created_at || a.order_date).getTime()
+              const dateB = new Date(b.created_at || b.order_date).getTime()
+              return dateB - dateA
+            })
+          }
+          return { rows: joinedOrders }
+        }
+        // Order by created_at for other queries
+        if (text.includes('ORDER BY') && text.includes('created_at')) {
+          orders = orders.sort((a: any, b: any) => {
+            const dateA = new Date(a.created_at || a.order_date).getTime()
+            const dateB = new Date(b.created_at || b.order_date).getTime()
+            return dateB - dateA
+          })
         }
         return { rows: orders }
       }

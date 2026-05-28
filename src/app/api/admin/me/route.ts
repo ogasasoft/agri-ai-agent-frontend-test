@@ -34,6 +34,15 @@ export async function GET(request: NextRequest) {
       success: true,
       user: adminUser,
     });
+  } catch (dbError: any) {
+    console.error('Database error in admin me:', dbError.message);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'データベースエラーが発生しました。',
+      },
+      { status: 500 }
+    );
   } catch (error: any) {
     console.error('Admin me error:', error);
     return NextResponse.json(

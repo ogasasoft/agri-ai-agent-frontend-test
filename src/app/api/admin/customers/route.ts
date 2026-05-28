@@ -10,7 +10,11 @@ export async function GET(request: NextRequest) {
     const sessionToken =
       request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
 
+    console.log('[Admin Customers GET] Session token:', sessionToken);
+    console.log('[Admin Customers GET] Headers:', request.headers);
+
     if (!sessionToken) {
+      console.log('[Admin Customers GET] No session token');
       return NextResponse.json(
         {
           success: false,
@@ -22,7 +26,10 @@ export async function GET(request: NextRequest) {
 
     const adminUser = await validateAdminSession(sessionToken);
 
+    console.log('[Admin Customers GET] Admin user:', adminUser);
+
     if (!adminUser) {
+      console.log('[Admin Customers GET] No admin user');
       return NextResponse.json(
         {
           success: false,
@@ -37,7 +44,7 @@ export async function GET(request: NextRequest) {
     try {
       // Get customers with order statistics from all users
       const result = await client.query(`
-        SELECT 
+        SELECT
           DISTINCT o.customer_name,
           o.phone,
           o.address,
@@ -70,8 +77,21 @@ export async function GET(request: NextRequest) {
         success: true,
         customers: result.rows,
       });
+    } catch (dbError: any) {
+      console.error('Database error in admin customers GET:', dbError.message);
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'データベースエラーが発生しました。',
+        },
+        { status: 500 }
+      );
     } finally {
-      await client.end();
+      try {
+        await client.end();
+      } catch (endError) {
+        console.error('Error closing client:', endError);
+      }
     }
   } catch (error: any) {
     console.error('Admin customers error:', error);
@@ -144,7 +164,7 @@ export async function POST(request: NextRequest) {
       const result = await client.query(
         `
         INSERT INTO orders (
-          order_code, customer_name, phone, address, price, 
+          order_code, customer_name, phone, address, price,
           order_date, user_id, source, notes, extra_data
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
@@ -184,8 +204,21 @@ export async function POST(request: NextRequest) {
         message: '顧客を作成しました。',
         customer_id: result.rows[0].id,
       });
+    } catch (dbError: any) {
+      console.error('Database error in admin create customer POST:', dbError.message);
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'データベースエラーが発生しました。',
+        },
+        { status: 500 }
+      );
     } finally {
-      await client.end();
+      try {
+        await client.end();
+      } catch (endError) {
+        console.error('Error closing client:', endError);
+      }
     }
   } catch (error: any) {
     console.error('Admin create customer error:', error);

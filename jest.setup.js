@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { TextEncoder, TextDecoder } from 'util';
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
@@ -224,11 +225,7 @@ global.Response = class Response {
 global.TextEncoder = class TextEncoder {};
 global.TextDecoder = class TextDecoder {};
 
-// Note: DATABASE_URL and other environment variables should be set by the test runner,
-// not mocked here. This allows tests to use real database connections when configured.
-
 // Mock environment variables
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db';
 process.env.OPENAI_API_KEY = 'test-openai-key';
 
 // Mock DB client

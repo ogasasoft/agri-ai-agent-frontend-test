@@ -266,8 +266,18 @@ export async function authenticateUser(
       message: 'ログインしました。',
       requiresPasswordChange,
     };
+  } catch (dbError: any) {
+    console.error('Database error in authenticateUser:', dbError.message);
+    return {
+      success: false,
+      message: 'データベースエラーが発生しました。',
+    };
   } finally {
-    await client.end();
+    try {
+      await client.end();
+    } catch (endError) {
+      console.error('Error closing client in authenticateUser:', endError);
+    }
   }
 }
 
@@ -314,8 +324,15 @@ export async function validateSession(
         is_active: row.is_active,
       },
     };
+  } catch (dbError: any) {
+    console.error('Database error in validateSession:', dbError.message);
+    return null;
   } finally {
-    await client.end();
+    try {
+      await client.end();
+    } catch (endError) {
+      console.error('Error closing client in validateSession:', endError);
+    }
   }
 }
 

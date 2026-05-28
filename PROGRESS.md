@@ -1,18 +1,19 @@
 # 進捗記録 - agri-ai-agent-frontend-test
-## 状態: IN_PROGRESS (TypeScript構文エラー修正中)
+## 状態: IN_PROGRESS (Test failures fixing - Phase 1)
 ## 完了済み
-- [x] エラーヘルパー改善 (Content-Type headerの問題解決)
-- [x] Shipping APIの500エラー修正
-- [x] TypeScript構文エラーの修正 (customers route: try/catch構造)
-  - POST関数: 変数スコープ修正、try-catch構造修正
-  - GET関数: 変数スコープ修正、try-catch構造修正
-  - DELETE関数: 変数スコープ修正、try-catch構造修正
-  - テスト: npm run typecheck通過 (test-utilsの型定義のみ警告)
-- [x] WIP commit (現在の進捗を保存)
+- [x] TypeScript構文エラーの修正
+  - tsconfig.json: test files exclude from compilation
+  - tsconfig.test.json: Created for Jest test files
+  - jest.config.js: Updated to use tsconfig.test.json
+  - ts build passes ✅
+- [x] Jest deprecation warnings fixed
+  - baseUrl/moduleResolution warnings resolved
+- [x] WIP commit (base setup)
 ## 未完了
-- [ ] 認証テストの修正 (login, logout, me routes)
-- [ ] Admin APIテストの修正 (customers, dashboard)
-- [ ] DB接続設定の改善
+- [ ] Fix database connection issues (500 errors in tests)
+- [ ] Fix authentication tests (login, logout, me routes)
+- [ ] Fix Admin API tests (customers, dashboard)
+- [ ] Fix API status code mismatches
 ## 次にやること
-認証テストとAdmin APIテストの修正から再開
-- Main issues: 認証テスト失敗、APIステータスコード不整合、DB接続設定
+Phase 1: Fix critical database connection and Admin API issues (currently failing 50 tests)
+- Main issues: DB connection failures, 500 errors, status code mismatches
