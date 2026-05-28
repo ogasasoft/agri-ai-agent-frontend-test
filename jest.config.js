@@ -28,6 +28,12 @@ const customJestConfig = {
     "<rootDir>/**/__tests__/**/*.{js,jsx,ts,tsx}",
     "<rootDir>/**/*.(test|spec).{js,jsx,ts,tsx}",
   ],
+  // Configure TypeScript for Jest
+  globals: {
+    "ts-jest": {
+      tsconfig: "./tsconfig.test.json",
+    },
+  },
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
