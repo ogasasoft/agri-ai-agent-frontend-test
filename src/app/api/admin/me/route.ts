@@ -5,8 +5,18 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    const cookie = request.cookies.get('session_token')
+    console.log('Admin me request debug:', {
+      hasHeader: !!request.headers.get('x-session-token'),
+      cookieObject: cookie,
+      cookieType: typeof cookie,
+      hasCookie: !!cookie,
+      cookieValue: cookie?.value,
+      sessionToken: cookie?.value
+    });
+
     const sessionToken =
-      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+      request.headers.get('x-session-token') || cookie?.value;
 
     if (!sessionToken) {
       return NextResponse.json(
@@ -34,16 +44,7 @@ export async function GET(request: NextRequest) {
       success: true,
       user: adminUser,
     });
-  } catch (dbError: any) {
-    console.error('Database error in admin me:', dbError.message);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'データベースエラーが発生しました。',
-      },
-      { status: 500 }
-    );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Admin me error:', error);
     return NextResponse.json(
       {

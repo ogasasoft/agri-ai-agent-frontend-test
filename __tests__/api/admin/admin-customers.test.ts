@@ -1,12 +1,14 @@
-import { GET, POST } from '@/app/api/admin/customers/route'
-import { createMockRequest, MockDbClient, createMockUser, createMockOrder, resetTestDatabase, seedTestData } from '../../setup/test-utils'
-import pg from 'pg'
+// Mock @/lib/db BEFORE importing it - this is critical!
+jest.mock('@/lib/db', () => ({
+  getDbClient: jest.fn(() => MockDbClient.getInstance())
+}))
 
-// Mock dependencies
+// Mock pg - also needed before importing
 jest.mock('pg', () => ({
   Client: jest.fn().mockImplementation(() => MockDbClient.getInstance())
 }))
 
+// Mock admin-auth before importing the route
 jest.mock('@/lib/admin-auth', () => ({
   validateAdminSession: jest.fn(),
   logAdminAction: jest.fn(),
@@ -15,6 +17,10 @@ jest.mock('@/lib/admin-auth', () => ({
     userAgent: 'Jest Test Agent'
   })
 }))
+
+import { GET, POST } from '@/app/api/admin/customers/route'
+import { createMockRequest, MockDbClient, createMockUser, createMockOrder, resetTestDatabase, seedTestData } from '../../setup/test-utils'
+import { getDbClient } from '@/lib/db'
 
 describe('/api/admin/customers', () => {
   let mockClient: MockDbClient

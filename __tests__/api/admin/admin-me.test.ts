@@ -1,18 +1,18 @@
-import { GET } from '@/app/api/admin/me/route'
-import { createMockRequest, MockDbClient, createMockUser, resetTestDatabase } from '../../setup/test-utils'
-
-// Mock dependencies
-jest.mock('pg', () => ({
-  Client: jest.fn().mockImplementation(() => MockDbClient.getInstance())
-}))
-
+// Mock @/lib/db BEFORE importing it
 jest.mock('@/lib/db', () => ({
   getDbClient: jest.fn(async () => MockDbClient.getInstance())
+}))
+
+jest.mock('pg', () => ({
+  Client: jest.fn().mockImplementation(() => MockDbClient.getInstance())
 }))
 
 jest.mock('@/lib/admin-auth', () => ({
   validateAdminSession: jest.fn(),
 }))
+
+import { GET } from '@/app/api/admin/me/route'
+import { createMockRequest, MockDbClient, createMockUser, resetTestDatabase } from '../../setup/test-utils'
 
 describe('/api/admin/me', () => {
   let mockClient: MockDbClient
