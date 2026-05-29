@@ -33,8 +33,10 @@ export async function GET(request: NextRequest) {
   const mockClient = (await getMockDbClient())?.getInstance()
 
   if (mockClient) {
+    console.log('[DEBUG] MockClient found, executing query')
     try {
       // Get customers with statistics
+      console.log('[DEBUG] Executing query...')
       const result = await mockClient.query(
         `SELECT
           c.*,
@@ -47,6 +49,7 @@ export async function GET(request: NextRequest) {
         GROUP BY c.id, u.username
         ORDER BY c.customer_name, c.phone`
       )
+      console.log('[DEBUG] Query result rows:', result.rows?.length || 0)
 
       const customers = result.rows.map((row: any) => ({
         ...row,
@@ -102,7 +105,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching customers:', error)
     return NextResponse.json(
-      { success: false, message: 'サーバーエラーが発生しました。' },
+      { success: false, message: 'データベースエラーが発生しました。' },
       { status: 500 }
     )
   }

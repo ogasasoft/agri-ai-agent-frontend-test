@@ -76,7 +76,39 @@ export class MockDbClient {
         return { rows: [newCustomer] }
       }
       if (text.includes('SELECT') && text.includes('customers') && text.includes('GROUP BY')) {
-        // Return customers with statistics
+        // Return customers with statistics - match the exact query pattern from route.ts
+        if (text.includes('JOIN users u ON c.user_id = u.id')) {
+          const customers = this.mockData.customers || []
+          const users = this.mockData.users || []
+
+          const result = customers.map((customer: any) => {
+            const user = users.find((u: any) => u.id === customer.user_id) || {
+              id: customer.user_id,
+              username: `user_${customer.user_id}`
+            }
+
+            // Count orders for this customer
+            const orders = this.mockData.orders || []
+            const customerOrders = orders.filter((o: any) => o.user_id === customer.user_id)
+
+            return {
+              ...customer,
+              username: user.username,
+              total_orders: customerOrders.length,
+              total_spent: customerOrders.reduce((sum: number, order: any) => sum + (order.price || 0), 0)
+            }
+          })
+
+          // Sort by customer_name and phone as in the query
+          result.sort((a: any, b: any) => {
+            if (a.customer_name !== b.customer_name) {
+              return a.customer_name.localeCompare(b.customer_name)
+            }
+            return a.phone.localeCompare(b.phone)
+          })
+
+          return { rows: result }
+        }
         if (!this.mockData.customers) {
           this.mockData.customers = []
         }
@@ -552,6 +584,34 @@ export async function seedTestData() {
   mockClient.setMockData('orders', [
     createMockOrder({ id: 1, order_number: 'ORD-001', user_id: 1 }),
     createMockOrder({ id: 2, order_number: 'ORD-002', user_id: 1 }),
+  ])
+
+  // Seed customers
+  mockClient.setMockData('customers', [
+    {
+      id: 1,
+      customer_name: '田中太郎',
+      phone: '090-1234-5678',
+      address: '東京都渋谷区1-1-1',
+      email: 'tanaka@example.com',
+      user_id: 2,
+      total_orders: 3,
+      total_spent: 15000,
+      last_order_date: '2024-01-15',
+      created_at: '2024-01-01T00:00:00Z'
+    },
+    {
+      id: 2,
+      customer_name: '山田花子',
+      phone: '090-9876-5432',
+      address: '大阪府大阪市2-2-2',
+      email: 'yamada@example.com',
+      user_id: 3,
+      total_orders: 2,
+      total_spent: 8000,
+      last_order_date: '2024-01-10',
+      created_at: '2024-01-02T00:00:00Z'
+    }
   ])
 }
 
