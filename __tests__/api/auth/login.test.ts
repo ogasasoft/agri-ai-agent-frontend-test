@@ -1,5 +1,6 @@
 import { POST } from '@/app/api/auth/login/route'
 import { createMockRequest, MockDbClient, createMockUser, resetTestDatabase } from '../../setup/test-utils'
+import { authenticateUserEnhanced, checkRateLimit } from '@/lib/auth-enhanced'
 
 // Mock dependencies
 jest.mock('pg', () => ({
@@ -10,15 +11,21 @@ jest.mock('@/lib/db', () => ({
   getDbClient: jest.fn(async () => MockDbClient.getInstance())
 }))
 
-jest.mock('@/lib/auth-enhanced', () => ({
-  authenticateUserEnhanced: jest.fn(),
-  getClientInfo: jest.fn().mockReturnValue({
-    ipAddress: '127.0.0.1',
-    userAgent: 'Jest Test Agent'
-  })
-}))
+jest.mock('@/lib/auth-enhanced', () => {
+  return {
+    authenticateUserEnhanced: jest.fn(),
+    getClientInfo: jest.fn().mockReturnValue({
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent'
+    }),
+    checkRateLimit: jest.fn().mockResolvedValue({
+      allowed: true,
+      remaining: 19,
+      resetTime: new Date(Date.now() + 15 * 60 * 1000)
+    })
+  }
+})
 
-// Mock bcryptjs
 jest.mock('bcryptjs', () => ({
   compare: jest.fn(),
   hash: jest.fn(),
@@ -29,7 +36,6 @@ const bcrypt = require('bcryptjs')
 
 describe('/api/auth/login', () => {
   let mockClient: MockDbClient
-  const { authenticateUserEnhanced } = require('@/lib/auth-enhanced')
 
   beforeEach(async () => {
     await resetTestDatabase()
@@ -50,17 +56,6 @@ describe('/api/auth/login', () => {
 
       mockClient.setMockData('users', [mockUser])
       bcrypt.compare.mockResolvedValue(true)
-      authenticateUserEnhanced.mockResolvedValue({
-        success: true,
-        message: 'ログイン成功',
-        user: mockUser,
-        session: {
-          user_id: 1,
-          session_token: 'test-session-token',
-          csrf_token: 'test-csrf-token'
-        },
-        requiresPasswordChange: false
-      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -96,10 +91,6 @@ describe('/api/auth/login', () => {
     it('should reject login with invalid username', async () => {
       // Arrange
       mockClient.setMockData('users', [])
-      authenticateUserEnhanced.mockResolvedValue({
-        success: false,
-        message: 'ユーザーが見つかりません'
-      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -130,11 +121,6 @@ describe('/api/auth/login', () => {
       })
 
       mockClient.setMockData('users', [mockUser])
-      bcrypt.compare.mockResolvedValue(false)
-      authenticateUserEnhanced.mockResolvedValue({
-        success: false,
-        message: 'パスワードが間違っています'
-      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -163,10 +149,6 @@ describe('/api/auth/login', () => {
       })
 
       mockClient.setMockData('users', [mockUser])
-      authenticateUserEnhanced.mockResolvedValue({
-        success: false,
-        message: 'アカウントが無効化されています'
-      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -198,11 +180,6 @@ describe('/api/auth/login', () => {
       })
 
       mockClient.setMockData('users', [mockUser])
-      authenticateUserEnhanced.mockResolvedValue({
-        success: false,
-        message: 'アカウントがロックされています',
-        lockoutInfo: { level: 2 }
-      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -233,23 +210,6 @@ describe('/api/auth/login', () => {
       })
 
       mockClient.setMockData('users', [mockUser])
-      bcrypt.compare.mockResolvedValue(true)
-      authenticateUserEnhanced.mockResolvedValue({
-        success: true,
-        message: 'ログイン成功',
-        user: mockUser,
-        session: {
-          user_id: 1,
-          session_token: 'test-session-token',
-          csrf_token: 'test-csrf-token'
-        },
-        rememberToken: {
-          token: 'test-remember-token',
-          selector: 'test-selector',
-          validator: 'test-validator'
-        },
-        requiresPasswordChange: false
-      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -273,7 +233,7 @@ describe('/api/auth/login', () => {
           selector: expect.any(String)
         })
       )
-      
+
       // Check Set-Cookie header for remember token
       const setCookieHeader = response.headers.get('Set-Cookie')
       expect(setCookieHeader).toContain('remember_token=')
@@ -323,18 +283,6 @@ describe('/api/auth/login', () => {
       })
 
       mockClient.setMockData('users', [mockUser])
-      bcrypt.compare.mockResolvedValue(true)
-      authenticateUserEnhanced.mockResolvedValue({
-        success: true,
-        message: 'ログイン成功',
-        user: mockUser,
-        session: {
-          user_id: 1,
-          session_token: 'test-session-token',
-          csrf_token: 'test-csrf-token'
-        },
-        requiresPasswordChange: false
-      })
 
       const request = createMockRequest({
         method: 'POST',

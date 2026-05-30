@@ -31,6 +31,7 @@ export class ErrorDetailBuilder {
   protected errorResponse: DetailedErrorResponse;
 
   constructor(message: string, errorCode: string) {
+    console.log('ErrorDetailBuilder constructor called, message:', message, 'errorCode:', errorCode);
     this.errorResponse = {
       success: false,
       message,
@@ -41,6 +42,7 @@ export class ErrorDetailBuilder {
       },
       suggestions: [],
     };
+    console.log('ErrorDetailBuilder constructor completed, errorResponse:', this.errorResponse);
   }
 
   setUser(userId: string): this {
@@ -106,7 +108,12 @@ export class ErrorDetailBuilder {
   }
 
   setDetails(details: any): this {
-    this.errorResponse.details = details;
+    console.log('setDetails called, this.errorResponse:', this.errorResponse, 'details:', details);
+    if (this.errorResponse) {
+      this.errorResponse.details = details;
+    } else {
+      console.error('setDetails error: this.errorResponse is undefined');
+    }
     return this;
   }
 

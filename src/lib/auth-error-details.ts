@@ -13,12 +13,16 @@ interface AuthenticationContext {
 export class AuthErrorBuilder extends ErrorDetailBuilder {
   constructor(message: string) {
     super(message, 'AUTHENTICATION_ERROR');
+    console.log('AuthErrorBuilder constructor called, errorResponse:', this.errorResponse);
   }
 
   setAuthContext(context: AuthenticationContext): this {
-    if (this.errorResponse.debug_info) {
-      this.errorResponse.debug_info.user_id = context.username;
-      this.errorResponse.debug_info.operation = 'USER_AUTHENTICATION';
+    console.log('setAuthContext called, this.errorResponse:', this.errorResponse);
+    if (this.errorResponse) {
+      if (this.errorResponse.debug_info) {
+        this.errorResponse.debug_info.user_id = context.username;
+        this.errorResponse.debug_info.operation = 'USER_AUTHENTICATION';
+      }
     }
     return this.setDetails({
       ip_address: context.ipAddress,

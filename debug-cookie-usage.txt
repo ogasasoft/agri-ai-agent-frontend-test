@@ -1,0 +1,19 @@
+# Debug info: Next.js 16 cookie handling
+
+Issue: request.cookies.get('session_token')?.value is undefined
+
+Expected behavior in Next.js 16:
+- request.cookies.get('name') returns a Cookie object
+- Cookie object has .name and .value properties
+
+Problem:
+- The mock setup in createMockRequest is setting cookies via:
+  request.cookies.set(name, value)
+- But it might not be properly exposing the get() method
+
+Solutions:
+1. Fix the createMockRequest to properly implement cookies.get()
+2. Change route to access cookies differently (e.g., via headers)
+3. Use request.cookies.get('session_token').value directly
+
+Let me check how Next.js 16 handles this and fix the test utilities.

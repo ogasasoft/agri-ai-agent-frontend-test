@@ -1,0 +1,19 @@
+# Debug info for me.test.ts
+
+The issue is that when session token is provided, the route is returning 401 instead of 200.
+
+The route checks:
+1. sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value
+
+If sessionToken is null, it returns 401 with "認証が必要です。"
+
+This means either:
+1. The cookie is not being set on the request correctly
+2. The route is not reading the cookies properly
+
+The mock request should have:
+- headers: { cookie: 'session_token=valid-session-token' }
+- cookies: { session_token: 'valid-session-token' }
+- request.cookies.get() should return the cookie value
+
+Let me check if the createMockRequest is setting up the cookies properly.

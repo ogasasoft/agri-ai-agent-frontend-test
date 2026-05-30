@@ -11,6 +11,8 @@ export async function POST(request: NextRequest) {
     const { ipAddress, userAgent } = getClientInfo(request);
 
     console.log('Login attempt - username:', username);
+    console.log('Login attempt - parsed values:', { username, password, rememberMe });
+    console.log('Login attempt - parsing values completed');
 
     if (!username || !password) {
       return NextResponse.json(
@@ -22,6 +24,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('Calling authenticateUserEnhanced with:', { username, password, ipAddress, userAgent, rememberMe });
+
     const authResult = await authenticateUserEnhanced(
       username,
       password,
@@ -29,6 +33,8 @@ export async function POST(request: NextRequest) {
       userAgent,
       rememberMe || false
     );
+
+    console.log('authenticateUserEnhanced result:', authResult);
 
     if (!authResult.success) {
       // ログイン失敗の詳細分析とログ記録
@@ -109,6 +115,11 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error: any) {
     // システムエラーの詳細分析
+    console.error('=== Login Route Error ===');
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    console.error('Error name:', error.name);
+
     const context = {
       ipAddress: getClientInfo(request).ipAddress,
       userAgent: getClientInfo(request).userAgent,
@@ -118,6 +129,7 @@ export async function POST(request: NextRequest) {
       .setAuthContext(context)
       .addProcessingStep('Request Processing', 'failed', {
         error: error.message,
+        stack: error.stack,
       })
       .addSuggestion(
         '一時的なサーバーエラーの可能性があります。しばらく時間をおいてから再試行してください'
@@ -125,6 +137,7 @@ export async function POST(request: NextRequest) {
       .addSuggestion('問題が続く場合は、管理者にお問い合わせください')
       .build();
 
+    console.error('System error response:', systemError);
     return NextResponse.json(systemError, { status: 500 });
   }
 }
