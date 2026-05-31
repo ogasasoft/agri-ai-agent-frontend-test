@@ -4,9 +4,8 @@ import { logAuthAttempt } from '@/lib/auth-error-details';
 
 export async function POST(request: NextRequest) {
   // Get session token from cookies object
-  const sessionToken =
-    request.headers.get('x-session-token') ||
-    (request.cookies.get('session_token')?.value || request.cookies.get('session_token')?.name);
+  const sessionToken = request.headers.get('x-session-token') ||
+    request.cookies.get('session_token')?.value;
 
   if (sessionToken) {
     try {
