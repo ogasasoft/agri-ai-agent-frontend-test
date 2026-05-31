@@ -1,6 +1,11 @@
 import { POST } from '@/app/api/auth/logout/route'
-import { createMockRequest, resetTestDatabase } from '../../setup/test-utils'
+import { createMockRequest, resetTestDatabase, MockDbClient } from '../../setup/test-utils'
 import { NextResponseMock } from '../../setup/test-utils'
+
+// Mock dependencies
+jest.mock('@/lib/db', () => ({
+  getDbClient: jest.fn(() => MockDbClient.getInstance())
+}))
 
 describe('/api/auth/logout', () => {
   beforeEach(async () => {

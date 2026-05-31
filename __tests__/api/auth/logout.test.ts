@@ -6,6 +6,10 @@ jest.mock('pg', () => ({
   Client: jest.fn().mockImplementation(() => MockDbClient.getInstance())
 }))
 
+jest.mock('@/lib/db', () => ({
+  getDbClient: jest.fn(() => MockDbClient.getInstance())
+}))
+
 jest.mock('@/lib/auth', () => ({
   validateSession: jest.fn(),
   invalidateSession: jest.fn(),
