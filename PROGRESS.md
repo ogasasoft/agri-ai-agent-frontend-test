@@ -1,5 +1,5 @@
 # 進捗記録 - agri-ai-agent-frontend-test
-## 状態: IN_PROGRESS (Test failures fixing - Phase 2)
+## 状態: IN_PROGRESS (Test failures fixing - Phase 3)
 ## 完了済み
 - [x] TypeScript構文エラーの修正
   - tsconfig.json: test files exclude from compilation
@@ -15,14 +15,23 @@
   - dashboard-stats.test.ts: Added jest.mock before imports ✅
   - All 14 admin-customers tests now passing ✅
   - Fixed "Cannot read properties of undefined (reading query)" errors ✅
+- [x] Centralize DB mock in src/lib/db.ts
+  - Test environment detection added
+  - Mock client handling in getDbClient()
+  - Removed duplicate mocks from route files ✅
+- [x] Error message consistency fix
+  - Unified "データベースエラー" across all APIs ✅
+- [x] Database client cleanup handling
+  - Safe client.end() in finally block ✅
 ## 未完了
-- [ ] Fix remaining test failures (37 failed, 178 passed)
-  - Auth tests: login.test.ts (4 failed), logout.test.ts (2 failed)
-  - Other API tests with db connection issues
-- [ ] Fix authentication tests (login, logout, me routes)
-- [ ] Fix Admin API tests (customers, dashboard)
-- [ ] Fix API status code mismatches
+- [ ] Fix remaining test failures (21 failed, 194 passed)
+  - Auth tests: shipping API partial success tests (4 failed)
+  - Yamato API tests (9 failed) - DB connection still failing
+  - Orders API tests (2 failed) - Query not returning expected data
+  - Dashboard stats tests (2 failed) - Error message mismatch
 ## 次にやること
-Phase 2: Fix remaining test failures
-- Focus on auth tests and other API tests with db connection issues
-- Investigate remaining 37 failures
+Phase 3: Fix remaining database mock issues
+- Investigate MockDbClient.query() implementation
+- Fix Orders API query mock data
+- Resolve Yamato API database connection issues
+- Update error message expectations in tests

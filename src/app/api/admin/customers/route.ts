@@ -92,11 +92,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Default server error
+    // Default error - use "データベースエラー" for consistency
     return NextResponse.json(
       {
         success: false,
-        message: 'サーバーエラーが発生しました。',
+        message: 'データベースエラーが発生しました。',
       },
       { status: 500 }
     );

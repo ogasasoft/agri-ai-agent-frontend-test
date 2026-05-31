@@ -1,6 +1,24 @@
 import { Client } from 'pg';
 
+// Mock database client for testing
+let mockClient: any = null;
+
+if (process.env.NODE_ENV === 'test') {
+  try {
+    const { MockDbClient } = require('../__tests__/setup/test-utils');
+    mockClient = MockDbClient.getInstance();
+    console.log('Using mock database client for testing');
+  } catch (error) {
+    console.error('Failed to load mock database client:', error);
+  }
+}
+
 export async function getDbClient(): Promise<Client> {
+  // In test environment, use mock client
+  if (process.env.NODE_ENV === 'test' && mockClient) {
+    return mockClient as any;
+  }
+
   // Try multiple environment variables in order of preference
   const connectionString =
     process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING;
@@ -36,6 +54,9 @@ export async function withDatabase<T>(callback: (client: Client) => Promise<T>):
   try {
     return await callback(client);
   } finally {
-    await client.end();
+    // Only close real client in non-test environment
+    if (process.env.NODE_ENV !== 'test' && !('query' in client && typeof client.query === 'function')) {
+      await client.end();
+    }
   }
 }

@@ -1,0 +1,4809 @@
+
+> agri-ai-agent-frontend@0.1.0 test
+> jest --verbose
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [ 1, 2 ], delivery_type: 'normal', notes: 'テスト発送' }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Querying orders for user_id: 1 order_ids: [ 1, 2 ]
+
+      at log (src/app/api/shipping/route.ts:203:15)
+
+  console.log
+    [DEBUG] Selected orders: [
+      {
+        id: 1,
+        order_number: 'ORD-001',
+        customer_name: '田中太郎',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: 'ORD-001',
+        address: '東京都渋谷区1-1-1',
+        phone: '090-1234-5678'
+      },
+      {
+        id: 2,
+        order_number: 'ORD-001',
+        customer_name: '山田花子',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: 'ORD-002',
+        address: '東京都渋谷区2-2-2',
+        phone: '080-2345-6789'
+      }
+    ]
+
+      at log (src/app/api/shipping/route.ts:223:15)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: undefined, delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [], delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [ 1, 2 ], delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Querying orders for user_id: 1 order_ids: [ 1, 2 ]
+
+      at log (src/app/api/shipping/route.ts:203:15)
+
+  console.error
+    Shipping API database error: Error: Database error
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/shipping.test.ts:137:46)
+        at Promise.then.completed (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:444:34)
+
+      307 |       });
+      308 |     } catch (error: any) {
+    > 309 |       console.error('Shipping API database error:', error);
+          |               ^
+      310 |       return NextResponse.json(
+      311 |         {
+      312 |           success: false,
+
+      at error (src/app/api/shipping/route.ts:309:15)
+      at Object.<anonymous> (__tests__/api/shipping/shipping.test.ts:149:24)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [ 999 ], delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Querying orders for user_id: 1 order_ids: [ 999 ]
+
+      at log (src/app/api/shipping/route.ts:203:15)
+
+  console.log
+    [DEBUG] Selected orders: []
+
+      at log (src/app/api/shipping/route.ts:223:15)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [ 1, 2 ], delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Querying orders for user_id: 1 order_ids: [ 1, 2 ]
+
+      at log (src/app/api/shipping/route.ts:203:15)
+
+  console.log
+    [DEBUG] Selected orders: [
+      {
+        id: 1,
+        order_number: 'ORD-001',
+        customer_name: '田中太郎',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: 'ORD-001'
+      },
+      {
+        id: 2,
+        order_number: 'ORD-001',
+        customer_name: '田中太郎',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: 'ORD-002'
+      }
+    ]
+
+      at log (src/app/api/shipping/route.ts:223:15)
+
+  console.log
+    [DEBUG] Response status: 400
+
+      at Object.log (__tests__/api/shipping/shipping.test.ts:228:15)
+
+  console.log
+    [DEBUG] Response data: { success: false, message: '一部の注文データに不足があります' }
+
+      at Object.log (__tests__/api/shipping/shipping.test.ts:229:15)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [ 1 ], delivery_type: 'express', notes: '急ぎの発送' }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [ 1 ], delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Querying orders for user_id: 1 order_ids: [ 1 ]
+
+      at log (src/app/api/shipping/route.ts:203:15)
+
+  console.log
+    [DEBUG] Selected orders: [
+      {
+        id: 1,
+        order_number: 'ORD-001',
+        customer_name: '田中太郎',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: 'ORD-001'
+      }
+    ]
+
+      at log (src/app/api/shipping/route.ts:223:15)
+
+  console.log
+    [DEBUG] Status: 400
+
+      at Object.log (__tests__/api/shipping/shipping.test.ts:307:15)
+
+  console.log
+    [DEBUG] Data: {
+      "success": false,
+      "message": "一部の注文データに不足があります"
+    }
+
+      at Object.log (__tests__/api/shipping/shipping.test.ts:308:15)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [ 1, 2, 3 ], delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Querying orders for user_id: 1 order_ids: [ 1, 2, 3 ]
+
+      at log (src/app/api/shipping/route.ts:203:15)
+
+  console.log
+    [DEBUG] Selected orders: [
+      {
+        id: 1,
+        order_number: 'ORD-001',
+        customer_name: '田中太郎',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: 'ORD-001'
+      },
+      {
+        id: 2,
+        order_number: 'ORD-001',
+        customer_name: '田中太郎',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: 'ORD-002'
+      },
+      {
+        id: 3,
+        order_number: 'ORD-001',
+        customer_name: '田中太郎',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: 'ORD-003'
+      }
+    ]
+
+      at log (src/app/api/shipping/route.ts:223:15)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: undefined, delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [], delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [ 1, 2 ], delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Querying orders for user_id: 1 order_ids: [ 1, 2 ]
+
+      at log (src/app/api/shipping/route.ts:203:15)
+
+  console.log
+    [DEBUG] Selected orders: [
+      {
+        id: 1,
+        order_number: 'ORD-001',
+        customer_name: '田中太郎',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: 'ORD-001',
+        address: '東京都渋谷区1-1-1',
+        phone: '090-1234-5678'
+      },
+      {
+        id: 2,
+        order_number: 'ORD-001',
+        customer_name: '',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: '',
+        address: '',
+        phone: '080-2345-6789'
+      }
+    ]
+
+      at log (src/app/api/shipping/route.ts:223:15)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: {
+      order_ids: [ 1, 2 ],
+      delivery_type: 'INVALID_TYPE',
+      notes: undefined
+    }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [ 1 ], delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Querying orders for user_id: 1 order_ids: [ 1 ]
+
+      at log (src/app/api/shipping/route.ts:203:15)
+
+  console.error
+    Shipping API database error: Error: Database error
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/shipping.test.ts:481:46)
+        at Promise.then.completed (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:444:34)
+
+      307 |       });
+      308 |     } catch (error: any) {
+    > 309 |       console.error('Shipping API database error:', error);
+          |               ^
+      310 |       return NextResponse.json(
+      311 |         {
+      312 |           success: false,
+
+      at error (src/app/api/shipping/route.ts:309:15)
+      at Object.<anonymous> (__tests__/api/shipping/shipping.test.ts:493:24)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [ 1, 2 ], delivery_type: 'normal', notes: 'テスト発送' }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Querying orders for user_id: 1 order_ids: [ 1, 2 ]
+
+      at log (src/app/api/shipping/route.ts:203:15)
+
+  console.error
+    Shipping API database error: Error: Database connection failed
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/shipping.test.ts:520:46)
+        at Promise.then.completed (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:444:34)
+
+      307 |       });
+      308 |     } catch (error: any) {
+    > 309 |       console.error('Shipping API database error:', error);
+          |               ^
+      310 |       return NextResponse.json(
+      311 |         {
+      312 |           success: false,
+
+      at error (src/app/api/shipping/route.ts:309:15)
+      at Object.<anonymous> (__tests__/api/shipping/shipping.test.ts:523:24)
+
+  console.log
+    [DEBUG] Shipping POST called
+
+      at log (src/app/api/shipping/route.ts:137:13)
+
+  console.log
+    [DEBUG] Session token: present
+
+      at log (src/app/api/shipping/route.ts:142:13)
+
+  console.log
+    [DEBUG] Session data: valid
+
+      at log (src/app/api/shipping/route.ts:155:13)
+
+  console.log
+    [DEBUG] Request body: { order_ids: [ 1, 2 ], delivery_type: 'normal', notes: undefined }
+
+      at log (src/app/api/shipping/route.ts:181:13)
+
+  console.log
+    [DEBUG] Querying orders for user_id: 1 order_ids: [ 1, 2 ]
+
+      at log (src/app/api/shipping/route.ts:203:15)
+
+  console.log
+    [DEBUG] Selected orders: [
+      {
+        id: 1,
+        order_number: 'ORD-001',
+        customer_name: '田中太郎',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: 'ORD-001',
+        address: '東京都渋谷区1-1-1',
+        phone: '090-1234-5678'
+      },
+      {
+        id: 2,
+        order_number: 'ORD-001',
+        customer_name: '山田花子',
+        customer_phone: '090-1234-5678',
+        customer_address: '東京都渋谷区1-1-1',
+        total_amount: 3000,
+        order_date: '2024-01-01',
+        delivery_date: '2024-01-03',
+        status: 'pending',
+        has_memo: false,
+        memo: null,
+        user_id: 1,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        order_code: 'ORD-002',
+        address: '東京都渋谷区2-2-2',
+        phone: '080-2345-6789'
+      }
+    ]
+
+      at log (src/app/api/shipping/route.ts:223:15)
+
+  console.error
+    Failed to update order 1: Error: Failed to update order
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/shipping.test.ts:559:46)
+        at Promise.then.completed (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:444:34)
+
+      271 |           });
+      272 |         } catch (error: any) {
+    > 273 |           console.error(`Failed to update order ${order.id}:`, error);
+          |                   ^
+      274 |           errors.push({
+      275 |             order_id: order.id,
+      276 |             order_code: order.order_code,
+
+      at error (src/app/api/shipping/route.ts:273:19)
+      at Object.<anonymous> (__tests__/api/shipping/shipping.test.ts:572:24)
+
+FAIL __tests__/api/shipping/shipping.test.ts
+  /api/shipping
+    POST /api/shipping
+      ✓ should process shipping for valid orders (20 ms)
+      ✓ should require order_ids parameter (6 ms)
+      ✓ should validate order_ids as non-empty array (1 ms)
+      ✓ should handle orders API failure (5 ms)
+      ✓ should handle case when no matching orders found (1 ms)
+      ✕ should handle partial success with some order update failures (2 ms)
+      ✕ should handle different delivery types (1 ms)
+      ✕ should simulate yamato API delays (1 ms)
+      ✕ should generate unique tracking numbers (1 ms)
+      ✓ should return 400 when order_ids is missing
+      ✓ should return 400 when order_ids is empty array (1 ms)
+      ✓ should return 400 when some orders have missing data (1 ms)
+      ✓ should return 400 when delivery_type is invalid (1 ms)
+      ✓ should handle network errors gracefully (1 ms)
+      ✓ should return 500 when database query fails (1 ms)
+      ✓ should return 500 when order update fails for one order (1 ms)
+    GET /api/shipping (tracking)
+      ✓ should return tracking information for valid tracking number (1 ms)
+      ✓ should require tracking_number parameter
+      ✓ should return mock tracking history with multiple events
+      ✓ should handle tracking API errors gracefully (1 ms)
+      ✓ should format dates correctly in tracking history
+      ✓ should provide realistic delivery estimate
+      ✓ should return 400 when tracking_number format is invalid
+      ✓ should return 400 when tracking_number is too short (1 ms)
+      ✓ should return 400 when tracking_number is too long
+
+  ● /api/shipping › POST /api/shipping › should handle partial success with some order update failures
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      230 |
+      231 |       // Assert
+    > 232 |       expect(response.status).toBe(200)
+          |                               ^
+      233 |       expect(data.success).toBe(true)
+      234 |       expect(data.message).toBe('1件の発送書類を作成しました')
+      235 |       expect(data.orders).toHaveLength(1)
+
+      at Object.toBe (__tests__/api/shipping/shipping.test.ts:232:31)
+
+  ● /api/shipping › POST /api/shipping › should handle different delivery types
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      270 |
+      271 |       // Assert
+    > 272 |       expect(response.status).toBe(200)
+          |                               ^
+      273 |       expect(data.success).toBe(true)
+      274 |       expect(data.orders).toHaveLength(1)
+      275 |     })
+
+      at Object.toBe (__tests__/api/shipping/shipping.test.ts:272:31)
+
+  ● /api/shipping › POST /api/shipping › should simulate yamato API delays
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      309 |
+      310 |       // Assert
+    > 311 |       expect(response.status).toBe(200)
+          |                               ^
+      312 |     })
+      313 |
+      314 |     it('should generate unique tracking numbers', async () => {
+
+      at Object.toBe (__tests__/api/shipping/shipping.test.ts:311:31)
+
+  ● /api/shipping › POST /api/shipping › should generate unique tracking numbers
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      354 |
+      355 |       // Assert
+    > 356 |       expect(response.status).toBe(200)
+          |                               ^
+      357 |       expect(data.orders).toHaveLength(3)
+      358 |
+      359 |       const trackingNumbers = data.orders.map((o: any) => o.tracking_number)
+
+      at Object.toBe (__tests__/api/shipping/shipping.test.ts:356:31)
+
+  console.error
+    Yamato settings fetch error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-settings/route.ts:94:33)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-settings.test.ts:49:24)
+
+      172 |     });
+      173 |   } catch (error) {
+    > 174 |     console.error('Yamato settings fetch error:', error);
+          |             ^
+      175 |     return NextResponse.json(
+      176 |       {
+      177 |         success: false,
+
+      at error (src/app/api/yamato-settings/route.ts:174:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-settings.test.ts:49:24)
+
+  console.error
+    Yamato settings fetch error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-settings/route.ts:94:33)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-settings.test.ts:79:24)
+
+      172 |     });
+      173 |   } catch (error) {
+    > 174 |     console.error('Yamato settings fetch error:', error);
+          |             ^
+      175 |     return NextResponse.json(
+      176 |       {
+      177 |         success: false,
+
+      at error (src/app/api/yamato-settings/route.ts:174:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-settings.test.ts:79:24)
+
+  console.error
+    Yamato settings fetch error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-settings/route.ts:94:33)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-settings.test.ts:126:24)
+
+      172 |     });
+      173 |   } catch (error) {
+    > 174 |     console.error('Yamato settings fetch error:', error);
+          |             ^
+      175 |     return NextResponse.json(
+      176 |       {
+      177 |         success: false,
+
+      at error (src/app/api/yamato-settings/route.ts:174:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-settings.test.ts:126:24)
+
+  console.log
+    [DEBUG] Session token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:198:13)
+
+  console.log
+    [DEBUG] Session data valid: true
+
+      at log (src/app/api/yamato-settings/route.ts:204:13)
+
+  console.log
+    [DEBUG] CSRF token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:214:13)
+
+  console.log
+    [DEBUG] About to parse request body
+
+      at log (src/app/api/yamato-settings/route.ts:219:13)
+
+  console.log
+    [DEBUG] Request body parsed: {
+      sender_name: '新農業株式会社',
+      sender_phone: '03-9876-5432',
+      sender_zip: '1000002',
+      sender_address: '東京都千代田区2-2-2',
+      default_slip_type: '1',
+      default_cool_section: '1',
+      default_delivery_time: '14',
+      enable_delivery_complete_email: 'true',
+      delivery_complete_email_message: '配送完了通知'
+    }
+
+      at log (src/app/api/yamato-settings/route.ts:221:13)
+
+  console.log
+    [DEBUG] Settings to save: {
+      sender_name: '新農業株式会社',
+      sender_phone: '03-9876-5432',
+      sender_zip: '1000002',
+      sender_address: '東京都千代田区2-2-2',
+      default_slip_type: '1',
+      default_cool_section: '1',
+      default_delivery_time: '14',
+      enable_delivery_complete_email: 'true',
+      delivery_complete_email_message: '配送完了通知'
+    }
+
+      at log (src/app/api/yamato-settings/route.ts:233:13)
+
+  console.log
+    [DEBUG] Saving setting: sender_name = 新農業株式会社
+
+      at log (src/app/api/yamato-settings/route.ts:237:15)
+
+  console.error
+    Yamato settings update error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-settings/route.ts:238:20)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-settings.test.ts:163:24)
+
+      254 |     });
+      255 |   } catch (error) {
+    > 256 |     console.error('Yamato settings update error:', error);
+          |             ^
+      257 |     return NextResponse.json(
+      258 |       {
+      259 |         success: false,
+
+      at error (src/app/api/yamato-settings/route.ts:256:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-settings.test.ts:163:24)
+
+  console.log
+    [DEBUG] Session token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:198:13)
+
+  console.log
+    [DEBUG] Session data valid: true
+
+      at log (src/app/api/yamato-settings/route.ts:204:13)
+
+  console.log
+    [DEBUG] CSRF token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:214:13)
+
+  console.log
+    [DEBUG] About to parse request body
+
+      at log (src/app/api/yamato-settings/route.ts:219:13)
+
+  console.log
+    [DEBUG] Request body parsed: { sender_name: '新会社名', sender_phone: '03-1111-2222' }
+
+      at log (src/app/api/yamato-settings/route.ts:221:13)
+
+  console.log
+    [DEBUG] Settings to save: { sender_name: '新会社名', sender_phone: '03-1111-2222' }
+
+      at log (src/app/api/yamato-settings/route.ts:233:13)
+
+  console.log
+    [DEBUG] Saving setting: sender_name = 新会社名
+
+      at log (src/app/api/yamato-settings/route.ts:237:15)
+
+  console.error
+    Yamato settings update error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-settings/route.ts:238:20)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-settings.test.ts:202:24)
+
+      254 |     });
+      255 |   } catch (error) {
+    > 256 |     console.error('Yamato settings update error:', error);
+          |             ^
+      257 |     return NextResponse.json(
+      258 |       {
+      259 |         success: false,
+
+      at error (src/app/api/yamato-settings/route.ts:256:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-settings.test.ts:202:24)
+
+  console.log
+    [DEBUG] Session token present: false
+
+      at log (src/app/api/yamato-settings/route.ts:198:13)
+
+  console.log
+    [DEBUG] Session token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:198:13)
+
+  console.log
+    [DEBUG] Session data valid: true
+
+      at log (src/app/api/yamato-settings/route.ts:204:13)
+
+  console.log
+    [DEBUG] CSRF token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:214:13)
+
+  console.log
+    [DEBUG] About to parse request body
+
+      at log (src/app/api/yamato-settings/route.ts:219:13)
+
+  console.log
+    [DEBUG] Request body parsed: {}
+
+      at log (src/app/api/yamato-settings/route.ts:221:13)
+
+  console.log
+    [DEBUG] Settings to save: {}
+
+      at log (src/app/api/yamato-settings/route.ts:233:13)
+
+  console.log
+    [DEBUG] Session token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:198:13)
+
+  console.log
+    [DEBUG] Session data valid: true
+
+      at log (src/app/api/yamato-settings/route.ts:204:13)
+
+  console.log
+    [DEBUG] CSRF token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:214:13)
+
+  console.log
+    [DEBUG] About to parse request body
+
+      at log (src/app/api/yamato-settings/route.ts:219:13)
+
+  console.log
+    [DEBUG] Request body parsed: {
+      sender_name: '<script>alert("xss")</script>悪意のあるスクリプト',
+      sender_phone: '03-1234-5678; DROP TABLE users;',
+      sender_address: '住所データ\nwith\ttabs'
+    }
+
+      at log (src/app/api/yamato-settings/route.ts:221:13)
+
+  console.log
+    [DEBUG] Settings to save: {
+      sender_name: '<script>alert("xss")</script>悪意のあるスクリプト',
+      sender_phone: '03-1234-5678; DROP TABLE users;',
+      sender_address: '住所データ\nwith\ttabs'
+    }
+
+      at log (src/app/api/yamato-settings/route.ts:233:13)
+
+  console.log
+    [DEBUG] Saving setting: sender_name = <script>alert("xss")</script>悪意のあるスクリプト
+
+      at log (src/app/api/yamato-settings/route.ts:237:15)
+
+  console.error
+    Yamato settings update error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-settings/route.ts:238:20)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-settings.test.ts:272:24)
+
+      254 |     });
+      255 |   } catch (error) {
+    > 256 |     console.error('Yamato settings update error:', error);
+          |             ^
+      257 |     return NextResponse.json(
+      258 |       {
+      259 |         success: false,
+
+      at error (src/app/api/yamato-settings/route.ts:256:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-settings.test.ts:272:24)
+
+  console.log
+    [DEBUG] Session token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:198:13)
+
+  console.log
+    [DEBUG] Session data valid: true
+
+      at log (src/app/api/yamato-settings/route.ts:204:13)
+
+  console.log
+    [DEBUG] CSRF token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:214:13)
+
+  console.log
+    [DEBUG] About to parse request body
+
+      at log (src/app/api/yamato-settings/route.ts:219:13)
+
+  console.log
+    [DEBUG] Request body parsed: { sender_name: 'テスト' }
+
+      at log (src/app/api/yamato-settings/route.ts:221:13)
+
+  console.log
+    [DEBUG] Settings to save: { sender_name: 'テスト' }
+
+      at log (src/app/api/yamato-settings/route.ts:233:13)
+
+  console.log
+    [DEBUG] Saving setting: sender_name = テスト
+
+      at log (src/app/api/yamato-settings/route.ts:237:15)
+
+  console.error
+    Yamato settings update error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-settings/route.ts:238:20)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-settings.test.ts:304:24)
+
+      254 |     });
+      255 |   } catch (error) {
+    > 256 |     console.error('Yamato settings update error:', error);
+          |             ^
+      257 |     return NextResponse.json(
+      258 |       {
+      259 |         success: false,
+
+      at error (src/app/api/yamato-settings/route.ts:256:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-settings.test.ts:304:24)
+
+  console.log
+    [DEBUG] Session token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:198:13)
+
+  console.log
+    [DEBUG] Session data valid: true
+
+      at log (src/app/api/yamato-settings/route.ts:204:13)
+
+  console.log
+    [DEBUG] CSRF token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:214:13)
+
+  console.log
+    [DEBUG] About to parse request body
+
+      at log (src/app/api/yamato-settings/route.ts:219:13)
+
+  console.log
+    [DEBUG] Request body parsed: {
+      sender_name: 'テスト会社',
+      invalid_key_with_special_chars: '不正なキー',
+      'another_invalid/key': 'テスト'
+    }
+
+      at log (src/app/api/yamato-settings/route.ts:221:13)
+
+  console.log
+    [DEBUG] Settings to save: {
+      sender_name: 'テスト会社',
+      invalid_key_with_special_chars: '不正なキー',
+      'another_invalid/key': 'テスト'
+    }
+
+      at log (src/app/api/yamato-settings/route.ts:233:13)
+
+  console.log
+    [DEBUG] Saving setting: sender_name = テスト会社
+
+      at log (src/app/api/yamato-settings/route.ts:237:15)
+
+  console.error
+    Yamato settings update error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-settings/route.ts:238:20)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-settings.test.ts:333:24)
+
+      254 |     });
+      255 |   } catch (error) {
+    > 256 |     console.error('Yamato settings update error:', error);
+          |             ^
+      257 |     return NextResponse.json(
+      258 |       {
+      259 |         success: false,
+
+      at error (src/app/api/yamato-settings/route.ts:256:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-settings.test.ts:333:24)
+
+  console.log
+    [DEBUG] Session token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:198:13)
+
+  console.log
+    [DEBUG] Session token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:198:13)
+
+  console.log
+    [DEBUG] Session data valid: true
+
+      at log (src/app/api/yamato-settings/route.ts:204:13)
+          at async Promise.all (index 0)
+
+  console.log
+    [DEBUG] CSRF token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:214:13)
+          at async Promise.all (index 0)
+
+  console.log
+    [DEBUG] About to parse request body
+
+      at log (src/app/api/yamato-settings/route.ts:219:13)
+          at async Promise.all (index 0)
+
+  console.log
+    [DEBUG] Session data valid: true
+
+      at log (src/app/api/yamato-settings/route.ts:204:13)
+          at async Promise.all (index 1)
+
+  console.log
+    [DEBUG] CSRF token present: true
+
+      at log (src/app/api/yamato-settings/route.ts:214:13)
+          at async Promise.all (index 1)
+
+  console.log
+    [DEBUG] About to parse request body
+
+      at log (src/app/api/yamato-settings/route.ts:219:13)
+          at async Promise.all (index 1)
+
+  console.log
+    [DEBUG] Request body parsed: { sender_name: '会社名', sender_phone: '03-1234-5678' }
+
+      at log (src/app/api/yamato-settings/route.ts:221:13)
+          at async Promise.all (index 0)
+
+  console.log
+    [DEBUG] Request body parsed: { sender_name: '会社名', sender_phone: '03-1234-5678' }
+
+      at log (src/app/api/yamato-settings/route.ts:221:13)
+          at async Promise.all (index 1)
+
+  console.log
+    [DEBUG] Settings to save: { sender_name: '会社名', sender_phone: '03-1234-5678' }
+
+      at log (src/app/api/yamato-settings/route.ts:233:13)
+          at async Promise.all (index 0)
+
+  console.log
+    [DEBUG] Saving setting: sender_name = 会社名
+
+      at log (src/app/api/yamato-settings/route.ts:237:15)
+          at async Promise.all (index 0)
+
+  console.error
+    Yamato settings update error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-settings/route.ts:238:20)
+        at async Promise.all (index 0)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-settings.test.ts:376:38)
+
+      254 |     });
+      255 |   } catch (error) {
+    > 256 |     console.error('Yamato settings update error:', error);
+          |             ^
+      257 |     return NextResponse.json(
+      258 |       {
+      259 |         success: false,
+
+      at error (src/app/api/yamato-settings/route.ts:256:13)
+          at async Promise.all (index 0)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-settings.test.ts:376:38)
+
+  console.log
+    [DEBUG] Settings to save: { sender_name: '会社名', sender_phone: '03-1234-5678' }
+
+      at log (src/app/api/yamato-settings/route.ts:233:13)
+          at async Promise.all (index 1)
+
+  console.log
+    [DEBUG] Saving setting: sender_name = 会社名
+
+      at log (src/app/api/yamato-settings/route.ts:237:15)
+          at async Promise.all (index 1)
+
+  console.error
+    Yamato settings update error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-settings/route.ts:238:20)
+        at async Promise.all (index 1)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-settings.test.ts:376:38)
+
+      254 |     });
+      255 |   } catch (error) {
+    > 256 |     console.error('Yamato settings update error:', error);
+          |             ^
+      257 |     return NextResponse.json(
+      258 |       {
+      259 |         success: false,
+
+      at error (src/app/api/yamato-settings/route.ts:256:13)
+          at async Promise.all (index 1)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-settings.test.ts:376:38)
+
+FAIL __tests__/api/shipping/yamato-settings.test.ts
+  /api/yamato-settings
+    GET /api/yamato-settings
+      ✕ should return yamato settings for authenticated user (5 ms)
+      ✕ should return default settings when no user settings exist
+      ✓ should require authentication (1 ms)
+      ✓ should handle database errors gracefully
+    PUT /api/yamato-settings
+      ✕ should save yamato settings successfully (2 ms)
+      ✕ should update existing settings (1 ms)
+      ✓ should validate required authentication
+      ✓ should handle empty request body (1 ms)
+      ✕ should sanitize input data (1 ms)
+      ✓ should handle database transaction errors (1 ms)
+      ✕ should validate setting key format (1 ms)
+      ✕ should handle concurrent settings updates (2 ms)
+
+  ● /api/yamato-settings › GET /api/yamato-settings › should return yamato settings for authenticated user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      51 |
+      52 |       // Assert
+    > 53 |       expect(response.status).toBe(200)
+         |                               ^
+      54 |       expect(data.success).toBe(true)
+      55 |       expect(data.settings).toEqual(expect.objectContaining({
+      56 |         sender_name: '農業株式会社',
+
+      at Object.toBe (__tests__/api/shipping/yamato-settings.test.ts:53:31)
+
+  ● /api/yamato-settings › GET /api/yamato-settings › should return default settings when no user settings exist
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      81 |
+      82 |       // Assert
+    > 83 |       expect(response.status).toBe(200)
+         |                               ^
+      84 |       expect(data.success).toBe(true)
+      85 |       expect(data.settings).toEqual(
+      86 |         expect.objectContaining({
+
+      at Object.toBe (__tests__/api/shipping/yamato-settings.test.ts:83:31)
+
+  ● /api/yamato-settings › PUT /api/yamato-settings › should save yamato settings successfully
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      165 |
+      166 |       // Assert
+    > 167 |       expect(response.status).toBe(200)
+          |                               ^
+      168 |       expect(data.success).toBe(true)
+      169 |       expect(data.message).toBe('Yamato設定を保存しました')
+      170 |       
+
+      at Object.toBe (__tests__/api/shipping/yamato-settings.test.ts:167:31)
+
+  ● /api/yamato-settings › PUT /api/yamato-settings › should update existing settings
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      204 |
+      205 |       // Assert
+    > 206 |       expect(response.status).toBe(200)
+          |                               ^
+      207 |       expect(data.success).toBe(true)
+      208 |       expect(data.message).toBe('Yamato設定を保存しました')
+      209 |     })
+
+      at Object.toBe (__tests__/api/shipping/yamato-settings.test.ts:206:31)
+
+  ● /api/yamato-settings › PUT /api/yamato-settings › should sanitize input data
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      274 |
+      275 |       // Assert
+    > 276 |       expect(response.status).toBe(200)
+          |                               ^
+      277 |       expect(data.success).toBe(true)
+      278 |       
+      279 |       // Verify that the data was sanitized during save
+
+      at Object.toBe (__tests__/api/shipping/yamato-settings.test.ts:276:31)
+
+  ● /api/yamato-settings › PUT /api/yamato-settings › should validate setting key format
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      335 |
+      336 |       // Assert
+    > 337 |       expect(response.status).toBe(200)
+          |                               ^
+      338 |       expect(data.success).toBe(true)
+      339 |       
+      340 |       // Should only save valid yamato settings keys
+
+      at Object.toBe (__tests__/api/shipping/yamato-settings.test.ts:337:31)
+
+  ● /api/yamato-settings › PUT /api/yamato-settings › should handle concurrent settings updates
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      385 |
+      386 |       // Assert - both should succeed
+    > 387 |       expect(response1.status).toBe(200)
+          |                                ^
+      388 |       expect(response2.status).toBe(200)
+      389 |       expect(data1.success).toBe(true)
+      390 |       expect(data2.success).toBe(true)
+
+      at Object.toBe (__tests__/api/shipping/yamato-settings.test.ts:387:32)
+
+  console.error
+    Yamato CSV generation error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-csv/route.ts:386:39)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-csv.test.ts:67:24)
+
+      582 |     });
+      583 |   } catch (error) {
+    > 584 |     console.error('Yamato CSV generation error:', error);
+          |             ^
+      585 |     return NextResponse.json(
+      586 |       {
+      587 |         success: false,
+
+      at error (src/app/api/yamato-csv/route.ts:584:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-csv.test.ts:67:24)
+
+  console.error
+    Yamato CSV generation error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-csv/route.ts:386:39)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-csv.test.ts:179:24)
+
+      582 |     });
+      583 |   } catch (error) {
+    > 584 |     console.error('Yamato CSV generation error:', error);
+          |             ^
+      585 |     return NextResponse.json(
+      586 |       {
+      587 |         success: false,
+
+      at error (src/app/api/yamato-csv/route.ts:584:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-csv.test.ts:179:24)
+
+  console.error
+    Yamato CSV generation error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-csv/route.ts:386:39)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-csv.test.ts:209:24)
+
+      582 |     });
+      583 |   } catch (error) {
+    > 584 |     console.error('Yamato CSV generation error:', error);
+          |             ^
+      585 |     return NextResponse.json(
+      586 |       {
+      587 |         success: false,
+
+      at error (src/app/api/yamato-csv/route.ts:584:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-csv.test.ts:209:24)
+
+  console.error
+    Yamato CSV generation error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-csv/route.ts:386:39)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-csv.test.ts:248:24)
+
+      582 |     });
+      583 |   } catch (error) {
+    > 584 |     console.error('Yamato CSV generation error:', error);
+          |             ^
+      585 |     return NextResponse.json(
+      586 |       {
+      587 |         success: false,
+
+      at error (src/app/api/yamato-csv/route.ts:584:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-csv.test.ts:248:24)
+
+  console.error
+    Yamato CSV generation error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-csv/route.ts:386:39)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-csv.test.ts:283:24)
+
+      582 |     });
+      583 |   } catch (error) {
+    > 584 |     console.error('Yamato CSV generation error:', error);
+          |             ^
+      585 |     return NextResponse.json(
+      586 |       {
+      587 |         success: false,
+
+      at error (src/app/api/yamato-csv/route.ts:584:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-csv.test.ts:283:24)
+
+  console.error
+    Yamato CSV generation error: TypeError: Cannot read properties of undefined (reading 'query')
+        at query (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/yamato-csv/route.ts:386:39)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/shipping/yamato-csv.test.ts:324:24)
+
+      582 |     });
+      583 |   } catch (error) {
+    > 584 |     console.error('Yamato CSV generation error:', error);
+          |             ^
+      585 |     return NextResponse.json(
+      586 |       {
+      587 |         success: false,
+
+      at error (src/app/api/yamato-csv/route.ts:584:13)
+      at Object.<anonymous> (__tests__/api/shipping/yamato-csv.test.ts:324:24)
+
+FAIL __tests__/api/shipping/yamato-csv.test.ts
+  /api/yamato-csv
+    POST /api/yamato-csv
+      ✕ should generate CSV for selected orders (5 ms)
+      ✓ should require authentication (1 ms)
+      ✓ should validate order IDs parameter
+      ✓ should validate order IDs as array
+      ✕ should only include orders belonging to authenticated user (1 ms)
+      ✕ should handle empty order results
+      ✕ should format CSV data correctly
+      ✓ should handle database errors gracefully (1 ms)
+      ✕ should include delivery date formatting
+
+  ● /api/yamato-csv › POST /api/yamato-csv › should generate CSV for selected orders
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      69 |
+      70 |       // Assert
+    > 71 |       expect(response.status).toBe(200)
+         |                               ^
+      72 |       expect(data.success).toBe(true)
+      73 |       expect(data.csv).toBeDefined()
+      74 |       expect(data.filename).toMatch(/yamato_b2_\d{4}-\d{2}-\d{2}_\d+orders\.csv/)
+
+      at Object.toBe (__tests__/api/shipping/yamato-csv.test.ts:71:31)
+
+  ● /api/yamato-csv › POST /api/yamato-csv › should only include orders belonging to authenticated user
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      181 |
+      182 |       // Assert
+    > 183 |       expect(response.status).toBe(200)
+          |                               ^
+      184 |       expect(data.success).toBe(true)
+      185 |       // Should only include order from user 1
+      186 |       const csvLines = data.csv.split('\n')
+
+      at Object.toBe (__tests__/api/shipping/yamato-csv.test.ts:183:31)
+
+  ● /api/yamato-csv › POST /api/yamato-csv › should handle empty order results
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 404
+    Received: 500
+
+      211 |
+      212 |       // Assert
+    > 213 |       expect(response.status).toBe(404)
+          |                               ^
+      214 |       expect(data.success).toBe(false)
+      215 |       expect(data.message).toContain('注文が見つかりません')
+      216 |     })
+
+      at Object.toBe (__tests__/api/shipping/yamato-csv.test.ts:213:31)
+
+  ● /api/yamato-csv › POST /api/yamato-csv › should format CSV data correctly
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      250 |
+      251 |       // Assert
+    > 252 |       expect(response.status).toBe(200)
+          |                               ^
+      253 |       const csvLines = data.csv.split('\n')
+      254 |       
+      255 |       // Check specific fields are properly formatted
+
+      at Object.toBe (__tests__/api/shipping/yamato-csv.test.ts:252:31)
+
+  ● /api/yamato-csv › POST /api/yamato-csv › should include delivery date formatting
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      326 |
+      327 |       // Assert
+    > 328 |       expect(response.status).toBe(200)
+          |                               ^
+      329 |       const csvData = data.csv
+      330 |       
+      331 |       // Should handle both cases - with and without delivery date
+
+      at Object.toBe (__tests__/api/shipping/yamato-csv.test.ts:328:31)
+
+  console.error
+    Database error in admin dashboard stats: Database connection failed
+
+      92 |       });
+      93 |     } catch (dbError: any) {
+    > 94 |       console.error('Database error in admin dashboard stats:', dbError.message);
+         |               ^
+      95 |       return NextResponse.json(
+      96 |         {
+      97 |           success: false,
+
+      at error (src/app/api/admin/dashboard/stats/route.ts:94:15)
+      at Object.<anonymous> (__tests__/api/admin/dashboard-stats.test.ts:167:24)
+
+  console.error
+    Database error in admin dashboard stats: Query failed
+
+      92 |       });
+      93 |     } catch (dbError: any) {
+    > 94 |       console.error('Database error in admin dashboard stats:', dbError.message);
+         |               ^
+      95 |       return NextResponse.json(
+      96 |         {
+      97 |           success: false,
+
+      at error (src/app/api/admin/dashboard/stats/route.ts:94:15)
+      at Object.<anonymous> (__tests__/api/admin/dashboard-stats.test.ts:192:24)
+
+FAIL __tests__/api/admin/dashboard-stats.test.ts
+  /api/admin/dashboard/stats
+    GET /api/admin/dashboard/stats
+      ✓ should return system statistics for admin user (1 ms)
+      ✓ should handle zero counts gracefully
+      ✓ should require admin authentication (1 ms)
+      ✓ should reject non-admin users
+      ✕ should handle database connection errors (2 ms)
+      ✕ should handle partial query failures (1 ms)
+      ✓ should format lastBackup as ISO string
+      ✓ should execute all queries in parallel
+      ✓ should work with regular admin (not super admin)
+      ✓ should handle large count values (1 ms)
+      ✓ should return 0 for weekly growth when no previous week orders
+      ✓ should validate admin session token from cookies
+
+  ● /api/admin/dashboard/stats › GET /api/admin/dashboard/stats › should handle database connection errors
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "サーバーエラーが発生しました。"
+    Received: "データベースエラーが発生しました。"
+
+      171 |       expect(response.status).toBe(500)
+      172 |       expect(data.success).toBe(false)
+    > 173 |       expect(data.message).toBe('サーバーエラーが発生しました。')
+          |                            ^
+      174 |     })
+      175 |
+      176 |     it('should handle partial query failures', async () => {
+
+      at Object.toBe (__tests__/api/admin/dashboard-stats.test.ts:173:28)
+
+  ● /api/admin/dashboard/stats › GET /api/admin/dashboard/stats › should handle partial query failures
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "サーバーエラーが発生しました。"
+    Received: "データベースエラーが発生しました。"
+
+      196 |       expect(response.status).toBe(500)
+      197 |       expect(data.success).toBe(false)
+    > 198 |       expect(data.message).toBe('サーバーエラーが発生しました。')
+          |                            ^
+      199 |     })
+      200 |
+      201 |     it('should format lastBackup as ISO string', async () => {
+
+      at Object.toBe (__tests__/api/admin/dashboard-stats.test.ts:198:28)
+
+  console.error
+    ❌ [2026-05-31T23:46:07.164Z] ERROR  DB SELECT 失敗
+
+      91 |     };
+      92 |
+    > 93 |     console.error('❌ ' + this.formatLog(logData));
+         |             ^
+      94 |     if (error) {
+      95 |       console.error('📊 Error Details:', error);
+      96 |       if (error.stack) {
+
+      at DebugLogger.error (src/lib/debug-logger.ts:93:13)
+      at error (src/lib/api-error-details.ts:266:17)
+      at GET (src/app/api/orders/route.ts:75:25)
+      at Object.<anonymous> (__tests__/api/orders/orders.test.ts:42:24)
+
+  console.error
+    📊 Error Details: {
+      operation: 'SELECT',
+      table: 'orders',
+      success: false,
+      user_id: '1',
+      details: { error: "Cannot read properties of undefined (reading 'end')" },
+      timestamp: '2026-05-31T23:46:07.164Z'
+    }
+
+      93 |     console.error('❌ ' + this.formatLog(logData));
+      94 |     if (error) {
+    > 95 |       console.error('📊 Error Details:', error);
+         |               ^
+      96 |       if (error.stack) {
+      97 |         console.error('📚 Stack Trace:', error.stack);
+      98 |       }
+
+      at DebugLogger.error (src/lib/debug-logger.ts:95:15)
+      at error (src/lib/api-error-details.ts:266:17)
+      at GET (src/app/api/orders/route.ts:75:25)
+      at Object.<anonymous> (__tests__/api/orders/orders.test.ts:42:24)
+
+  console.error
+    ❌ [2026-05-31T23:46:07.174Z] ERROR  DB SELECT 失敗
+
+      91 |     };
+      92 |
+    > 93 |     console.error('❌ ' + this.formatLog(logData));
+         |             ^
+      94 |     if (error) {
+      95 |       console.error('📊 Error Details:', error);
+      96 |       if (error.stack) {
+
+      at DebugLogger.error (src/lib/debug-logger.ts:93:13)
+      at error (src/lib/api-error-details.ts:266:17)
+      at GET (src/app/api/orders/route.ts:75:25)
+      at Object.<anonymous> (__tests__/api/orders/orders.test.ts:107:24)
+
+  console.error
+    📊 Error Details: {
+      operation: 'SELECT',
+      table: 'orders',
+      success: false,
+      user_id: '1',
+      details: { error: "Cannot read properties of undefined (reading 'end')" },
+      timestamp: '2026-05-31T23:46:07.174Z'
+    }
+
+      93 |     console.error('❌ ' + this.formatLog(logData));
+      94 |     if (error) {
+    > 95 |       console.error('📊 Error Details:', error);
+         |               ^
+      96 |       if (error.stack) {
+      97 |         console.error('📚 Stack Trace:', error.stack);
+      98 |       }
+
+      at DebugLogger.error (src/lib/debug-logger.ts:95:15)
+      at error (src/lib/api-error-details.ts:266:17)
+      at GET (src/app/api/orders/route.ts:75:25)
+      at Object.<anonymous> (__tests__/api/orders/orders.test.ts:107:24)
+
+  console.error
+    Database error: TypeError: Cannot read properties of undefined (reading 'end')
+        at end (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/orders/route.ts:188:20)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/orders/orders.test.ts:141:24)
+
+      189 |     }
+      190 |   } catch (error: any) {
+    > 191 |     console.error('Database error:', error);
+          |             ^
+      192 |
+      193 |     // Handle specific database errors
+      194 |     if (error.code === '23505') {
+
+      at error (src/app/api/orders/route.ts:191:13)
+      at Object.<anonymous> (__tests__/api/orders/orders.test.ts:141:24)
+
+  console.error
+    Database error: TypeError: Cannot read properties of undefined (reading 'end')
+        at end (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/src/app/api/orders/route.ts:188:20)
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/orders/orders.test.ts:199:24)
+
+      189 |     }
+      190 |   } catch (error: any) {
+    > 191 |     console.error('Database error:', error);
+          |             ^
+      192 |
+      193 |     // Handle specific database errors
+      194 |     if (error.code === '23505') {
+
+      at error (src/app/api/orders/route.ts:191:13)
+      at Object.<anonymous> (__tests__/api/orders/orders.test.ts:199:24)
+
+FAIL __tests__/api/orders/orders.test.ts
+  /api/orders
+    GET /api/orders
+      ✕ should return orders for authenticated user (8 ms)
+      ✓ should return 401 without valid session (1 ms)
+      ✓ should handle super admin restriction
+      ✓ should return empty array on database error (1 ms)
+    POST /api/orders
+      ✕ should create new order with valid data (1 ms)
+      ✓ should require user authentication
+      ✓ should handle database errors (1 ms)
+
+  ● /api/orders › GET /api/orders › should return orders for authenticated user
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 2
+    Received length: 0
+    Received array:  []
+
+      46 |       expect(response.status).toBe(200)
+      47 |       expect(Array.isArray(data)).toBe(true)
+    > 48 |       expect(data).toHaveLength(2)
+         |                    ^
+      49 |       // Order comes from mockData, check the actual values
+      50 |       expect(data[0]).toHaveProperty('order_number')
+      51 |       expect(data[1]).toHaveProperty('order_number')
+
+      at Object.toHaveLength (__tests__/api/orders/orders.test.ts:48:20)
+
+  ● /api/orders › POST /api/orders › should create new order with valid data
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      143 |
+      144 |       // Assert
+    > 145 |       expect(response.status).toBe(200)
+          |                               ^
+      146 |       expect(data.success).toBe(true)
+      147 |       expect(data.order).toEqual(
+      148 |         expect.objectContaining({
+
+      at Object.toBe (__tests__/api/orders/orders.test.ts:145:31)
+
+PASS src/app/admin/customers/page.test.tsx
+  Customers Management
+    ✓ should render customer list after loading completes (4 ms)
+
+PASS __tests__/utils/error-test-helpers.test.ts
+  エラーハンドリングヘルパー
+    validateErrorResponse
+      ✓ 正しいエラーレスポンスを検証する
+      ✓ 無効なレスポンスを検証に失敗する
+      ✓ TypeScript型ガードが正しく動作することを確認 (1 ms)
+    validateDebugInfo
+      ✓ 開発環境でdebug_infoが存在することを検証する
+      ✓ 開発環境でdebug_infoが存在しないことを検証する
+      ✓ 本番環境でdebug_infoが存在しないことを検証する
+    validateSuggestions
+      ✓ 提案配列が正しければtrueを返す
+      ✓ 提案がない場合はtrueを返す
+      ✓ 空の提案配列の場合はtrueを返す
+      ✓ 無効な提案配列を検証に失敗する
+    validateUserActions
+      ✓ 有効なユーザーアクションを検証する
+      ✓ ユーザーアクションがない場合はtrueを返す
+      ✓ 無効なユーザーアクションを検証に失敗する
+      ✓ 無効なアクションタイプを検証に失敗する
+    validateCompleteErrorResponse
+      ✓ 完全なエラーレスポンスを検証する (1 ms)
+      ✓ 基本構造が無効な場合にエラーを返す
+      ✓ 複数の検証エラーをまとめて返す
+    createMockSession
+      ✓ 基本的なセッションデータを作成する
+      ✓ オーバーライドでデータを上書きする
+    createMockRequest
+      ✓ GETリクエストを作成する
+      ✓ POSTリクエストを作成する
+      ✓ Cookieヘッダーを設定する
+      ✓ リクエストボディを設定する (1 ms)
+    DatabaseErrorSimulator
+      ✓ connectionErrorをシミュレートする
+      ✓ timeoutErrorをシミュレートする (3 ms)
+      ✓ syntaxErrorをシミュレートする
+      ✓ constraintViolationをシミュレートする
+      ✓ tableNotFoundをシミュレートする
+    ExternalAPIErrorSimulator
+      ✓ openAIRateLimitをシミュレートする
+      ✓ openAIInvalidKeyをシミュレートする
+      ✓ openAIQuotaExceededをシミュレートする
+      ✓ networkErrorをシミュレートする
+      ✓ timeoutErrorをシミュレートする
+    expectStructuredError
+      ✓ 構造化エラーをアサートする (1 ms)
+      ✓ エラーコードが一致しないとエラーになる (4 ms)
+    expectLogCalls
+      ✓ ログ呼び出しを検証する
+    measureErrorHandlingPerformance
+      ✓ パフォーマンス測定を実行する
+      ✓ 非同期関数の実行時間を測定する (16 ms)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: { username: 'testuser', password: 'password123', rememberMe: false }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'testuser',
+      password: 'password123',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: false
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: {
+      success: true,
+      message: 'ログイン成功しました',
+      user: {
+        id: 1,
+        username: 'testuser',
+        email: 'test@example.com',
+        is_active: true,
+        is_super_admin: false,
+        created_at: '2024-01-01T00:00:00Z'
+      },
+      session: {
+        user_id: 1,
+        session_token: 'mock-session-token',
+        csrf_token: 'mock-csrf-token',
+        expires_at: '2026-06-01T23:46:07.370Z',
+        is_active: true
+      },
+      rememberToken: undefined,
+      requiresPasswordChange: false
+    }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+  console.log
+    Login attempt - username: nonexistent
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: {
+      username: 'nonexistent',
+      password: 'password123',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'nonexistent',
+      password: 'password123',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: { success: false, message: 'ユーザー名またはパスワードが正しくありません' }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+  console.warn
+    ⚠️ [2026-05-31T23:46:07.373Z] WARN  認証失敗
+
+      75 |     };
+      76 |
+    > 77 |     console.warn('⚠️ ' + this.formatLog(logData));
+         |             ^
+      78 |     if (data) {
+      79 |       console.warn('📊 Data:', data);
+      80 |     }
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:77:13)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login.test.ts:144:24)
+
+  console.warn
+    📊 Data: {
+      result: 'FAILURE',
+      username: 'nonexistent',
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      timestamp: '2026-05-31T23:46:07.373Z'
+    }
+
+      77 |     console.warn('⚠️ ' + this.formatLog(logData));
+      78 |     if (data) {
+    > 79 |       console.warn('📊 Data:', data);
+         |               ^
+      80 |     }
+      81 |   }
+      82 |
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:79:15)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login.test.ts:144:24)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: ユーザー名またはパスワードが正しくありません errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.375Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.375Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    setAuthContext called, this.errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.375Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at AuthErrorBuilder.log [as setAuthContext] (src/lib/auth-error-details.ts:20:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.375Z',
+        processing_steps: [],
+        user_id: 'nonexistent',
+        operation: 'USER_AUTHENTICATION'
+      },
+      suggestions: []
+    } details: {
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      attempt_count: undefined,
+      lockout_duration: undefined
+    }
+
+      at AuthErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: {
+      username: 'testuser',
+      password: 'wrongpassword',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'testuser',
+      password: 'wrongpassword',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: { success: false, message: 'ユーザー名またはパスワードが正しくありません' }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+  console.warn
+    ⚠️ [2026-05-31T23:46:07.376Z] WARN  認証失敗
+
+      75 |     };
+      76 |
+    > 77 |     console.warn('⚠️ ' + this.formatLog(logData));
+         |             ^
+      78 |     if (data) {
+      79 |       console.warn('📊 Data:', data);
+      80 |     }
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:77:13)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login.test.ts:179:24)
+
+  console.warn
+    📊 Data: {
+      result: 'FAILURE',
+      username: 'testuser',
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      timestamp: '2026-05-31T23:46:07.376Z'
+    }
+
+      77 |     console.warn('⚠️ ' + this.formatLog(logData));
+      78 |     if (data) {
+    > 79 |       console.warn('📊 Data:', data);
+         |               ^
+      80 |     }
+      81 |   }
+      82 |
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:79:15)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login.test.ts:179:24)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: ユーザー名またはパスワードが正しくありません errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.376Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.376Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    setAuthContext called, this.errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.376Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at AuthErrorBuilder.log [as setAuthContext] (src/lib/auth-error-details.ts:20:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.376Z',
+        processing_steps: [],
+        user_id: 'testuser',
+        operation: 'USER_AUTHENTICATION'
+      },
+      suggestions: []
+    } details: {
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      attempt_count: undefined,
+      lockout_duration: undefined
+    }
+
+      at AuthErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: {
+      username: 'testuser',
+      password: 'password123',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'testuser',
+      password: 'password123',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: { success: false, message: 'アカウントが無効になっています。管理者にお問い合わせください。' }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+  console.warn
+    ⚠️ [2026-05-31T23:46:07.377Z] WARN  認証失敗
+
+      75 |     };
+      76 |
+    > 77 |     console.warn('⚠️ ' + this.formatLog(logData));
+         |             ^
+      78 |     if (data) {
+      79 |       console.warn('📊 Data:', data);
+      80 |     }
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:77:13)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login.test.ts:211:24)
+
+  console.warn
+    📊 Data: {
+      result: 'FAILURE',
+      username: 'testuser',
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      timestamp: '2026-05-31T23:46:07.377Z'
+    }
+
+      77 |     console.warn('⚠️ ' + this.formatLog(logData));
+      78 |     if (data) {
+    > 79 |       console.warn('📊 Data:', data);
+         |               ^
+      80 |     }
+      81 |   }
+      82 |
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:79:15)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login.test.ts:211:24)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: ユーザー名またはパスワードが正しくありません errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.378Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.378Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    setAuthContext called, this.errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.378Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at AuthErrorBuilder.log [as setAuthContext] (src/lib/auth-error-details.ts:20:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.378Z',
+        processing_steps: [],
+        user_id: 'testuser',
+        operation: 'USER_AUTHENTICATION'
+      },
+      suggestions: []
+    } details: {
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      attempt_count: undefined,
+      lockout_duration: undefined
+    }
+
+      at AuthErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: {
+      username: 'testuser',
+      password: 'password123',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'testuser',
+      password: 'password123',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: {
+      success: false,
+      message: 'アカウントがロックされています。しばらく時間をおいてから再試行してください。',
+      lockoutInfo: { level: 3, unlockTime: 2026-05-31T23:47:07.378Z }
+    }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+  console.warn
+    ⚠️ [2026-05-31T23:46:07.379Z] WARN  認証失敗
+
+      75 |     };
+      76 |
+    > 77 |     console.warn('⚠️ ' + this.formatLog(logData));
+         |             ^
+      78 |     if (data) {
+      79 |       console.warn('📊 Data:', data);
+      80 |     }
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:77:13)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login.test.ts:250:24)
+
+  console.warn
+    📊 Data: {
+      result: 'FAILURE',
+      username: 'testuser',
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      timestamp: '2026-05-31T23:46:07.379Z'
+    }
+
+      77 |     console.warn('⚠️ ' + this.formatLog(logData));
+      78 |     if (data) {
+    > 79 |       console.warn('📊 Data:', data);
+         |               ^
+      80 |     }
+      81 |   }
+      82 |
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:79:15)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login.test.ts:250:24)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: アカウントが一時的にロックされています errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'アカウントが一時的にロックされています',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.379Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'アカウントが一時的にロックされています',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.379Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    setAuthContext called, this.errorResponse: {
+      success: false,
+      message: 'アカウントが一時的にロックされています',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.379Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at AuthErrorBuilder.log [as setAuthContext] (src/lib/auth-error-details.ts:20:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'アカウントが一時的にロックされています',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.379Z',
+        processing_steps: [],
+        user_id: 'testuser',
+        operation: 'USER_AUTHENTICATION'
+      },
+      suggestions: []
+    } details: {
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      attempt_count: 3,
+      lockout_duration: undefined
+    }
+
+      at AuthErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: { username: 'testuser', password: 'password123', rememberMe: true }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'testuser',
+      password: 'password123',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: true
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: {
+      success: true,
+      message: 'ログイン成功しました',
+      user: {
+        id: 1,
+        username: 'testuser',
+        email: 'test@example.com',
+        is_active: true,
+        is_super_admin: false,
+        created_at: '2024-01-01T00:00:00Z'
+      },
+      session: {
+        user_id: 1,
+        session_token: 'mock-session-token',
+        csrf_token: 'mock-csrf-token',
+        expires_at: '2026-06-01T23:46:07.380Z',
+        is_active: true
+      },
+      rememberToken: { selector: 'test-selector', validator: 'test-validator' },
+      requiresPasswordChange: false
+    }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+  console.log
+    Login attempt - username: undefined
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: { username: undefined, password: 'password123', rememberMe: undefined }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: { username: 'testuser', password: undefined, rememberMe: undefined }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Login attempt - username: test@example.com
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: {
+      username: 'test@example.com',
+      password: 'password123',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'test@example.com',
+      password: 'password123',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: {
+      success: true,
+      message: 'ログイン成功しました',
+      user: {
+        id: 1,
+        username: 'testuser',
+        email: 'test@example.com',
+        is_active: true,
+        is_super_admin: false,
+        created_at: '2024-01-01T00:00:00Z'
+      },
+      session: {
+        user_id: 1,
+        session_token: 'mock-session-token',
+        csrf_token: 'mock-csrf-token',
+        expires_at: '2026-06-01T23:46:07.380Z',
+        is_active: true
+      },
+      rememberToken: { selector: 'test-selector', validator: 'test-validator' },
+      requiresPasswordChange: false
+    }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+PASS __tests__/api/auth/login.test.ts
+  /api/auth/login
+    POST /api/auth/login
+      ✓ should successfully login with valid credentials (3 ms)
+      ✓ should reject login with invalid username (3 ms)
+      ✓ should reject login with invalid password (2 ms)
+      ✓ should reject login for inactive user (1 ms)
+      ✓ should reject login for locked user (2 ms)
+      ✓ should handle remember me functionality (1 ms)
+      ✓ should validate required fields
+      ✓ should handle email login (1 ms)
+
+  console.log
+    [TEST DEBUG] mockAdminUser: {
+      id: 1,
+      username: 'testuser',
+      email: 'test@example.com',
+      is_active: true,
+      is_super_admin: true,
+      created_at: '2024-01-01T00:00:00Z'
+    }
+
+      at Object.log (__tests__/api/admin/admin-customers.test.ts:43:15)
+
+  console.log
+    [TEST DEBUG] validateAdminSession.mock.calls: []
+
+      at Object.log (__tests__/api/admin/admin-customers.test.ts:44:15)
+
+  console.log
+    [TEST DEBUG] mockClient.query.mock.calls: []
+
+      at Object.log (__tests__/api/admin/admin-customers.test.ts:45:15)
+
+  console.log
+    [Admin Customers GET] Session token: admin-session
+
+      at log (src/app/api/admin/customers/route.ts:15:13)
+
+  console.log
+    [Admin Customers GET] Headers: {
+      'x-session-token': 'admin-session',
+      'x-request-url': 'http://localhost:3000',
+      get: [Function (anonymous)]
+    }
+
+      at log (src/app/api/admin/customers/route.ts:16:13)
+
+  console.log
+    [Admin Customers GET] Admin user: {
+      id: 1,
+      username: 'testuser',
+      email: 'test@example.com',
+      is_active: true,
+      is_super_admin: true,
+      created_at: '2024-01-01T00:00:00Z'
+    }
+
+      at log (src/app/api/admin/customers/route.ts:31:13)
+
+  console.log
+    [Admin Customers GET] Session token: admin-session
+
+      at log (src/app/api/admin/customers/route.ts:15:13)
+
+  console.log
+    [Admin Customers GET] Headers: {
+      'x-session-token': 'admin-session',
+      'x-request-url': 'http://localhost:3000',
+      get: [Function (anonymous)]
+    }
+
+      at log (src/app/api/admin/customers/route.ts:16:13)
+
+  console.log
+    [Admin Customers GET] Admin user: {
+      id: 1,
+      username: 'testuser',
+      email: 'test@example.com',
+      is_active: true,
+      is_super_admin: true,
+      created_at: '2024-01-01T00:00:00Z'
+    }
+
+      at log (src/app/api/admin/customers/route.ts:31:13)
+
+  console.log
+    [Admin Customers GET] Session token: undefined
+
+      at log (src/app/api/admin/customers/route.ts:15:13)
+
+  console.log
+    [Admin Customers GET] Headers: {
+      'x-request-url': 'http://localhost:3000',
+      get: [Function (anonymous)]
+    }
+
+      at log (src/app/api/admin/customers/route.ts:16:13)
+
+  console.log
+    [Admin Customers GET] No session token
+
+      at log (src/app/api/admin/customers/route.ts:19:15)
+
+  console.log
+    [Admin Customers GET] Session token: regular-user-session
+
+      at log (src/app/api/admin/customers/route.ts:15:13)
+
+  console.log
+    [Admin Customers GET] Headers: {
+      'x-session-token': 'regular-user-session',
+      'x-request-url': 'http://localhost:3000',
+      get: [Function (anonymous)]
+    }
+
+      at log (src/app/api/admin/customers/route.ts:16:13)
+
+  console.log
+    [Admin Customers GET] Admin user: null
+
+      at log (src/app/api/admin/customers/route.ts:31:13)
+
+  console.log
+    [Admin Customers GET] No admin user
+
+      at log (src/app/api/admin/customers/route.ts:34:15)
+
+  console.log
+    [Admin Customers GET] Session token: admin-session
+
+      at log (src/app/api/admin/customers/route.ts:15:13)
+
+  console.log
+    [Admin Customers GET] Headers: {
+      'x-session-token': 'admin-session',
+      'x-request-url': 'http://localhost:3000',
+      get: [Function (anonymous)]
+    }
+
+      at log (src/app/api/admin/customers/route.ts:16:13)
+
+  console.log
+    [Admin Customers GET] Admin user: {
+      id: 1,
+      username: 'testuser',
+      email: 'test@example.com',
+      is_active: true,
+      is_super_admin: true,
+      created_at: '2024-01-01T00:00:00Z'
+    }
+
+      at log (src/app/api/admin/customers/route.ts:31:13)
+
+  console.error
+    Admin customers error: Error: Database connection failed
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/admin/admin-customers.test.ts:220:54)
+        at Promise.then.completed (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:444:34)
+
+      80 |     });
+      81 |   } catch (error: any) {
+    > 82 |     console.error('Admin customers error:', error);
+         |             ^
+      83 |
+      84 |     // Check if it's a database error
+      85 |     if (error.code === 'ECONNREFUSED' || error.code === '3D000') {
+
+      at error (src/app/api/admin/customers/route.ts:82:13)
+      at Object.<anonymous> (__tests__/api/admin/admin-customers.test.ts:228:24)
+
+  console.log
+    [Admin Customers GET] Session token: admin-session
+
+      at log (src/app/api/admin/customers/route.ts:15:13)
+
+  console.log
+    [Admin Customers GET] Headers: {
+      'x-session-token': 'admin-session',
+      'x-request-url': 'http://localhost:3000',
+      get: [Function (anonymous)]
+    }
+
+      at log (src/app/api/admin/customers/route.ts:16:13)
+
+  console.log
+    [Admin Customers GET] Admin user: {
+      id: 1,
+      username: 'testuser',
+      email: 'test@example.com',
+      is_active: true,
+      is_super_admin: true,
+      created_at: '2024-01-01T00:00:00Z'
+    }
+
+      at log (src/app/api/admin/customers/route.ts:31:13)
+
+  console.error
+    Admin create customer error: Error: Insert failed
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/admin/admin-customers.test.ts:549:28)
+        at Promise.then.completed (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:444:34)
+
+      213 |     });
+      214 |   } catch (error: any) {
+    > 215 |     console.error('Admin create customer error:', error);
+          |             ^
+      216 |
+      217 |     // Check if it's a database error
+      218 |     if (error.code === 'ECONNREFUSED' || error.code === '3D000') {
+
+      at error (src/app/api/admin/customers/route.ts:215:13)
+      at Object.<anonymous> (__tests__/api/admin/admin-customers.test.ts:563:24)
+
+PASS __tests__/api/admin/admin-customers.test.ts
+  /api/admin/customers
+    GET /api/admin/customers
+      ✓ should return all customers with statistics for admin (3 ms)
+      ✓ should return empty array when no customers exist
+      ✓ should require admin authentication (1 ms)
+      ✓ should reject non-admin users (1 ms)
+      ✓ should handle database errors gracefully (3 ms)
+      ✓ should group customers by name and phone correctly (1 ms)
+    POST /api/admin/customers
+      ✓ should create new customer successfully
+      ✓ should validate required fields (1 ms)
+      ✓ should validate user exists
+      ✓ should handle optional fields correctly
+      ✓ should generate unique order codes
+      ✓ should include admin ID in extra_data
+      ✓ should require admin authentication
+      ✓ should handle database errors during creation
+
+  console.log
+    Request body (via text): {"username":"testuser","password":"password123","rememberMe":false}
+
+      at Object.log (__tests__/api/auth/login-enhanced.test.ts:91:15)
+
+  console.log
+    Request headers: application/json
+
+      at Object.log (__tests__/api/auth/login-enhanced.test.ts:92:15)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: { username: 'testuser', password: 'password123', rememberMe: false }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'testuser',
+      password: 'password123',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: false
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: {
+      success: true,
+      message: 'ログインに成功しました',
+      user: {
+        id: 1,
+        username: 'testuser',
+        email: 'test@example.com',
+        is_active: true,
+        is_super_admin: false,
+        created_at: '2024-01-01T00:00:00Z'
+      },
+      session: {
+        session_token: 'mock-session-token',
+        csrf_token: 'mock-csrf-token',
+        expires_at: 2026-05-31T23:46:07.450Z
+      },
+      requiresPasswordChange: false
+    }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: {
+      username: 'testuser',
+      password: 'wrongpassword',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'testuser',
+      password: 'wrongpassword',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: { success: false, message: 'ユーザー名またはパスワードが正しくありません。' }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+  console.warn
+    ⚠️ [2026-05-31T23:46:07.453Z] WARN  認証失敗
+
+      75 |     };
+      76 |
+    > 77 |     console.warn('⚠️ ' + this.formatLog(logData));
+         |             ^
+      78 |     if (data) {
+      79 |       console.warn('📊 Data:', data);
+      80 |     }
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:77:13)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login-enhanced.test.ts:135:24)
+
+  console.warn
+    📊 Data: {
+      result: 'FAILURE',
+      username: 'testuser',
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      timestamp: '2026-05-31T23:46:07.453Z'
+    }
+
+      77 |     console.warn('⚠️ ' + this.formatLog(logData));
+      78 |     if (data) {
+    > 79 |       console.warn('📊 Data:', data);
+         |               ^
+      80 |     }
+      81 |   }
+      82 |
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:79:15)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login-enhanced.test.ts:135:24)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: ユーザー名またはパスワードが正しくありません errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.453Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.453Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    setAuthContext called, this.errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.453Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at AuthErrorBuilder.log [as setAuthContext] (src/lib/auth-error-details.ts:20:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.453Z',
+        processing_steps: [],
+        user_id: 'testuser',
+        operation: 'USER_AUTHENTICATION'
+      },
+      suggestions: []
+    } details: {
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      attempt_count: undefined,
+      lockout_duration: undefined
+    }
+
+      at AuthErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    Login attempt - username: undefined
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: { username: undefined, password: 'password123', rememberMe: undefined }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: { username: 'testuser', password: undefined, rememberMe: undefined }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: { username: 'testuser', password: 'password123', rememberMe: true }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'testuser',
+      password: 'password123',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: true
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: {
+      success: true,
+      message: 'ログインに成功しました',
+      user: {
+        id: 1,
+        username: 'testuser',
+        email: 'test@example.com',
+        is_active: true,
+        is_super_admin: false,
+        created_at: '2024-01-01T00:00:00Z'
+      },
+      session: {
+        session_token: 'mock-session-token',
+        csrf_token: 'mock-csrf-token',
+        expires_at: 2026-05-31T23:46:07.455Z
+      },
+      rememberToken: { selector: 'mock-selector', validator: 'mock-validator' },
+      requiresPasswordChange: false
+    }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+  console.log
+    Login attempt - username: lockeduser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: {
+      username: 'lockeduser',
+      password: 'password123',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'lockeduser',
+      password: 'password123',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: {
+      success: false,
+      message: 'アカウントが一時的にロックされています。5分後に再試行してください。',
+      lockoutInfo: {
+        isLocked: true,
+        lockoutLevel: 1,
+        unlockTime: 2026-05-31T23:51:07.455Z
+      }
+    }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+  console.warn
+    ⚠️ [2026-05-31T23:46:07.456Z] WARN  認証失敗
+
+      75 |     };
+      76 |
+    > 77 |     console.warn('⚠️ ' + this.formatLog(logData));
+         |             ^
+      78 |     if (data) {
+      79 |       console.warn('📊 Data:', data);
+      80 |     }
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:77:13)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login-enhanced.test.ts:240:24)
+
+  console.warn
+    📊 Data: {
+      result: 'FAILURE',
+      username: 'lockeduser',
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      timestamp: '2026-05-31T23:46:07.456Z'
+    }
+
+      77 |     console.warn('⚠️ ' + this.formatLog(logData));
+      78 |     if (data) {
+    > 79 |       console.warn('📊 Data:', data);
+         |               ^
+      80 |     }
+      81 |   }
+      82 |
+
+      at DebugLogger.warn (src/lib/debug-logger.ts:79:15)
+      at warn (src/lib/auth-error-details.ts:187:17)
+      at POST (src/app/api/auth/login/route.ts:51:21)
+      at Object.<anonymous> (__tests__/api/auth/login-enhanced.test.ts:240:24)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: アカウントが一時的にロックされています errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'アカウントが一時的にロックされています',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.456Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'アカウントが一時的にロックされています',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.456Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    setAuthContext called, this.errorResponse: {
+      success: false,
+      message: 'アカウントが一時的にロックされています',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.456Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at AuthErrorBuilder.log [as setAuthContext] (src/lib/auth-error-details.ts:20:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'アカウントが一時的にロックされています',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.456Z',
+        processing_steps: [],
+        user_id: 'lockeduser',
+        operation: 'USER_AUTHENTICATION'
+      },
+      suggestions: []
+    } details: {
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      attempt_count: undefined,
+      lockout_duration: undefined
+    }
+
+      at AuthErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: {
+      username: 'testuser',
+      password: 'password123',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'testuser',
+      password: 'password123',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.error
+    === Login Route Error ===
+
+      147 |
+      148 |     // システムエラーの詳細分析
+    > 149 |     console.error('=== Login Route Error ===');
+          |             ^
+      150 |     console.error('Error message:', error.message);
+      151 |     console.error('Error stack:', error.stack);
+      152 |     console.error('Error name:', error.name);
+
+      at error (src/app/api/auth/login/route.ts:149:13)
+      at Object.<anonymous> (__tests__/api/auth/login-enhanced.test.ts:262:24)
+
+  console.error
+    Error message: Database error
+
+      148 |     // システムエラーの詳細分析
+      149 |     console.error('=== Login Route Error ===');
+    > 150 |     console.error('Error message:', error.message);
+          |             ^
+      151 |     console.error('Error stack:', error.stack);
+      152 |     console.error('Error name:', error.name);
+      153 |
+
+      at error (src/app/api/auth/login/route.ts:150:13)
+      at Object.<anonymous> (__tests__/api/auth/login-enhanced.test.ts:262:24)
+
+  console.error
+    Error stack: Error: Database error
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/auth/login-enhanced.test.ts:251:50)
+        at Promise.then.completed (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:444:34)
+
+      149 |     console.error('=== Login Route Error ===');
+      150 |     console.error('Error message:', error.message);
+    > 151 |     console.error('Error stack:', error.stack);
+          |             ^
+      152 |     console.error('Error name:', error.name);
+      153 |
+      154 |     const context = {
+
+      at error (src/app/api/auth/login/route.ts:151:13)
+      at Object.<anonymous> (__tests__/api/auth/login-enhanced.test.ts:262:24)
+
+  console.error
+    Error name: Error
+
+      150 |     console.error('Error message:', error.message);
+      151 |     console.error('Error stack:', error.stack);
+    > 152 |     console.error('Error name:', error.name);
+          |             ^
+      153 |
+      154 |     const context = {
+      155 |       ipAddress: getClientInfo(request).ipAddress,
+
+      at error (src/app/api/auth/login/route.ts:152:13)
+      at Object.<anonymous> (__tests__/api/auth/login-enhanced.test.ts:262:24)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: システムエラーが発生しました errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'システムエラーが発生しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.459Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'システムエラーが発生しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.459Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    setAuthContext called, this.errorResponse: {
+      success: false,
+      message: 'システムエラーが発生しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.459Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at AuthErrorBuilder.log [as setAuthContext] (src/lib/auth-error-details.ts:20:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'システムエラーが発生しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.459Z',
+        processing_steps: [],
+        user_id: undefined,
+        operation: 'USER_AUTHENTICATION'
+      },
+      suggestions: []
+    } details: {
+      ip_address: '127.0.0.1',
+      user_agent: 'Jest Test Agent',
+      attempt_count: undefined,
+      lockout_duration: undefined
+    }
+
+      at AuthErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.error
+    System error response: {
+      success: false,
+      message: 'システムエラーが発生しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      suggestions: [
+        '一時的なサーバーエラーの可能性があります。しばらく時間をおいてから再試行してください',
+        '問題が続く場合は、管理者にお問い合わせください'
+      ],
+      details: {
+        ip_address: '127.0.0.1',
+        user_agent: 'Jest Test Agent',
+        attempt_count: undefined,
+        lockout_duration: undefined
+      }
+    }
+
+      169 |       .build();
+      170 |
+    > 171 |     console.error('System error response:', systemError);
+          |             ^
+      172 |     return NextResponse.json(systemError, { status: 500 });
+      173 |   }
+      174 | }
+
+      at error (src/app/api/auth/login/route.ts:171:13)
+      at Object.<anonymous> (__tests__/api/auth/login-enhanced.test.ts:262:24)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: {
+      username: 'testuser',
+      password: 'password123',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'testuser',
+      password: 'password123',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: {
+      success: true,
+      message: 'ログインに成功しました',
+      user: {
+        id: 1,
+        username: 'testuser',
+        email: 'test@example.com',
+        is_active: true,
+        is_super_admin: false,
+        created_at: '2024-01-01T00:00:00Z'
+      },
+      session: {
+        session_token: 'mock-session-token',
+        csrf_token: 'mock-csrf-token',
+        expires_at: 2026-05-31T23:46:07.460Z
+      },
+      requiresPasswordChange: false
+    }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+  console.log
+    Login attempt - username: testuser
+
+      at log (src/app/api/auth/login/route.ts:15:13)
+
+  console.log
+    Login attempt - parsed values: {
+      username: 'testuser',
+      password: 'temppassword',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:16:13)
+
+  console.log
+    Login attempt - parsing values completed
+
+      at log (src/app/api/auth/login/route.ts:17:13)
+
+  console.log
+    Calling authenticateUserEnhanced with: {
+      username: 'testuser',
+      password: 'temppassword',
+      ipAddress: '127.0.0.1',
+      userAgent: 'Jest Test Agent',
+      rememberMe: undefined
+    }
+
+      at log (src/app/api/auth/login/route.ts:29:13)
+
+  console.log
+    authenticateUserEnhanced result: {
+      success: true,
+      message: 'ログインに成功しました',
+      user: {
+        id: 1,
+        username: 'testuser',
+        email: 'test@example.com',
+        is_active: true,
+        is_super_admin: false,
+        created_at: '2024-01-01T00:00:00Z'
+      },
+      session: {
+        session_token: 'mock-session-token',
+        csrf_token: 'mock-csrf-token',
+        expires_at: 2026-05-31T23:46:07.460Z
+      },
+      requiresPasswordChange: true
+    }
+
+      at log (src/app/api/auth/login/route.ts:39:13)
+
+PASS __tests__/api/auth/login-enhanced.test.ts
+  /api/auth/login
+    POST /api/auth/login
+      ✓ should successfully login with valid credentials (2 ms)
+      ✓ should reject login with invalid credentials (2 ms)
+      ✓ should validate required fields
+      ✓ should handle remember me functionality (1 ms)
+      ✓ should handle account lockout (2 ms)
+      ✓ should handle server errors gracefully (3 ms)
+      ✓ should set appropriate cookies on successful login
+      ✓ should handle password change requirement (1 ms)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: Test error message errorCode: TEST_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'Test error message',
+      error_code: 'TEST_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.487Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: Test error errorCode: TEST_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'Test error',
+      error_code: 'TEST_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.488Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: Test error errorCode: TEST_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'Test error',
+      error_code: 'TEST_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.488Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: Test error errorCode: TEST_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'Test error',
+      error_code: 'TEST_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.489Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: 必須フィールドが見つかりません: order_code, customer_name errorCode: CSV_PROCESSING_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: '必須フィールドが見つかりません: order_code, customer_name',
+      error_code: 'CSV_PROCESSING_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.490Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: データの検証に失敗しました errorCode: CSV_PROCESSING_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'データの検証に失敗しました',
+      error_code: 'CSV_PROCESSING_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.490Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: ユーザー名またはパスワードが正しくありません errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.491Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.491Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    setAuthContext called, this.errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.491Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at AuthErrorBuilder.log [as setAuthContext] (src/lib/auth-error-details.ts:20:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'ユーザー名またはパスワードが正しくありません',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.491Z',
+        processing_steps: [],
+        user_id: 'test_user',
+        operation: 'USER_AUTHENTICATION'
+      },
+      suggestions: []
+    } details: {
+      ip_address: '192.168.1.1',
+      user_agent: 'Mozilla/5.0...',
+      attempt_count: 3,
+      lockout_duration: undefined
+    }
+
+      at AuthErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: ログイン試行回数が上限に達しました errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'ログイン試行回数が上限に達しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.492Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'ログイン試行回数が上限に達しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.492Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    setAuthContext called, this.errorResponse: {
+      success: false,
+      message: 'ログイン試行回数が上限に達しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.492Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at AuthErrorBuilder.log [as setAuthContext] (src/lib/auth-error-details.ts:20:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'ログイン試行回数が上限に達しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.492Z',
+        processing_steps: [],
+        user_id: 'test_user',
+        operation: 'USER_AUTHENTICATION'
+      },
+      suggestions: []
+    } details: {
+      ip_address: '192.168.1.1',
+      user_agent: 'Mozilla/5.0...',
+      attempt_count: 6,
+      lockout_duration: undefined
+    }
+
+      at AuthErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: CSRF検証に失敗しました errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'CSRF検証に失敗しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.500Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'CSRF検証に失敗しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.500Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'CSRF検証に失敗しました',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.500Z',
+        processing_steps: [ [Object], [Object], [Object] ],
+        operation: 'SESSION_VALIDATION'
+      },
+      suggestions: []
+    } details: {
+      session_info: { token_present: true, created_at: undefined, user_id: '123' }
+    }
+
+      at AuthErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: データベース接続に失敗しました errorCode: DATABASE_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'データベース接続に失敗しました',
+      error_code: 'DATABASE_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.501Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'データベース接続に失敗しました',
+      error_code: 'DATABASE_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.501Z',
+        processing_steps: [],
+        operation: 'DB_SELECT',
+        user_id: undefined
+      },
+      suggestions: []
+    } details: { table: 'users', query_type: 'SELECT', transaction_id: undefined }
+
+      at DatabaseErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: データベースクエリの実行に失敗しました errorCode: DATABASE_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'データベースクエリの実行に失敗しました',
+      error_code: 'DATABASE_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.502Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'データベースクエリの実行に失敗しました',
+      error_code: 'DATABASE_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.502Z',
+        processing_steps: [],
+        operation: 'DB_SELECT',
+        user_id: '123'
+      },
+      suggestions: []
+    } details: {
+      table: 'unknown_table',
+      query_type: 'SELECT',
+      transaction_id: undefined
+    }
+
+      at DatabaseErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: OpenAI APIの呼び出しに失敗しました errorCode: EXTERNAL_API_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'OpenAI APIの呼び出しに失敗しました',
+      error_code: 'EXTERNAL_API_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.503Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'OpenAI APIの呼び出しに失敗しました',
+      error_code: 'EXTERNAL_API_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.503Z',
+        processing_steps: [],
+        operation: 'API_POST'
+      },
+      suggestions: []
+    } details: {
+      api_name: 'OpenAI',
+      endpoint: '/v1/chat/completions',
+      method: 'POST',
+      status_code: 429,
+      response_time: 1500
+    }
+
+      at ExternalAPIErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: 配送APIの呼び出しに失敗しました errorCode: EXTERNAL_API_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: '配送APIの呼び出しに失敗しました',
+      error_code: 'EXTERNAL_API_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.504Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: '配送APIの呼び出しに失敗しました',
+      error_code: 'EXTERNAL_API_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.504Z',
+        processing_steps: [],
+        operation: 'API_POST'
+      },
+      suggestions: []
+    } details: {
+      api_name: 'Yamato Transport',
+      endpoint: '/api/shipping/label',
+      method: 'POST',
+      status_code: undefined,
+      response_time: undefined
+    }
+
+      at ExternalAPIErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: Test error errorCode: TEST_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'Test error',
+      error_code: 'TEST_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.505Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: Test error errorCode: TEST_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'Test error',
+      error_code: 'TEST_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.506Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: Test error errorCode: TEST_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'Test error',
+      error_code: 'TEST_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.506Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+PASS __tests__/error-handling/error-builder.test.ts
+  ErrorBuilder Classes
+    ErrorDetailBuilder
+      ✓ should create basic error response (1 ms)
+      ✓ should add processing steps (1 ms)
+      ✓ should add suggestions (1 ms)
+      ✓ should remove debug_info in production
+    CSVErrorBuilder
+      ✓ should create field mapping error (1 ms)
+      ✓ should create validation error (1 ms)
+    AuthErrorBuilder
+      ✓ should create login failure error (1 ms)
+      ✓ should detect brute force patterns (1 ms)
+      ✓ should create session error (2 ms)
+    DatabaseErrorBuilder
+      ✓ should create connection error (1 ms)
+      ✓ should create query error (1 ms)
+    ExternalAPIErrorBuilder
+      ✓ should create OpenAI error (1 ms)
+      ✓ should create shipping API error (1 ms)
+    Error Response Validation
+      ✓ should validate complete error response structure
+      ✓ should detect invalid error response
+      ✓ should validate debug info presence in development (1 ms)
+      ✓ should validate debug info absence in production
+
+PASS src/app/page.test.tsx
+  HomePage
+    ✓ should render a div element (component exists) (1 ms)
+    ✓ should render the component (1 ms)
+    ○ skipped should redirect to /orders page on mount
+    ○ skipped should redirect exactly to /orders, not related paths
+
+  console.log
+    [DEBUG] Session token extraction: {
+      xSessionToken: undefined,
+      cookieObj: { name: 'session_token', value: 'valid-session-token' },
+      cookieValue: 'valid-session-token',
+      cookieName: 'session_token',
+      sessionToken: 'valid-session-token'
+    }
+
+      at log (src/app/api/auth/me/route.ts:11:13)
+
+  console.log
+    [DEBUG] Session token extraction: {
+      xSessionToken: undefined,
+      cookieObj: { name: 'session_token', value: undefined },
+      cookieValue: undefined,
+      cookieName: 'session_token',
+      sessionToken: 'session_token'
+    }
+
+      at log (src/app/api/auth/me/route.ts:11:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: 認証が必要です。 errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: '認証が必要です。',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.569Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: '認証が必要です。',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.569Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    [DEBUG] Session token extraction: {
+      xSessionToken: undefined,
+      cookieObj: { name: 'session_token', value: 'invalid-session-token' },
+      cookieValue: 'invalid-session-token',
+      cookieName: 'session_token',
+      sessionToken: 'invalid-session-token'
+    }
+
+      at log (src/app/api/auth/me/route.ts:11:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: セッションが無効です。 errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'セッションが無効です。',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.570Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'セッションが無効です。',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.570Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    [DEBUG] Session token extraction: {
+      xSessionToken: undefined,
+      cookieObj: { name: 'session_token', value: 'valid-session-token' },
+      cookieValue: 'valid-session-token',
+      cookieName: 'session_token',
+      sessionToken: 'valid-session-token'
+    }
+
+      at log (src/app/api/auth/me/route.ts:11:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: サーバーエラーが発生しました。 errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'サーバーエラーが発生しました。',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.571Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'サーバーエラーが発生しました。',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.571Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+  console.log
+    [DEBUG] Session token extraction: {
+      xSessionToken: undefined,
+      cookieObj: { name: 'session_token', value: 'admin-session-token' },
+      cookieValue: 'admin-session-token',
+      cookieName: 'session_token',
+      sessionToken: 'admin-session-token'
+    }
+
+      at log (src/app/api/auth/me/route.ts:11:13)
+
+  console.log
+    [DEBUG] Session token extraction: {
+      xSessionToken: undefined,
+      cookieObj: { name: 'session_token', value: 'expired-session-token' },
+      cookieValue: 'expired-session-token',
+      cookieName: 'session_token',
+      sessionToken: 'expired-session-token'
+    }
+
+      at log (src/app/api/auth/me/route.ts:11:13)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: セッションが無効です。 errorCode: AUTHENTICATION_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'セッションが無効です。',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.572Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    AuthErrorBuilder constructor called, errorResponse: {
+      success: false,
+      message: 'セッションが無効です。',
+      error_code: 'AUTHENTICATION_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.572Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/auth-error-details.ts:16:13)
+
+PASS __tests__/api/auth/me.test.ts
+  /api/auth/me
+    GET /api/auth/me
+      ✓ should return user info with valid session (1 ms)
+      ✓ should return 401 when no session token provided (1 ms)
+      ✓ should return 401 when session is invalid
+      ✓ should handle session validation errors
+      ✓ should include admin flag for super admin users
+      ✓ should handle expired sessions (mock only) (1 ms)
+      ○ skipped should handle expired sessions (requires DB connection)
+
+  console.error
+    ❌ [2026-05-31T23:46:07.605Z] ERROR  External API OpenAI 失敗
+
+      91 |     };
+      92 |
+    > 93 |     console.error('❌ ' + this.formatLog(logData));
+         |             ^
+      94 |     if (error) {
+      95 |       console.error('📊 Error Details:', error);
+      96 |       if (error.stack) {
+
+      at DebugLogger.error (src/lib/debug-logger.ts:93:13)
+      at error (src/lib/api-error-details.ts:291:17)
+      at POST (src/app/api/chat/route.ts:108:23)
+      at Object.<anonymous> (__tests__/api/ai/chat.test.ts:338:24)
+
+  console.error
+    📊 Error Details: {
+      api_name: 'OpenAI',
+      endpoint: '/v1/chat/completions',
+      method: 'POST',
+      success: false,
+      response_time: 0,
+      status_code: 500,
+      timestamp: '2026-05-31T23:46:07.605Z'
+    }
+
+      93 |     console.error('❌ ' + this.formatLog(logData));
+      94 |     if (error) {
+    > 95 |       console.error('📊 Error Details:', error);
+         |               ^
+      96 |       if (error.stack) {
+      97 |         console.error('📚 Stack Trace:', error.stack);
+      98 |       }
+
+      at DebugLogger.error (src/lib/debug-logger.ts:95:15)
+      at error (src/lib/api-error-details.ts:291:17)
+      at POST (src/app/api/chat/route.ts:108:23)
+      at Object.<anonymous> (__tests__/api/ai/chat.test.ts:338:24)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: OpenAI APIの呼び出しに失敗しました errorCode: EXTERNAL_API_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'OpenAI APIの呼び出しに失敗しました',
+      error_code: 'EXTERNAL_API_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.607Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'OpenAI APIの呼び出しに失敗しました',
+      error_code: 'EXTERNAL_API_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.607Z',
+        processing_steps: [],
+        operation: 'API_POST'
+      },
+      suggestions: []
+    } details: {
+      api_name: 'OpenAI',
+      endpoint: '/v1/chat/completions',
+      method: 'POST',
+      status_code: 500,
+      response_time: 0
+    }
+
+      at ExternalAPIErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.error
+    ❌ [2026-05-31T23:46:07.607Z] ERROR  External API OpenAI 失敗
+
+      91 |     };
+      92 |
+    > 93 |     console.error('❌ ' + this.formatLog(logData));
+         |             ^
+      94 |     if (error) {
+      95 |       console.error('📊 Error Details:', error);
+      96 |       if (error.stack) {
+
+      at DebugLogger.error (src/lib/debug-logger.ts:93:13)
+      at error (src/lib/api-error-details.ts:291:17)
+      at POST (src/app/api/chat/route.ts:108:23)
+      at Object.<anonymous> (__tests__/api/ai/chat.test.ts:373:24)
+
+  console.error
+    📊 Error Details: {
+      api_name: 'OpenAI',
+      endpoint: '/v1/chat/completions',
+      method: 'POST',
+      success: false,
+      response_time: 0,
+      status_code: undefined,
+      timestamp: '2026-05-31T23:46:07.607Z'
+    }
+
+      93 |     console.error('❌ ' + this.formatLog(logData));
+      94 |     if (error) {
+    > 95 |       console.error('📊 Error Details:', error);
+         |               ^
+      96 |       if (error.stack) {
+      97 |         console.error('📚 Stack Trace:', error.stack);
+      98 |       }
+
+      at DebugLogger.error (src/lib/debug-logger.ts:95:15)
+      at error (src/lib/api-error-details.ts:291:17)
+      at POST (src/app/api/chat/route.ts:108:23)
+      at Object.<anonymous> (__tests__/api/ai/chat.test.ts:373:24)
+
+  console.log
+    ErrorDetailBuilder constructor called, message: OpenAI APIの呼び出しに失敗しました errorCode: EXTERNAL_API_ERROR
+
+      at new log (src/lib/error-details.ts:34:13)
+
+  console.log
+    ErrorDetailBuilder constructor completed, errorResponse: {
+      success: false,
+      message: 'OpenAI APIの呼び出しに失敗しました',
+      error_code: 'EXTERNAL_API_ERROR',
+      debug_info: { timestamp: '2026-05-31T23:46:07.608Z', processing_steps: [] },
+      suggestions: []
+    }
+
+      at new log (src/lib/error-details.ts:45:13)
+
+  console.log
+    setDetails called, this.errorResponse: {
+      success: false,
+      message: 'OpenAI APIの呼び出しに失敗しました',
+      error_code: 'EXTERNAL_API_ERROR',
+      debug_info: {
+        timestamp: '2026-05-31T23:46:07.608Z',
+        processing_steps: [],
+        operation: 'API_POST'
+      },
+      suggestions: []
+    } details: {
+      api_name: 'OpenAI',
+      endpoint: '/v1/chat/completions',
+      method: 'POST',
+      status_code: undefined,
+      response_time: 0
+    }
+
+      at ExternalAPIErrorBuilder.log [as setDetails] (src/lib/error-details.ts:111:13)
+
+  console.error
+    Chat API error: Error: Network error
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/ai/chat.test.ts:476:35)
+        at Promise.then.completed (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:444:34)
+
+      130 |     return NextResponse.json({ response: 'AI機能が使用できません。' });
+      131 |   } catch (error: any) {
+    > 132 |     console.error('Chat API error:', error);
+          |             ^
+      133 |     return NextResponse.json(
+      134 |       {
+      135 |         success: false,
+
+      at error (src/app/api/chat/route.ts:132:13)
+      at Object.<anonymous> (__tests__/api/ai/chat.test.ts:485:24)
+
+  console.error
+    Chat API error: Error: Specific error message
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/ai/chat.test.ts:545:35)
+        at Promise.then.completed (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:444:34)
+
+      130 |     return NextResponse.json({ response: 'AI機能が使用できません。' });
+      131 |   } catch (error: any) {
+    > 132 |     console.error('Chat API error:', error);
+          |             ^
+      133 |     return NextResponse.json(
+      134 |       {
+      135 |         success: false,
+
+      at error (src/app/api/chat/route.ts:132:13)
+      at Object.<anonymous> (__tests__/api/ai/chat.test.ts:554:24)
+
+PASS __tests__/api/ai/chat.test.ts
+  /api/chat
+    POST /api/chat
+      ✓ should process chat message successfully with OpenAI
+      ✓ should require authentication (1 ms)
+      ✓ should validate session
+      ✓ should validate CSRF token
+      ✓ should validate message field
+      ✓ should reject empty messages
+      ✓ should reject messages that are too long
+      ✓ should handle missing OpenAI API key
+      ✓ should handle placeholder API key
+      ✓ should handle OpenAI API errors (2 ms)
+      ✓ should handle OpenAI API with malformed response (1 ms)
+      ✓ should send correct parameters to OpenAI API
+      ✓ should trim AI response content
+      ✓ should handle network errors gracefully (3 ms)
+      ✓ should validate message type
+      ✓ should include error details in development environment
+
+  console.log
+    Admin me request debug: {
+      hasHeader: true,
+      cookieObject: { name: 'session_token', value: undefined },
+      cookieType: 'object',
+      hasCookie: true,
+      cookieValue: undefined,
+      sessionToken: undefined
+    }
+
+      at log (src/app/api/admin/me/route.ts:9:13)
+
+  console.log
+    Admin me request debug: {
+      hasHeader: true,
+      cookieObject: { name: 'session_token', value: undefined },
+      cookieType: 'object',
+      hasCookie: true,
+      cookieValue: undefined,
+      sessionToken: undefined
+    }
+
+      at log (src/app/api/admin/me/route.ts:9:13)
+
+  console.log
+    Admin me request debug: {
+      hasHeader: false,
+      cookieObject: { name: 'session_token', value: undefined },
+      cookieType: 'object',
+      hasCookie: true,
+      cookieValue: undefined,
+      sessionToken: undefined
+    }
+
+      at log (src/app/api/admin/me/route.ts:9:13)
+
+  console.log
+    Admin me request debug: {
+      hasHeader: false,
+      cookieObject: { name: 'session_token', value: 'cookie-session-token' },
+      cookieType: 'object',
+      hasCookie: true,
+      cookieValue: 'cookie-session-token',
+      sessionToken: 'cookie-session-token'
+    }
+
+      at log (src/app/api/admin/me/route.ts:9:13)
+
+  console.log
+    Admin me request debug: {
+      hasHeader: true,
+      cookieObject: { name: 'session_token', value: undefined },
+      cookieType: 'object',
+      hasCookie: true,
+      cookieValue: undefined,
+      sessionToken: undefined
+    }
+
+      at log (src/app/api/admin/me/route.ts:9:13)
+
+  console.log
+    Admin me request debug: {
+      hasHeader: true,
+      cookieObject: { name: 'session_token', value: undefined },
+      cookieType: 'object',
+      hasCookie: true,
+      cookieValue: undefined,
+      sessionToken: undefined
+    }
+
+      at log (src/app/api/admin/me/route.ts:9:13)
+
+  console.log
+    Admin me request debug: {
+      hasHeader: true,
+      cookieObject: { name: 'session_token', value: undefined },
+      cookieType: 'object',
+      hasCookie: true,
+      cookieValue: undefined,
+      sessionToken: undefined
+    }
+
+      at log (src/app/api/admin/me/route.ts:9:13)
+
+  console.error
+    Admin me error: Error: Database connection failed
+        at Object.<anonymous> (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/__tests__/api/admin/admin-me.test.ts:176:46)
+        at Promise.then.completed (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:316:40)
+        at _runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:121:9)
+        at run (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/Users/amadeus/.openclaw/workspace/projects/agri-ai-agent-frontend-test/node_modules/jest-runner/build/runTest.js:444:34)
+
+      46 |     });
+      47 |   } catch (error: any) {
+    > 48 |     console.error('Admin me error:', error);
+         |             ^
+      49 |     return NextResponse.json(
+      50 |       {
+      51 |         success: false,
+
+      at error (src/app/api/admin/me/route.ts:48:13)
+      at Object.<anonymous> (__tests__/api/admin/admin-me.test.ts:184:24)
+
+  console.log
+    Admin me request debug: {
+      hasHeader: true,
+      cookieObject: { name: 'session_token', value: undefined },
+      cookieType: 'object',
+      hasCookie: true,
+      cookieValue: undefined,
+      sessionToken: undefined
+    }
+
+      at log (src/app/api/admin/me/route.ts:9:13)
+
+  console.log
+    Admin me request debug: {
+      hasHeader: true,
+      cookieObject: { name: 'session_token', value: undefined },
+      cookieType: 'object',
+      hasCookie: true,
+      cookieValue: undefined,
+      sessionToken: undefined
+    }
+
+      at log (src/app/api/admin/me/route.ts:9:13)
+
+  console.log
+    Admin me request debug: {
+      hasHeader: true,
+      cookieObject: { name: 'session_token', value: 'cookie-session-token' },
+      cookieType: 'object',
+      hasCookie: true,
+      cookieValue: 'cookie-session-token',
+      sessionToken: 'cookie-session-token'
+    }
+
+      at log (src/app/api/admin/me/route.ts:9:13)
+
+  console.log
+    Admin me request debug: {
+      hasHeader: true,
+      cookieObject: { name: 'session_token', value: undefined },
+      cookieType: 'object',
+      hasCookie: true,
+      cookieValue: undefined,
+      sessionToken: undefined
+    }
+
+      at log (src/app/api/admin/me/route.ts:9:13)
+
+PASS __tests__/api/admin/admin-me.test.ts
+  /api/admin/me
+    GET /api/admin/me
+      ✓ should return admin user for valid session (1 ms)
+      ✓ should return admin user for regular admin (1 ms)
+      ✓ should require session token in headers
+      ✓ should accept session token from cookies
+      ✓ should reject invalid admin session (1 ms)
+      ✓ should reject non-admin user session
+      ✓ should handle database/validation errors gracefully (2 ms)
+      ✓ should handle expired session tokens (1 ms)
+      ✓ should call validateAdminSession with correct session token
+      ✓ should prioritize header token over cookie token (1 ms)
+      ✓ should return user data without sensitive fields
+
+PASS __tests__/api/categories/categories.test.ts
+  /api/categories
+    GET /api/categories
+      ✓ should return categories for authenticated user (1 ms)
+      ✓ should return 401 without authentication
+      ✓ should only return categories for current user
+    POST /api/categories
+      ✓ should create new category with valid data
+      ✓ should validate required name field
+      ✓ should prevent duplicate category names for same user (1 ms)
+      ✓ should set default values for optional fields
+    PUT /api/categories
+      ✓ should update existing category
+      ✓ should return 404 for non-existent category
+    DELETE /api/categories
+      ✓ should delete category without associated orders
+      ✓ should prevent deletion of category with associated orders (1 ms)
+      ✓ should require category ID parameter
+
+  console.log
+    Test request headers: {
+      'x-request-url': 'http://localhost:3000',
+      get: [Function (anonymous)]
+    }
+
+      at Object.log (__tests__/api/auth/logout.test.ts:76:15)
+
+  console.log
+    x-session-token: undefined
+
+      at Object.log (__tests__/api/auth/logout.test.ts:77:15)
+
+  console.log
+    cookies: { name: 'session_token', value: undefined }
+
+      at Object.log (__tests__/api/auth/logout.test.ts:78:15)
+
+PASS __tests__/api/auth/logout.test.ts
+  /api/auth/logout
+    POST /api/auth/logout
+      ✓ should successfully logout with valid session
+      ✓ should handle logout without session token (1 ms)
+      ✓ should handle logout with invalid session
+      ✓ should handle logout with remember token
+      ✓ should handle database errors gracefully
+      ✓ should handle session invalidation errors gracefully (1 ms)
+
+PASS __tests__/api/auth/logout-enhanced.test.ts
+  /api/auth/logout
+    POST /api/auth/logout
+      ✓ should successfully logout and clear cookies (1 ms)
+      ✓ should handle logout without session token
+      ✓ should handle logout with only session token
+      ✓ should handle logout with remember token
+      ✓ should handle errors gracefully (5 ms)
+      ✓ should be able to handle multiple logout requests
+      ✓ should work with various cookie combinations (1 ms)
+      ✓ should return consistent response structure
+
+PASS src/app/api/auth/logout.test.ts
+  Auth Logout API
+    ✓ should return 200 and clear session on successful logout
+    ✓ should handle GET method not allowed
+    ✓ should return 500 if session destruction fails (1 ms)
+
+Test Suites: 5 failed, 14 passed, 19 total
+Tests:       20 failed, 3 skipped, 195 passed, 218 total
+Snapshots:   0 total
+Time:        1.044 s
+Ran all test suites.

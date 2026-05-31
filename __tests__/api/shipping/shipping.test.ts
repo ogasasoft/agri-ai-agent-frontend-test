@@ -225,6 +225,8 @@ describe('/api/shipping', () => {
       const data = await response.json()
 
       // Debug
+      console.log('[DEBUG] Response status:', response.status)
+      console.log('[DEBUG] Response data:', data)
 
       // Assert
       expect(response.status).toBe(200)
