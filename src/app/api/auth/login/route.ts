@@ -69,15 +69,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(detailedError, { status: statusCode });
     }
 
-    // Set secure HTTP-only cookies
-    const response = NextResponse.json({
-      success: true,
-      message: authResult.message,
-      user: authResult.user,
-      session: authResult.session,
-      rememberToken: authResult.rememberToken || undefined,
-      requiresPasswordChange: authResult.requiresPasswordChange,
-    });
+    // Create response object early to allow cookie setting
+    const response = NextResponse.json(
+      {
+        success: true,
+        message: authResult.message,
+        user: authResult.user,
+        session: authResult.session,
+        rememberToken: authResult.rememberToken || undefined,
+        requiresPasswordChange: authResult.requiresPasswordChange,
+      },
+      { status: 200 } // Set initial status code
+    );
 
     // Set session cookie (HTTP-only, secure, SameSite)
     response.cookies.set('session_token', authResult.session!.session_token, {

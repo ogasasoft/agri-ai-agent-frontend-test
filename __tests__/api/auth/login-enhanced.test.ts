@@ -1,4 +1,22 @@
 import { POST } from '@/app/api/auth/login/route'
+import { NextRequest, NextResponse } from 'next/server';
+
+// Mock next/server to provide a mock NextResponse with a cookies property
+jest.mock('next/server', () => ({
+  NextResponse: {
+    json: jest.fn((body, init) => {
+      const response = new Response(JSON.stringify(body), init);
+      (response as any).cookies = {
+        set: jest.fn((name, value, options) => {
+          // You can log cookie settings here if needed for debugging
+          // console.log(`Mock cookie set: ${name}=${value} with options`, options);
+        }),
+      };
+      return response as NextResponse;
+    }),
+  },
+  NextRequest: jest.requireActual('next/server').NextRequest, // Use actual NextRequest if needed
+}));
 import { createMockRequest, MockDbClient, createMockUser, resetTestDatabase, getDbClient } from '../../setup/test-utils'
 
 // Mock dependencies
