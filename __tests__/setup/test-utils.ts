@@ -470,7 +470,9 @@ export function createMockRequest(options: {
     cookieMap.set(name, value)
   })
   request.cookies.get = (name: string) => {
-    return cookieMap.get(name)
+    const value = cookieMap.get(name)
+    // Return object with value and name properties for compatibility with Next.js
+    return { name, value }
   }
 
   // Fix for auth-enhanced.ts getClientInfo: Add ip property if missing

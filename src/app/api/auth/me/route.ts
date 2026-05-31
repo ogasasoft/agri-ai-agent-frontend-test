@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
     });
 
     const sessionToken =
-      request.headers.get('x-session-token') || (cookieObj?.value || cookieObj?.name);
+      request.headers.get('x-session-token') || (cookieObj?.value || (cookieObj && cookieObj.name));
 
-    if (!sessionToken) {
+    if (!sessionToken || (typeof sessionToken === 'string' && !cookieObj?.value)) {
       const authError = new AuthErrorBuilder('認証が必要です。')
         .setOperation('SESSION_VALIDATION')
         .addProcessingStep('Session Token Check', 'failed')

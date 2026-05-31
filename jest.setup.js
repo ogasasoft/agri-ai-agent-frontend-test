@@ -138,7 +138,11 @@ jest.mock('next/server', () => {
       headers: headers,
       body: requestInit.body || null,
       cookies: {
-        get: jest.fn((name) => cookies.get(name)),
+        get: jest.fn((name) => {
+          const value = cookies.get(name);
+          // Return object with value and name properties for compatibility with Next.js
+          return { name, value };
+        }),
         set: jest.fn((name, value) => {
           cookies.set(name, value);
         }),
