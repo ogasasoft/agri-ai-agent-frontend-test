@@ -167,7 +167,9 @@ jest.mock('next/server', () => {
 // Mock Request class for Node.js environment
 global.Request = class Request {
   constructor(input, init) {
-    this.url = typeof input === 'string' ? input : input.url;
+    // Extract URL from input (string or object with url property)
+    const url = typeof input === 'string' ? input : input.url;
+    this.url = url;
     this.method = init?.method || 'GET';
     this.credentials = init?.credentials || 'same-origin';
     this.headers = new Map();
@@ -232,6 +234,20 @@ process.env.OPENAI_API_KEY = 'test-openai-key';
 jest.mock('@/lib/db', () => ({
   getDbClient: jest.fn(),
   withDatabase: jest.fn()
+}));
+
+// Mock auth-enhanced module
+jest.mock('@/lib/auth-enhanced', () => ({
+  authenticateUserEnhanced: jest.fn(),
+  getClientInfo: jest.fn().mockReturnValue({
+    ipAddress: '127.0.0.1',
+    userAgent: 'Jest Test Agent'
+  }),
+  checkRateLimit: jest.fn().mockResolvedValue({
+    allowed: true,
+    remaining: 19,
+    resetTime: new Date(Date.now() + 15 * 60 * 1000)
+  })
 }));
 
 // Mock Headers class

@@ -34,6 +34,13 @@ const customJestConfig = {
       tsconfig: "./tsconfig.test.json",
     },
   },
+  // Mock auth-enhanced module globally
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+  },
+  // Ensure mocks are applied before modules are loaded
+  clearMocks: true,
+  resetModules: false,
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

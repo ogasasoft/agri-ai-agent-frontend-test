@@ -36,20 +36,20 @@ export async function POST(request: NextRequest) {
 
     console.log('authenticateUserEnhanced result:', authResult);
 
-    if (!authResult.success) {
+    if (!authResult?.success) {
       // ログイン失敗の詳細分析とログ記録
       const context = {
         username,
         ipAddress,
         userAgent,
-        attemptCount: authResult.lockoutInfo?.level,
+        attemptCount: authResult?.lockoutInfo?.level,
         lockoutDuration: undefined,
       };
 
       logAuthAttempt('FAILURE', username, context);
 
       // 攻撃パターンの検出
-      if (authResult.lockoutInfo?.level && authResult.lockoutInfo.level > 5) {
+      if (authResult?.lockoutInfo?.level && authResult.lockoutInfo.level > 5) {
         logSecurityEvent('BRUTE_FORCE', { authResult }, context);
       }
 
@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
       let reason: 'INVALID_CREDENTIALS' | 'USER_NOT_FOUND' | 'ACCOUNT_LOCKED' | 'RATE_LIMITED' =
         'INVALID_CREDENTIALS';
 
-      if (authResult.message?.includes('ロック')) {
+      if (authResult?.message?.includes('ロック')) {
         reason = 'ACCOUNT_LOCKED';
-      } else if (authResult.message?.includes('制限')) {
+      } else if (authResult?.message?.includes('制限')) {
         reason = 'RATE_LIMITED';
       }
 
@@ -67,6 +67,27 @@ export async function POST(request: NextRequest) {
 
       const statusCode = reason === 'ACCOUNT_LOCKED' ? 423 : 401;
       return NextResponse.json(detailedError, { status: statusCode });
+    }
+
+    // Check if authResult and required fields are defined
+    if (!authResult || !authResult.session || !authResult.session.session_token || !authResult.session.csrf_token) {
+      const context = {
+        ipAddress,
+        userAgent,
+      };
+
+      const systemError = new AuthErrorBuilder('システムエラーが発生しました')
+        .setAuthContext(context)
+        .addProcessingStep('Response Generation', 'failed', {
+          error: 'Missing required authentication data',
+          authResult: authResult ? 'defined (incomplete)' : 'undefined',
+        })
+        .addSuggestion('一時的なサーバーエラーの可能性があります。しばらく時間をおいてから再試行してください')
+        .addSuggestion('問題が続く場合は、管理者にお問い合わせください')
+        .build();
+
+      console.error('System error response:', systemError);
+      return NextResponse.json(systemError, { status: 500 });
     }
 
     // Create response object early to allow cookie setting
@@ -83,7 +104,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Set session cookie (HTTP-only, secure, SameSite)
-    response.cookies.set('session_token', authResult.session!.session_token, {
+    response.cookies.set('session_token', authResult.session.session_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -92,7 +113,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Set CSRF token cookie (accessible to JavaScript for CSRF protection)
-    response.cookies.set('csrf_token', authResult.session!.csrf_token, {
+    response.cookies.set('csrf_token', authResult.session.csrf_token, {
       httpOnly: false, // Accessible to JS for CSRF headers
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -117,6 +138,11 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error: any) {
+    // Ensure authResult is logged before error handling
+    if (authResult && authResult.success) {
+      logAuthAttempt('SUCCESS', username, { ipAddress, userAgent });
+    }
+
     // システムエラーの詳細分析
     console.error('=== Login Route Error ===');
     console.error('Error message:', error.message);

@@ -11,21 +11,6 @@ jest.mock('@/lib/db', () => ({
   getDbClient: jest.fn(async () => MockDbClient.getInstance())
 }))
 
-jest.mock('@/lib/auth-enhanced', () => {
-  return {
-    authenticateUserEnhanced: jest.fn(),
-    getClientInfo: jest.fn().mockReturnValue({
-      ipAddress: '127.0.0.1',
-      userAgent: 'Jest Test Agent'
-    }),
-    checkRateLimit: jest.fn().mockResolvedValue({
-      allowed: true,
-      remaining: 19,
-      resetTime: new Date(Date.now() + 15 * 60 * 1000)
-    })
-  }
-})
-
 jest.mock('bcryptjs', () => ({
   compare: jest.fn(),
   hash: jest.fn(),
@@ -33,6 +18,11 @@ jest.mock('bcryptjs', () => ({
 }))
 
 const bcrypt = require('bcryptjs')
+
+// Setup bcrypt mock to return true for tests
+bcrypt.compare.mockResolvedValue(true)
+bcrypt.hash.mockResolvedValue('hashed-password')
+bcrypt.genSalt.mockResolvedValue('salt')
 
 describe('/api/auth/login', () => {
   let mockClient: MockDbClient
