@@ -2,7 +2,7 @@ import { POST } from '@/app/api/auth/login/route'
 import { createMockRequest, MockDbClient, createMockUser, resetTestDatabase } from '../../setup/test-utils'
 import { authenticateUserEnhanced, checkRateLimit } from '@/lib/auth-enhanced'
 
-// Mock dependencies
+// Mock dependencies - must be at the top
 jest.mock('pg', () => ({
   Client: jest.fn().mockImplementation(() => MockDbClient.getInstance())
 }))
@@ -17,12 +17,33 @@ jest.mock('bcryptjs', () => ({
   genSalt: jest.fn()
 }))
 
-const bcrypt = require('bcryptjs')
+// Mock NextResponse
+jest.mock('next/server', () => ({
+  ...jest.requireActual('next/server'),
+  NextResponse: {
+    json: jest.fn().mockImplementation((data, options) => {
+      const mockResponse = {
+        json: async () => data,
+        status: options?.status || 200,
+        headers: new Map(),
+        cookies: {
+          set: jest.fn(),
+          get: jest.fn(),
+          delete: jest.fn()
+        }
+      };
+      // Set default headers
+      mockResponse.headers.set('content-type', 'application/json');
+      return mockResponse;
+    })
+  }
+}))
 
-// Setup bcrypt mock to return true for tests
-bcrypt.compare.mockResolvedValue(true)
-bcrypt.hash.mockResolvedValue('hashed-password')
-bcrypt.genSalt.mockResolvedValue('salt')
+import bcrypt from 'bcryptjs'
+import { NextResponse } from 'next/server'
+
+// Mock authenticateUserEnhanced to return success
+const mockAuthEnhanced = jest.spyOn(require('@/lib/auth-enhanced'), 'authenticateUserEnhanced').mockImplementation()
 
 describe('/api/auth/login', () => {
   let mockClient: MockDbClient
@@ -30,7 +51,11 @@ describe('/api/auth/login', () => {
   beforeEach(async () => {
     await resetTestDatabase()
     mockClient = MockDbClient.getInstance()
-    authenticateUserEnhanced.mockClear()
+    mockAuthEnhanced.mockClear()
+    // Setup bcrypt mock to return true for tests
+    bcrypt.compare.mockResolvedValue(true)
+    bcrypt.hash.mockResolvedValue('hashed-password')
+    bcrypt.genSalt.mockResolvedValue('salt')
   })
 
   describe('POST /api/auth/login', () => {
@@ -46,6 +71,27 @@ describe('/api/auth/login', () => {
 
       mockClient.setMockData('users', [mockUser])
       bcrypt.compare.mockResolvedValue(true)
+      mockAuthEnhanced.mockResolvedValue({
+        success: true,
+        message: 'ログイン成功しました',
+        user: {
+          id: 1,
+          username: 'testuser',
+          email: 'test@example.com',
+          is_active: true,
+          is_super_admin: false,
+          created_at: '2024-01-01T00:00:00Z'
+        },
+        session: {
+          user_id: 1,
+          session_token: 'mock-session-token',
+          csrf_token: 'mock-csrf-token',
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          is_active: true
+        },
+        rememberToken: undefined,
+        requiresPasswordChange: false
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -81,6 +127,10 @@ describe('/api/auth/login', () => {
     it('should reject login with invalid username', async () => {
       // Arrange
       mockClient.setMockData('users', [])
+      mockAuthEnhanced.mockResolvedValue({
+        success: false,
+        message: 'ユーザー名またはパスワードが正しくありません'
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -111,6 +161,11 @@ describe('/api/auth/login', () => {
       })
 
       mockClient.setMockData('users', [mockUser])
+      bcrypt.compare.mockResolvedValue(false)
+      mockAuthEnhanced.mockResolvedValue({
+        success: false,
+        message: 'ユーザー名またはパスワードが正しくありません'
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -139,6 +194,10 @@ describe('/api/auth/login', () => {
       })
 
       mockClient.setMockData('users', [mockUser])
+      mockAuthEnhanced.mockResolvedValue({
+        success: false,
+        message: 'アカウントが無効になっています。管理者にお問い合わせください。'
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -170,6 +229,14 @@ describe('/api/auth/login', () => {
       })
 
       mockClient.setMockData('users', [mockUser])
+      mockAuthEnhanced.mockResolvedValue({
+        success: false,
+        message: 'アカウントがロックされています。しばらく時間をおいてから再試行してください。',
+        lockoutInfo: {
+          level: 3,
+          unlockTime: new Date(futureTime)
+        }
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -200,6 +267,31 @@ describe('/api/auth/login', () => {
       })
 
       mockClient.setMockData('users', [mockUser])
+      bcrypt.compare.mockResolvedValue(true)
+      mockAuthEnhanced.mockResolvedValue({
+        success: true,
+        message: 'ログイン成功しました',
+        user: {
+          id: 1,
+          username: 'testuser',
+          email: 'test@example.com',
+          is_active: true,
+          is_super_admin: false,
+          created_at: '2024-01-01T00:00:00Z'
+        },
+        session: {
+          user_id: 1,
+          session_token: 'mock-session-token',
+          csrf_token: 'mock-csrf-token',
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          is_active: true
+        },
+        rememberToken: {
+          selector: 'test-selector',
+          validator: 'test-validator'
+        },
+        requiresPasswordChange: false
+      })
 
       const request = createMockRequest({
         method: 'POST',
@@ -219,14 +311,23 @@ describe('/api/auth/login', () => {
       expect(data.success).toBe(true)
       expect(data.rememberToken).toEqual(
         expect.objectContaining({
-          token: expect.any(String),
-          selector: expect.any(String)
+          selector: expect.any(String),
+          validator: expect.any(String)
         })
       )
 
-      // Check Set-Cookie header for remember token
-      const setCookieHeader = response.headers.get('Set-Cookie')
-      expect(setCookieHeader).toContain('remember_token=')
+      // Check that cookies were set
+      expect(response.cookies.set).toHaveBeenCalledWith(
+        'remember_token',
+        expect.stringContaining(':'),
+        expect.objectContaining({
+          httpOnly: true,
+          secure: false,
+          sameSite: 'strict',
+          maxAge: 30 * 24 * 60 * 60,
+          path: '/'
+        })
+      )
     })
 
     it('should validate required fields', async () => {

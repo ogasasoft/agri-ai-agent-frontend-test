@@ -6,6 +6,8 @@ import { cookies } from 'next/headers';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  let authResult: any;
+
   try {
     const { username, password, rememberMe } = await request.json();
     const { ipAddress, userAgent } = getClientInfo(request);

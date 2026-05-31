@@ -169,7 +169,11 @@ global.Request = class Request {
   constructor(input, init) {
     // Extract URL from input (string or object with url property)
     const url = typeof input === 'string' ? input : input.url;
-    this.url = url;
+    // URL is read-only in Next.js 16
+    Object.defineProperty(this, 'url', {
+      get: () => url,
+      set: () => {}
+    });
     this.method = init?.method || 'GET';
     this.credentials = init?.credentials || 'same-origin';
     this.headers = new Map();

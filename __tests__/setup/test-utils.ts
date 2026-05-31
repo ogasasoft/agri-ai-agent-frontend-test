@@ -281,7 +281,14 @@ export class MockDbClient {
         return { rows: this.mockData.user_settings || [] }
       }
       if (text.includes('SELECT') && text.includes('users')) {
-        return { rows: this.mockData.users || [] }
+        // Enhanced user query detection for auth-enhanced.ts
+        if (text.includes('WHERE username = $1 OR email = $1')) {
+          return { rows: this.mockData.users || [] }
+        }
+        // Also handle generic user queries
+        if (text.includes('SELECT') && text.includes('users')) {
+          return { rows: this.mockData.users || [] }
+        }
       }
       // Categories queries - must be before orders
       if (text.includes('categories')) {
@@ -431,6 +438,9 @@ export function createMockRequest(options: {
     requestHeaders['Content-Type'] = 'application/json'
   }
 
+  // Auto-set X-Request-URL header for Next.js 16 compatibility
+  requestHeaders['x-request-url'] = url
+
   // Mock cookies - include in headers
   if (Object.keys(cookies).length > 0) {
     const cookieString = Object.entries(cookies)
@@ -444,6 +454,9 @@ export function createMockRequest(options: {
     headers: requestHeaders,
     body: body ? JSON.stringify(body) : undefined,
   })
+
+  // Next.js 16: URL is read-only, so we use x-request-url header instead
+  // No need to redefine url property
 
   // Also set cookies via the cookies object
   Object.entries(cookies).forEach(([name, value]) => {
