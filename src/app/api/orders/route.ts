@@ -189,6 +189,12 @@ export async function POST(request: NextRequest) {
     }
   } catch (error: any) {
     console.error('Database error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      constraint: error.constraint,
+      detail: error.detail
+    });
 
     // Handle specific database errors
     if (error.code === '23505') {

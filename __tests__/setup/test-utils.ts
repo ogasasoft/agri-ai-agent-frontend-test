@@ -346,6 +346,28 @@ export class MockDbClient {
           const orderId = params[0]
           orders = orders.filter((o: any) => o.id === orderId || o.id === Number(orderId))
         }
+        // Filter by user_id if specified (orders WHERE o.user_id = $1)
+        if (params && text.includes('WHERE') && text.includes('o.user_id') && text.includes('$1')) {
+          const userId = params[0]
+          orders = orders.filter((o: any) => {
+            const compare = (val1: any, val2: any) => {
+              if (typeof val1 === 'number' && typeof val2 === 'number') {
+                return val1 === val2
+              }
+              if (typeof val1 === 'string' && typeof val2 === 'string') {
+                return val1 === val2
+              }
+              if (typeof val1 === 'number' && typeof val2 === 'string') {
+                return val1 === Number(val2)
+              }
+              if (typeof val1 === 'string' && typeof val2 === 'number') {
+                return Number(val1) === val2
+              }
+              return val1 == val2 // Loose equality for type coercion
+            }
+            return compare(o.user_id, userId)
+          })
+        }
         // Get distinct orders with user join for admin customers API
         if (text.includes('DISTINCT o.') && text.includes('JOIN users u')) {
           const joinedOrders: any[] = []

@@ -15,9 +15,9 @@ describe('/api/orders', () => {
   const { validateSession } = require('@/lib/auth')
 
   beforeEach(async () => {
-    await resetTestDatabase()
     mockClient = MockDbClient.getInstance()
     validateSession.mockClear()
+    mockClient.clearMockData()
   })
 
   describe('GET /api/orders', () => {
@@ -33,6 +33,10 @@ describe('/api/orders', () => {
       validateSession.mockResolvedValue(mockSessionData)
       mockClient.setMockData('orders', mockOrders)
 
+      // Debug: Log mock data and query
+      console.log('Test setup - Mock orders:', mockOrders)
+      console.log('Test setup - Mock client data:', mockClient.mockData)
+
       const request = createMockRequest({
         method: 'GET',
         headers: createMockAuthHeaders()
@@ -41,6 +45,9 @@ describe('/api/orders', () => {
       // Act
       const response = await GET(request)
       const data = await response.json()
+
+      console.log('Response status:', response.status)
+      console.log('Response data:', data)
 
       // Assert
       expect(response.status).toBe(200)
@@ -130,6 +137,9 @@ describe('/api/orders', () => {
 
       const mockUser = createMockUser({ id: 1 })
       validateSession.mockResolvedValue({ user: mockUser, session: { csrf_token: 'mock-csrf-token' } })
+
+      console.log('Mock user ID:', mockUser.id)
+      console.log('User ID as string:', mockUser.id.toString())
 
       const request = createMockRequest({
         method: 'POST',

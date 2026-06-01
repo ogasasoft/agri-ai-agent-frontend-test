@@ -1,5 +1,5 @@
 # 進捗記録 - agri-ai-agent-frontend-test
-## 状態: IN_PROGRESS (Test failures fixing - Phase 3)
+## 状態: IN_PROGRESS (Test failures fixing - Phase 4)
 ## 完了済み
 - [x] TypeScript構文エラーの修正
   - tsconfig.json: test files exclude from compilation
@@ -23,15 +23,22 @@
   - Unified "データベースエラー" across all APIs ✅
 - [x] Database client cleanup handling
   - Safe client.end() in finally block ✅
+- [x] Feature branch creation: feature/test-improvements-phase4
 ## 未完了
 - [ ] Fix remaining test failures (21 failed, 194 passed)
   - Auth tests: shipping API partial success tests (4 failed)
   - Yamato API tests (9 failed) - DB connection still failing
   - Orders API tests (2 failed) - Query not returning expected data
   - Dashboard stats tests (2 failed) - Error message mismatch
+  - Admin-customers API: DB error handling test
+  - Yamato-settings API: Authentication tests
+  - Yamato-csv API: CSV generation tests
 ## 次にやること
-Phase 3: Fix remaining database mock issues
-- Investigate MockDbClient.query() implementation
+Phase 4: Fix remaining test failures
+- Fix shipping API partial success test
+- Fix Yamato API connection issues
 - Fix Orders API query mock data
-- Resolve Yamato API database connection issues
 - Update error message expectations in tests
+- Fix Admin-customers DB error handling test
+- Fix Yamato-settings authentication tests
+- Fix Yamato-csv CSV generation tests
