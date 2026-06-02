@@ -195,7 +195,7 @@ describe('/api/admin/dashboard/stats', () => {
       // Assert
       expect(response.status).toBe(500)
       expect(data.success).toBe(false)
-      expect(data.message).toBe('サーバーエラーが発生しました。')
+      expect(data.message).toBe('データベースエラーが発生しました。')
     })
 
     it('should format lastBackup as ISO string', async () => {
