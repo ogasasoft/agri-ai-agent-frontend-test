@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getClientIp } from '@/lib/client-ip';
 
 // シンプルなレート制限実装（メモリベース）
 const rateLimit = new Map<string, { count: number; resetTime: number }>();
@@ -84,10 +85,7 @@ export async function middleware(request: NextRequest) {
   // レート制限チェック（APIエンドポイントのみ）
   // 開発環境では完全に無効化
   if (pathname.startsWith('/api/') && process.env.NODE_ENV !== 'development') {
-    const ip = request.ip || 
-              request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-              request.headers.get('x-real-ip') ||
-              'localhost-dev';
+    const ip = getClientIp(request);
     
     // Rate limit configuration by endpoint
     

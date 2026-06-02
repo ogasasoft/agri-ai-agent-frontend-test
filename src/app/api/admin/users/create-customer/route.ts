@@ -3,6 +3,7 @@ import { Client } from 'pg';
 import bcrypt from 'bcryptjs';
 import { validateAdminSession } from '@/lib/admin-auth';
 import { createErrorResponse } from '@/lib/security';
+import { getClientIp } from '@/lib/client-ip';
 import { getDbClient } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
         customer_email: customerEmail,
         initial_password_set: true
       }),
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+      getClientIp(request),
       request.headers.get('user-agent') || 'unknown'
     ]);
 
