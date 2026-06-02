@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
           o.id,
           o.order_code,
           o.customer_name,
-          o.phone,
+          o.customer_phone as phone,
           o.address,
           o.price,
           o.order_date,

@@ -65,6 +65,10 @@ export async function GET(request: NextRequest) {
         [userId]
       );
 
+      console.log('[DEBUG] Orders query result:', result.rows.length, 'rows');
+      console.log('[DEBUG] userId:', userId);
+      console.log('[DEBUG] result:', result);
+
       logDatabaseOperation('SELECT', 'orders', true, { count: result.rows.length }, userId);
 
       return NextResponse.json(result.rows);
@@ -72,6 +76,7 @@ export async function GET(request: NextRequest) {
       await client.end();
     }
   } catch (error: any) {
+    console.error('[ERROR] Orders API error:', error);
     logDatabaseOperation('SELECT', 'orders', false, { error: error.message }, userId);
 
     return NextResponse.json([], { status: 200 });

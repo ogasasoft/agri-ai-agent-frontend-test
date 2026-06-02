@@ -193,11 +193,15 @@ describe('/api/shipping', () => {
         createMockOrder({
           id: 1,
           order_code: 'ORD-001',
+          customer_name: '田中太郎',
+          address: '東京都渋谷区1-1-1',
           user_id: 1
         }),
         createMockOrder({
           id: 2,
           order_code: 'ORD-002',
+          customer_name: '山本花子',
+          address: '東京都渋谷区2-2-2',
           user_id: 1
         })
       ]
@@ -207,7 +211,7 @@ describe('/api/shipping', () => {
         rows: mockOrders
       });
       // First order update succeeds
-      mockClient.query.mockResolvedValueOnce({}); // Update first order
+      mockClient.query.mockResolvedValueOnce({});
       // Second order update fails
       mockClient.query.mockRejectedValueOnce(new Error('Update failed'));
 
@@ -229,9 +233,12 @@ describe('/api/shipping', () => {
       console.log('[DEBUG] Response data:', data)
 
       // Assert
-      expect(response.status).toBe(200)
-      expect(data.success).toBe(true)
-      expect(data.message).toBe('1件の発送書類を作成しました')
+      expect(response.status).toBe(500)
+      expect(data.success).toBe(false)
+      expect(data.message).toContain('件の注文の更新に失敗しました')
+      expect(data.updatedMessage).toContain('件の注文は正常に更新されました')
+      expect(data.errors).toHaveLength(1)
+      expect(data.errors![0].order_id).toBe(2)
       expect(data.orders).toHaveLength(1)
     })
 
@@ -241,6 +248,8 @@ describe('/api/shipping', () => {
         createMockOrder({
           id: 1,
           order_code: 'ORD-001',
+          customer_name: '田中太郎',
+          address: '東京都渋谷区1-1-1',
           user_id: 1
         })
       ]
@@ -259,7 +268,7 @@ describe('/api/shipping', () => {
         },
         body: {
           order_ids: [1],
-          delivery_type: 'express', // Different delivery type
+          delivery_type: 'cool', // Valid delivery type
           notes: '急ぎの発送'
         }
       })
@@ -272,6 +281,7 @@ describe('/api/shipping', () => {
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
       expect(data.orders).toHaveLength(1)
+      expect(data.orders![0].delivery_type).toBe('cool')
     })
 
     it('should simulate yamato API delays', async () => {

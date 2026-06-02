@@ -23,11 +23,12 @@ describe('/api/orders', () => {
   describe('GET /api/orders', () => {
     it('should return orders for authenticated user', async () => {
       // Arrange
+      await resetTestDatabase()
       const mockUser = createMockUser({ id: 1 })
       const mockSessionData = { user: mockUser }
       const mockOrders = [
-        createMockOrder({ id: 1, order_code: 'ORD-001', user_id: 1 }),
-        createMockOrder({ id: 2, order_code: 'ORD-002', user_id: 1 }),
+        createMockOrder({ id: 1, order_code: 'ORD-001', customer_name: '田中太郎', address: '東京都渋谷区1-1-1', user_id: 1 }),
+        createMockOrder({ id: 2, order_code: 'ORD-002', customer_name: '山田花子', address: '大阪府大阪市2-2-2', user_id: 1 }),
       ]
 
       validateSession.mockResolvedValue(mockSessionData)
@@ -54,8 +55,8 @@ describe('/api/orders', () => {
       expect(Array.isArray(data)).toBe(true)
       expect(data).toHaveLength(2)
       // Order comes from mockData, check the actual values
-      expect(data[0]).toHaveProperty('order_number')
-      expect(data[1]).toHaveProperty('order_number')
+      expect(data[0]).toHaveProperty('order_code')
+      expect(data[1]).toHaveProperty('order_code')
     })
 
     it('should return 401 without valid session', async () => {

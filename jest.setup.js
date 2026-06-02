@@ -1,6 +1,12 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
 
+// Set NODE_ENV to 'test' for Jest to properly load mocks
+process.env.NODE_ENV = 'test';
+
+// Set global variable to indicate we're in testing mode
+global.__TESTING_DB__ = true;
+
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter() {
@@ -236,6 +242,7 @@ global.TextEncoder = class TextEncoder {};
 global.TextDecoder = class TextDecoder {};
 
 // Mock environment variables
+process.env.NODE_ENV = 'test';
 process.env.OPENAI_API_KEY = 'test-openai-key';
 
 // Mock DB client

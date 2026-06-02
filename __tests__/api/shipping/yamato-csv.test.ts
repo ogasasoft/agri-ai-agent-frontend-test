@@ -24,8 +24,8 @@ describe('/api/yamato-csv', () => {
     it('should generate CSV for selected orders', async () => {
       // Arrange
       const mockUser = createMockUser({ id: 1 })
-      const mockSession = createMockSession({ 
-        user_id: 1, 
+      const mockSession = createMockSession({
+        user_id: 1,
         csrf_token: 'csrf-token',
         session_token: 'session-token'
       })
@@ -33,29 +33,36 @@ describe('/api/yamato-csv', () => {
       validateSession.mockResolvedValue({ user: mockUser })
 
       const mockOrders = [
-        createMockOrder({ 
-          id: 1, 
-          order_number: 'ORD-001',
+        createMockOrder({
+          id: 1,
+          order_code: 'ORD-001',
           customer_name: '田中太郎',
-          customer_phone: '090-1234-5678',
-          customer_address: '東京都渋谷区1-1-1',
+          phone: '090-1234-5678',
+          address: '東京都渋谷区1-1-1',
           delivery_date: '2024-01-03',
-          total_amount: 3000,
+          price: 3000,
+          item_name: '農産物',
           user_id: 1
         }),
-        createMockOrder({ 
-          id: 2, 
-          order_number: 'ORD-002',
+        createMockOrder({
+          id: 2,
+          order_code: 'ORD-002',
           customer_name: '山田花子',
-          customer_phone: '090-9876-5432',
-          customer_address: '大阪府大阪市2-2-2',
+          phone: '090-9876-5432',
+          address: '大阪府大阪市2-2-2',
           delivery_date: '2024-01-04',
-          total_amount: 5000,
+          price: 5000,
+          item_name: '野菜',
           user_id: 1
         })
       ]
 
       mockClient.setMockData('orders', mockOrders)
+
+      // Mock user data for sender info
+      mockClient.setMockData('users', [
+        { id: 1, username: '農業事業者', email: 'test@example.com' }
+      ])
 
       const request = createMockRequest({
         method: 'POST',

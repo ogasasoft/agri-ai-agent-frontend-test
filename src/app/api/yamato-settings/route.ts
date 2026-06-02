@@ -88,7 +88,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    client = await getDbClient();
+    let client: any = null;
+    try {
+      client = await getDbClient();
+    } catch (error: any) {
+      console.error('Yamato settings fetch error:', error);
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'データベース接続エラーが発生しました',
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!client || !client.query) {
+      console.error('Yamato settings fetch error: Invalid client object');
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'データベースクライアントが無効です',
+          error: 'Invalid database client',
+        },
+        { status: 500 }
+      );
+    }
 
     // ユーザー固有の設定を取得
     const result = await client.query(
@@ -189,8 +214,7 @@ export async function GET(request: NextRequest) {
 
 // PUT - ヤマト設定の更新
 export async function PUT(request: NextRequest) {
-  let client: Client | null = null;
-
+  let queryClient: any = null;
   try {
     // セッション検証
     const sessionToken =
@@ -220,12 +244,25 @@ export async function PUT(request: NextRequest) {
     const settings: Partial<YamatoSettings> = await request.json();
     console.log('[DEBUG] Request body parsed:', settings);
 
+    let queryClient: any = null;
     try {
-      client = await getDbClient();
+      queryClient = await getDbClient();
+      console.log('[YAMATO-SETTINGS] getDbClient returned:', typeof queryClient, Object.keys(queryClient || {}));
     } catch (error: any) {
       console.error('[YAMATO-SETTINGS] Database client error:', error);
       return NextResponse.json(
         { success: false, message: 'データベース接続エラーが発生しました' },
+        { status: 500 }
+      );
+    }
+
+    console.log('[YAMATO-SETTINGS] queryClient value:', queryClient);
+    console.log('[YAMATO-SETTINGS] queryClient.query exists:', !!(queryClient && queryClient.query));
+
+    if (!queryClient || !queryClient.query) {
+      console.error('[YAMATO-SETTINGS] Invalid database client object');
+      return NextResponse.json(
+        { success: false, message: 'データベースクライアントが無効です' },
         { status: 500 }
       );
     }
@@ -235,12 +272,12 @@ export async function PUT(request: NextRequest) {
     // 設定を保存（upsert）
     for (const [key, value] of Object.entries(settings)) {
       console.log('[DEBUG] Saving setting:', key, '=', value);
-      await client.query(
+      await queryClient.query(
         `
         INSERT INTO user_settings (user_id, setting_key, setting_value, created_at, updated_at)
         VALUES ($1, $2, $3, NOW(), NOW())
         ON CONFLICT (user_id, setting_key)
-        DO UPDATE SET 
+        DO UPDATE SET
           setting_value = EXCLUDED.setting_value,
           updated_at = NOW()
       `,
@@ -263,8 +300,12 @@ export async function PUT(request: NextRequest) {
       { status: 500 }
     );
   } finally {
-    if (client) {
-      await client.end();
+    if (queryClient) {
+      try {
+        await queryClient.end();
+      } catch (endError) {
+        console.error('Error closing database client:', endError);
+      }
     }
   }
 }
