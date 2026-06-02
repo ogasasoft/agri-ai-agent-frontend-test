@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
         validIds
       );
 
-      const existingCustomers = customerCheck.rows;
-      const existingIds = existingCustomers.map((c) => c.id);
+      const existingCustomers = customerCheck.rows as Array<{ id: string; email: string }>;
+      const existingIds = existingCustomers.map((c: { id: string; email: string }) => c.id);
       const notFoundIds = validIds.filter((id) => !existingIds.includes(id));
 
       if (existingIds.length === 0) {

@@ -555,9 +555,12 @@ export const createMockCategory = (overrides = {}) => ({
 export const createMockOrder = (overrides = {}) => ({
   id: 1,
   order_number: 'ORD-001',
+  order_code: 'ORD-001',
   customer_name: '田中太郎',
   customer_phone: '090-1234-5678',
   customer_address: '東京都渋谷区1-1-1',
+  address: '東京都渋谷区1-1-1',
+  phone: '090-1234-5678',
   total_amount: 3000,
   order_date: '2024-01-01',
   delivery_date: '2024-01-03',

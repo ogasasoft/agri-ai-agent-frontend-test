@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 // GET - Get user passwords (admin only)
 export async function GET(request: NextRequest) {
-  let client: Client | null = null;
+  let client: any = null;
 
   try {
     // Session validation

@@ -177,10 +177,12 @@ export async function POST(request: NextRequest) {
 
     const userId = sessionData.user.id.toString();
     const body: ShippingRequest = await request.json();
+    console.log('[DEBUG] request.json() result:', body);
     const { order_ids, delivery_type = 'normal', notes } = body;
     console.log('[DEBUG] Request body:', { order_ids, delivery_type, notes })
 
     if (!order_ids || order_ids.length === 0) {
+      console.log('[DEBUG] Returning 400: order_ids missing or empty', { order_ids });
       return NextResponse.json(
         { success: false, message: '注文IDが指定されていません' },
         { status: 400 }
@@ -230,7 +232,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Validate order data
-      const invalidOrders = selectedOrders.filter(order => {
+      const invalidOrders = selectedOrders.filter((order: any) => {
         return !order.order_code || !order.customer_name || !order.address;
       });
 
@@ -268,6 +270,7 @@ export async function POST(request: NextRequest) {
             tracking_number: trackingNumber,
             status: 'shipped',
             shipped_at: shippedAt,
+            delivery_type: delivery_type,
           });
         } catch (error: any) {
           console.error(`Failed to update order ${order.id}:`, error);
@@ -287,6 +290,7 @@ export async function POST(request: NextRequest) {
             success: false,
             message: `${errors.length}件の注文の更新に失敗しました`,
             errors: errors,
+            orders: successfulOrders,
             updatedMessage: `${successfulOrders.length}件の注文は正常に更新されました`
           },
           { status: 500 }

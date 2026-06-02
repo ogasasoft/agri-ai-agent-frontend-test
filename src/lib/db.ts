@@ -5,48 +5,14 @@ declare global {
   var __TESTING_DB__: boolean;
 }
 
-// Mock database client for testing
-let mockClient: any = null;
-
-console.log('[DEBUG] src/lib/db.ts loading, NODE_ENV:', process.env.NODE_ENV, '__TESTING_DB__:', typeof globalThis.__TESTING_DB__);
-
-// Check for test environment - try multiple indicators
-const isTestEnvironment =
-  process.env.NODE_ENV === 'test' ||
-  process.env.JEST_WORKER_ID ||
-  !process.env.DATABASE_URL ||
-  (globalThis as any).__TESTING_DB__;
-
-if (isTestEnvironment && !mockClient) {
-  console.log('[DEBUG] Loading MockDbClient from __tests__/setup/test-utils');
-  try {
-    // Use dynamic import for test utils
-    const path = require('path');
-    const testUtilsPath = path.join(process.cwd(), '__tests__/setup/test-utils');
-    const { MockDbClient } = require(testUtilsPath);
-    console.log('[DEBUG] MockDbClient loaded:', typeof MockDbClient);
-    mockClient = MockDbClient.getInstance();
-    console.log('[DEBUG] MockDbClient instance created:', !!mockClient, 'mockClient:', !!mockClient);
-  } catch (error) {
-    console.error('[ERROR] Failed to load mock database client:', error);
-  }
-}
+// In test environment, mock DB client is loaded via jest.mock in test files.
+// db.ts never imports test-utils directly to avoid Turbopack bundling issues.
+// Tests should mock '@/lib/db' or use jest.mock for the mock client.
 
 export async function getDbClient(): Promise<any> {
-  // In test environment, use mock client
-  // Also check if we're running in a Jest environment
-  const isTestEnvironment =
-    process.env.NODE_ENV === 'test' ||
-    process.env.JEST_WORKER_ID ||
-    !process.env.DATABASE_URL ||
-    (globalThis as any).__TESTING_DB__;
-
-  console.log('[DEBUG] getDbClient called, isTestEnvironment:', isTestEnvironment, 'mockClient:', !!mockClient);
-
-  if (isTestEnvironment && mockClient) {
-    console.log('[DEBUG] getDbClient returning mock client');
-    return mockClient as any;
-  }
+  // In test environment, tests should mock this function entirely
+  // via jest.mock('@/lib/db', ...) in their test setup files.
+  // If we reach here during a test, something went wrong with mocking.
 
   // Try multiple environment variables in order of preference
   const connectionString =
@@ -59,8 +25,6 @@ export async function getDbClient(): Promise<any> {
     );
   }
 
-  console.log('[DEBUG] Attempting to connect to database:', connectionString.replace(/:[^:@]+@/, ':***@'));
-
   const client = new Client({
     connectionString,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
@@ -69,7 +33,6 @@ export async function getDbClient(): Promise<any> {
 
   try {
     await client.connect();
-    console.log('[DEBUG] Database connection successful');
   } catch (error) {
     console.error('[ERROR] Database connection failed:', error);
     throw error;
@@ -84,7 +47,7 @@ export async function withDatabase<T>(callback: (client: Client) => Promise<T>):
     return await callback(client);
   } finally {
     // Only close real client in non-test environment
-    if (process.env.NODE_ENV !== 'test' && !('query' in client && typeof client.query === 'function')) {
+    if (process.env.NODE_ENV !== 'test') {
       await client.end();
     }
   }

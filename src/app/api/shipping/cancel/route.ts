@@ -70,13 +70,13 @@ export async function POST(request: NextRequest) {
       }
 
       // Check if any order is not in 'shipped' status
-      const nonShippedOrders = verifyResult.rows.filter((order) => order.status !== 'shipped');
+      const nonShippedOrders = verifyResult.rows.filter((order: any) => order.status !== 'shipped');
       if (nonShippedOrders.length > 0) {
         return NextResponse.json(
           {
             success: false,
             message: '発送済みステータスではない注文が含まれています',
-            non_shipped_orders: nonShippedOrders.map((o) => o.order_code),
+            non_shipped_orders: nonShippedOrders.map((o: any) => o.order_code),
           },
           { status: 400 }
         );

@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       `);
 
       // Transform activities for frontend
-      const activities = result.rows.map((row) => {
+      const activities = result.rows.map((row: any) => {
         let message = '';
         let severity: 'info' | 'warning' | 'error' | 'success' = 'info';
 

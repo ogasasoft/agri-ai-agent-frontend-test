@@ -7,10 +7,16 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   let authResult: any;
+  let username: string = '';
+  let ipAddress: string = '';
+  let userAgent: string = '';
 
   try {
-    const { username, password, rememberMe } = await request.json();
-    const { ipAddress, userAgent } = getClientInfo(request);
+    const { username: rawUsername, password, rememberMe } = await request.json();
+    const clientInfo = getClientInfo(request);
+    username = rawUsername || '';
+    ipAddress = clientInfo.ipAddress;
+    userAgent = clientInfo.userAgent;
 
     console.log('Login attempt - username:', username);
     console.log('Login attempt - parsed values:', { username, password, rememberMe });
@@ -28,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Calling authenticateUserEnhanced with:', { username, password, ipAddress, userAgent, rememberMe });
 
-    const authResult = await authenticateUserEnhanced(
+    authResult = await authenticateUserEnhanced(
       username,
       password,
       ipAddress,

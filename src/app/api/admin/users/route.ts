@@ -8,7 +8,7 @@ import { getDbClient } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  let client: Client | null = null;
+  let client: any = null;
 
   try {
     // Session validation
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  let client: Client | null = null;
+  let client: any = null;
 
   try {
     // Session validation

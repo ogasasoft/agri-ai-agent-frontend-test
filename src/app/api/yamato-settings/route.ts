@@ -70,7 +70,7 @@ interface YamatoSettings {
 
 // GET - ヤマト設定の取得
 export async function GET(request: NextRequest) {
-  let client: Client | null = null;
+  let client: any = null;
 
   try {
     // セッション検証
@@ -179,7 +179,7 @@ export async function GET(request: NextRequest) {
 
     // 保存された設定で上書き
     const settings = { ...defaultSettings };
-    result.rows.forEach((row) => {
+    result.rows.forEach((row: any) => {
       const key = row.setting_key.replace('yamato_', '') as keyof YamatoSettings;
       if (key in settings) {
         const value = row.setting_value;

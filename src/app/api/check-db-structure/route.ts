@@ -3,7 +3,7 @@ import { Client } from 'pg';
 import { getDbClient } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
-  let client: Client | null = null;
+  let client: any = null;
 
   try {
     client = await getDbClient();

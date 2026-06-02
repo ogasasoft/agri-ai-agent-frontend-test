@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let client: Client | null = null;
+  let client: any = null;
 
   try {
     client = await getDbClient();

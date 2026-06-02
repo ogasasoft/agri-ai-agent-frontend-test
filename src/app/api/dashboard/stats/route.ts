@@ -195,12 +195,12 @@ export async function GET(request: NextRequest) {
           revenueGrowth: parseFloat(revenueGrowth.toFixed(2)),
           orderGrowth: parseFloat(orderGrowth.toFixed(2)),
         },
-        dailyTrend: dailyTrend.rows.map((row) => ({
+        dailyTrend: dailyTrend.rows.map((row: any) => ({
           date: row.date,
           orderCount: parseInt(row.order_count),
           revenue: parseFloat(row.revenue),
         })),
-        topCustomers: topCustomers.rows.map((row) => ({
+        topCustomers: topCustomers.rows.map((row: any) => ({
           customerName: row.customer_name,
           orderCount: parseInt(row.order_count),
           totalSpent: parseFloat(row.total_spent),
@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
           newCustomers: parseInt(repeatCustomers.rows[0]?.new_customers || 0),
           repeatCustomers: parseInt(repeatCustomers.rows[0]?.repeat_customers || 0),
         },
-        weekdayStats: weekdayStats.rows.map((row) => ({
+        weekdayStats: weekdayStats.rows.map((row: any) => ({
           weekday: parseInt(row.weekday),
           orderCount: parseInt(row.order_count),
           revenue: parseFloat(row.revenue),

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 // PUT - 注文情報の更新
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  let client: Client | null = null;
+  let client: any = null;
 
   try {
     // セッション検証
@@ -145,7 +145,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 // GET - 個別注文の取得
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  let client: Client | null = null;
+  let client: any = null;
 
   try {
     // セッション検証

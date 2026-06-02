@@ -3,7 +3,7 @@ import { Client } from 'pg';
 import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
-  let client: Client | null = null;
+  let client: any = null;
 
   try {
     const { username } = await request.json();

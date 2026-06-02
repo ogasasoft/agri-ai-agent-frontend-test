@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
-  let client: Client | null = null;
+  let client: any = null;
 
   try {
     const { username, password } = await request.json();

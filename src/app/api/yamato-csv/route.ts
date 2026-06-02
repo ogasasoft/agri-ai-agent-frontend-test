@@ -349,7 +349,7 @@ function convertOrderToYamatoCsv(order: any, senderInfo: any, settings?: any): Y
 }
 
 export async function POST(request: NextRequest) {
-  let client: Client | null = null;
+  let client: any = null;
 
   try {
     // セッション検証
@@ -424,7 +424,7 @@ export async function POST(request: NextRequest) {
 
     // 設定をオブジェクトに変換
     const userSettings: any = {};
-    settingsResult.rows.forEach((row) => {
+    settingsResult.rows.forEach((row: any) => {
       const key = row.setting_key.replace('yamato_', '');
       userSettings[key] = row.setting_value;
     });
@@ -438,7 +438,7 @@ export async function POST(request: NextRequest) {
     };
 
     // CSVデータを生成
-    const csvRows = ordersResult.rows.map((order) =>
+    const csvRows = ordersResult.rows.map((order: any) =>
       convertOrderToYamatoCsv(order, senderInfo, userSettings)
     );
 
@@ -567,7 +567,7 @@ export async function POST(request: NextRequest) {
     // CSV文字列を生成
     const csvContent = [
       headers.join(','),
-      ...csvRows.map((row) =>
+      ...csvRows.map((row: any) =>
         Object.values(row)
           .map((value) => (typeof value === 'string' && value.includes(',') ? `"${value}"` : value))
           .join(',')
