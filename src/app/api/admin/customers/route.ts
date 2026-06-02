@@ -12,11 +12,8 @@ export async function GET(request: NextRequest) {
     const sessionToken =
       request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
 
-    console.log('[Admin Customers GET] Session token:', sessionToken);
-    console.log('[Admin Customers GET] Headers:', request.headers);
 
     if (!sessionToken) {
-      console.log('[Admin Customers GET] No session token');
       return NextResponse.json(
         {
           success: false,
@@ -28,10 +25,8 @@ export async function GET(request: NextRequest) {
 
     const adminUser = await validateAdminSession(sessionToken);
 
-    console.log('[Admin Customers GET] Admin user:', adminUser);
 
     if (!adminUser) {
-      console.log('[Admin Customers GET] No admin user');
       return NextResponse.json(
         {
           success: false,

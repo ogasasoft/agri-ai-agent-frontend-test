@@ -22,7 +22,6 @@ export async function POST(request: NextRequest) {
     const client = await getDbClient();
 
     try {
-      console.log('🗑️  Starting category feature removal migration...');
 
       // Step 1: Drop foreign key constraint
       try {
@@ -31,7 +30,6 @@ export async function POST(request: NextRequest) {
           DROP CONSTRAINT IF EXISTS orders_category_id_fkey
         `);
         steps.push('✓ Dropped foreign key constraint: orders_category_id_fkey');
-        console.log('✓ Foreign key constraint dropped');
       } catch (error: any) {
         const errorMsg = `Failed to drop FK constraint: ${error.message}`;
         errors.push(errorMsg);
@@ -45,7 +43,6 @@ export async function POST(request: NextRequest) {
           DROP COLUMN IF EXISTS category_id CASCADE
         `);
         steps.push('✓ Dropped column: orders.category_id (CASCADE)');
-        console.log('✓ category_id column dropped from orders table');
       } catch (error: any) {
         const errorMsg = `Failed to drop category_id column: ${error.message}`;
         errors.push(errorMsg);
@@ -59,7 +56,6 @@ export async function POST(request: NextRequest) {
           DROP COLUMN IF EXISTS product_category CASCADE
         `);
         steps.push('✓ Dropped column: orders.product_category (CASCADE)');
-        console.log('✓ product_category column dropped from orders table');
       } catch (error: any) {
         const errorMsg = `Failed to drop product_category column: ${error.message}`;
         errors.push(errorMsg);
@@ -72,7 +68,6 @@ export async function POST(request: NextRequest) {
           DROP TABLE IF EXISTS categories CASCADE
         `);
         steps.push('✓ Dropped table: categories (CASCADE)');
-        console.log('✓ categories table dropped');
       } catch (error: any) {
         const errorMsg = `Failed to drop categories table: ${error.message}`;
         errors.push(errorMsg);
@@ -85,13 +80,10 @@ export async function POST(request: NextRequest) {
           DROP INDEX IF EXISTS idx_orders_category_id
         `);
         steps.push('✓ Dropped index: idx_orders_category_id');
-        console.log('✓ Index dropped');
       } catch (error: any) {
         // Index might not exist, this is not critical
-        console.log('ℹ️  Index might not exist, skipping');
       }
 
-      console.log('✅ Category feature removal migration completed successfully');
 
       return NextResponse.json({
         success: true,

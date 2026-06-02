@@ -219,13 +219,11 @@ export async function PUT(request: NextRequest) {
     // セッション検証
     const sessionToken =
       request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
-    console.log('[DEBUG] Session token present:', !!sessionToken);
     if (!sessionToken) {
       return NextResponse.json({ success: false, message: '認証が必要です' }, { status: 401 });
     }
 
     const sessionData = await validateSession(sessionToken);
-    console.log('[DEBUG] Session data valid:', !!sessionData);
     if (!sessionData || !sessionData.user) {
       return NextResponse.json(
         { success: false, message: '無効なセッションです' },
@@ -235,19 +233,14 @@ export async function PUT(request: NextRequest) {
 
     // CSRF token validation
     const csrfToken = request.headers.get('x-csrf-token');
-    console.log('[DEBUG] CSRF token present:', !!csrfToken);
     if (!csrfToken || csrfToken !== sessionData.session?.csrf_token) {
       return NextResponse.json({ success: false, message: 'CSRF token mismatch' }, { status: 403 });
     }
-
-    console.log('[DEBUG] About to parse request body');
     const settings: Partial<YamatoSettings> = await request.json();
-    console.log('[DEBUG] Request body parsed:', settings);
 
     let queryClient: any = null;
     try {
       queryClient = await getDbClient();
-      console.log('[YAMATO-SETTINGS] getDbClient returned:', typeof queryClient, Object.keys(queryClient || {}));
     } catch (error: any) {
       console.error('[YAMATO-SETTINGS] Database client error:', error);
       return NextResponse.json(
@@ -256,8 +249,6 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.log('[YAMATO-SETTINGS] queryClient value:', queryClient);
-    console.log('[YAMATO-SETTINGS] queryClient.query exists:', !!(queryClient && queryClient.query));
 
     if (!queryClient || !queryClient.query) {
       console.error('[YAMATO-SETTINGS] Invalid database client object');
@@ -267,11 +258,8 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.log('[DEBUG] Settings to save:', settings);
-
     // 設定を保存（upsert）
     for (const [key, value] of Object.entries(settings)) {
-      console.log('[DEBUG] Saving setting:', key, '=', value);
       await queryClient.query(
         `
         INSERT INTO user_settings (user_id, setting_key, setting_value, created_at, updated_at)

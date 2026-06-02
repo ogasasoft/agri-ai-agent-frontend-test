@@ -65,10 +65,6 @@ export async function GET(request: NextRequest) {
         [userId]
       );
 
-      console.log('[DEBUG] Orders query result:', result.rows.length, 'rows');
-      console.log('[DEBUG] userId:', userId);
-      console.log('[DEBUG] result:', result);
-
       logDatabaseOperation('SELECT', 'orders', true, { count: result.rows.length }, userId);
 
       return NextResponse.json(result.rows);

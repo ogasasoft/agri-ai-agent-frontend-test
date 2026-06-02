@@ -6,7 +6,6 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const cookie = request.cookies.get('session_token')
-    console.log('Admin me request debug:', {
       hasHeader: !!request.headers.get('x-session-token'),
       cookieObject: cookie,
       cookieType: typeof cookie,

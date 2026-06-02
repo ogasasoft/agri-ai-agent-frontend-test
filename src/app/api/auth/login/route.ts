@@ -18,9 +18,6 @@ export async function POST(request: NextRequest) {
     ipAddress = clientInfo.ipAddress;
     userAgent = clientInfo.userAgent;
 
-    console.log('Login attempt - username:', username);
-    console.log('Login attempt - parsed values:', { username, password, rememberMe });
-    console.log('Login attempt - parsing values completed');
 
     if (!username || !password) {
       return NextResponse.json(
@@ -32,7 +29,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Calling authenticateUserEnhanced with:', { username, password, ipAddress, userAgent, rememberMe });
 
     authResult = await authenticateUserEnhanced(
       username,
@@ -42,7 +38,6 @@ export async function POST(request: NextRequest) {
       rememberMe || false
     );
 
-    console.log('authenticateUserEnhanced result:', authResult);
 
     if (!authResult?.success) {
       // ログイン失敗の詳細分析とログ記録

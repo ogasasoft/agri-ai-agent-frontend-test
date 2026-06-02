@@ -8,13 +8,6 @@ export async function GET(request: NextRequest) {
   try {
     // Try multiple sources for session token
     const cookieObj = request.cookies.get('session_token');
-    console.log('[DEBUG] Session token extraction:', {
-      xSessionToken: request.headers.get('x-session-token'),
-      cookieObj: cookieObj,
-      cookieValue: cookieObj?.value,
-      cookieName: cookieObj?.name,
-      sessionToken: cookieObj?.value || cookieObj?.name
-    });
 
     const sessionToken =
       request.headers.get('x-session-token') || (cookieObj?.value || (cookieObj && cookieObj.name));
