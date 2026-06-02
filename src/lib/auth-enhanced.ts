@@ -6,14 +6,21 @@ import { validateSession, logAuditEvent, User, Session } from './auth';
 import { getDbClient } from '@/lib/db';
 
 export function getClientInfo(request: NextRequest): { ipAddress: string; userAgent: string } {
-  const ipAddress = request.ip || 
-                   request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                   request.headers.get('x-real-ip') || 
-                   'unknown';
-  
-  const userAgent = request.headers.get('user-agent') || 'unknown';
-  
-  return { ipAddress, userAgent };
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    const firstIp = forwardedFor.split(',')[0]?.trim();
+    if (firstIp) {
+      return {
+        ipAddress: firstIp,
+        userAgent: request.headers.get('user-agent') || 'unknown',
+      };
+    }
+  }
+
+  return {
+    ipAddress: request.headers.get('x-real-ip')?.trim() || 'unknown',
+    userAgent: request.headers.get('user-agent') || 'unknown',
+  };
 }
 
 // Enhanced security constants

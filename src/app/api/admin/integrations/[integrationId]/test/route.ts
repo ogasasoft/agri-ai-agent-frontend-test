@@ -134,7 +134,9 @@ export async function POST(
             integrationType: integration.type,
             testResult
           }),
-          request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+          request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+          request.headers.get('x-real-ip')?.trim() ||
+          'unknown',
           request.headers.get('user-agent') || 'unknown'
         ]
       );

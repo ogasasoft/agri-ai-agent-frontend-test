@@ -112,7 +112,9 @@ export async function POST(request: NextRequest) {
         customer_email: customerEmail,
         action: 'password_updated'
       }),
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip')?.trim() ||
+      'unknown',
       request.headers.get('user-agent') || 'unknown'
     ]);
 
