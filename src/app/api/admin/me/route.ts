@@ -5,14 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const cookie = request.cookies.get('session_token')
-      hasHeader: !!request.headers.get('x-session-token'),
-      cookieObject: cookie,
-      cookieType: typeof cookie,
-      hasCookie: !!cookie,
-      cookieValue: cookie?.value,
-      sessionToken: cookie?.value
-    });
+    const cookie = request.cookies.get('session_token');
 
     const sessionToken =
       request.headers.get('x-session-token') || cookie?.value;
