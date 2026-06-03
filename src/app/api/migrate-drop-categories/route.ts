@@ -98,24 +98,26 @@ export async function POST(request: NextRequest) {
         message: 'Category feature successfully removed from database',
         steps,
         errors: errors.length > 0 ? errors : undefined,
-        warning: errors.length > 0
-          ? 'Some steps failed but migration partially completed. Check errors array.'
-          : undefined
+        warning:
+          errors.length > 0
+            ? 'Some steps failed but migration partially completed. Check errors array.'
+            : undefined,
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
     console.error('❌ Migration failed with critical error:', error);
 
-    return NextResponse.json({
-      success: false,
-      message: 'Migration failed with critical error',
-      error: error.message,
-      steps,
-      errors
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Migration failed with critical error',
+        error: error.message,
+        steps,
+        errors,
+      },
+      { status: 500 }
+    );
   }
 }

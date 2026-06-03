@@ -1,36 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
-import { validateSession } from "@/lib/auth";
-import { getDbClient } from "@/lib/db";
-import { AuthErrorBuilder } from "@/lib/auth-error-details";
-import {
-  DatabaseErrorBuilder,
-  logDatabaseOperation,
-} from "@/lib/api-error-details";
+import { NextRequest, NextResponse } from 'next/server';
+import { validateSession } from '@/lib/auth';
+import { getDbClient } from '@/lib/db';
+import { AuthErrorBuilder } from '@/lib/auth-error-details';
+import { DatabaseErrorBuilder, logDatabaseOperation } from '@/lib/api-error-details';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  let userId = "unknown";
+  let userId = 'unknown';
 
   try {
     // **CRITICAL: Admin cannot access customer orders API**
     const sessionToken =
-      request.headers.get("x-session-token") ||
-      request.cookies.get("session_token")?.value;
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
 
     if (!sessionToken) {
-      return NextResponse.json(
-        { success: false, message: "認証が必要です。" },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, message: '認証が必要です。' }, { status: 401 });
     }
 
     const sessionData = await validateSession(sessionToken);
     if (!sessionData) {
-      return NextResponse.json(
-        { success: false, message: "認証が必要です。" },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, message: '認証が必要です。' }, { status: 401 });
     }
 
     // **NOTE: Super admin users should use admin APIs instead**
@@ -38,9 +28,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "管理者アカウントはこのAPIを使用できません。",
+          message: '管理者アカウントはこのAPIを使用できません。',
         },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -72,29 +62,17 @@ export async function GET(request: NextRequest) {
         WHERE o.user_id = $1
         ORDER BY o.created_at DESC
       `,
-        [userId],
+        [userId]
       );
 
-      logDatabaseOperation(
-        "SELECT",
-        "orders",
-        true,
-        { count: result.rows.length },
-        userId,
-      );
+      logDatabaseOperation('SELECT', 'orders', true, { count: result.rows.length }, userId);
 
       return NextResponse.json(result.rows);
     } finally {
       await client.end();
     }
   } catch (error: any) {
-    logDatabaseOperation(
-      "SELECT",
-      "orders",
-      false,
-      { error: error.message },
-      userId,
-    );
+    logDatabaseOperation('SELECT', 'orders', false, { error: error.message }, userId);
 
     return NextResponse.json([], { status: 200 });
   }
@@ -104,15 +82,14 @@ export async function POST(request: NextRequest) {
   try {
     // Session validation
     const sessionToken =
-      request.headers.get("x-session-token") ||
-      request.cookies.get("session_token")?.value;
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       return NextResponse.json(
         {
           success: false,
-          message: "認証が必要です。",
+          message: '認証が必要です。',
         },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -121,21 +98,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "セッションが無効です。",
+          message: 'セッションが無効です。',
         },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
     // CSRF validation
-    const csrfToken = request.headers.get("x-csrf-token");
+    const csrfToken = request.headers.get('x-csrf-token');
     if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
       return NextResponse.json(
         {
           success: false,
-          message: "CSRF検証に失敗しました。",
+          message: 'CSRF検証に失敗しました。',
         },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -148,8 +125,8 @@ export async function POST(request: NextRequest) {
     try {
       // Check for duplicate order code within the user's orders
       const duplicateCheck = await client.query(
-        "SELECT id FROM orders WHERE order_code = $1 AND user_id = $2",
-        [data.order_code || data.order_number, userId],
+        'SELECT id FROM orders WHERE order_code = $1 AND user_id = $2',
+        [data.order_code || data.order_number, userId]
       );
 
       if (duplicateCheck.rows.length > 0) {
@@ -158,7 +135,7 @@ export async function POST(request: NextRequest) {
             success: false,
             message: `注文番号「${data.order_code || data.order_number}」は既に存在します。別の注文番号をご使用ください。`,
           },
-          { status: 409 },
+          { status: 409 }
         );
       }
 
@@ -174,18 +151,18 @@ export async function POST(request: NextRequest) {
         [
           data.order_code || data.order_number,
           data.customer_name,
-          data.phone || data.customer_phone || "",
-          data.address || data.customer_address || "",
+          data.phone || data.customer_phone || '',
+          data.address || data.customer_address || '',
           data.price || data.total_amount,
           data.order_date,
           data.delivery_date || null,
-          data.notes || data.memo || "",
-          data.source || "manual_entry",
+          data.notes || data.memo || '',
+          data.source || 'manual_entry',
           JSON.stringify({
-            registration_method: data.source || "manual_entry",
+            registration_method: data.source || 'manual_entry',
           }),
           userId,
-        ],
+        ]
       );
 
       const newOrder = result.rows[0];
@@ -200,7 +177,7 @@ export async function POST(request: NextRequest) {
           total_amount: newOrder.price,
           order_date: newOrder.order_date,
           delivery_date: newOrder.delivery_date,
-          status: "pending",
+          status: 'pending',
           has_memo: !!newOrder.notes,
           memo: newOrder.notes,
           created_at: newOrder.created_at,
@@ -211,41 +188,41 @@ export async function POST(request: NextRequest) {
       await client.end();
     }
   } catch (error: any) {
-    console.error("Database error:", error);
+    console.error('Database error:', error);
 
     // Handle specific database errors
-    if (error.code === "23505") {
+    if (error.code === '23505') {
       // Unique constraint violation
       if (
-        error.constraint === "orders_order_code_key" ||
-        error.constraint === "orders_order_code_user_id_key"
+        error.constraint === 'orders_order_code_key' ||
+        error.constraint === 'orders_order_code_user_id_key'
       ) {
         return NextResponse.json(
           {
             success: false,
-            message: "注文番号が既に存在します。別の注文番号をご使用ください。",
+            message: '注文番号が既に存在します。別の注文番号をご使用ください。',
           },
-          { status: 409 },
+          { status: 409 }
         );
       }
-    } else if (error.code === "23502") {
+    } else if (error.code === '23502') {
       // Not null constraint violation
       return NextResponse.json(
         {
           success: false,
-          message: "必須項目が入力されていません。",
+          message: '必須項目が入力されていません。',
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     return NextResponse.json(
       {
         success: false,
-        message: "データベースエラーが発生しました。",
+        message: 'データベースエラーが発生しました。',
         error: error.message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -254,32 +231,28 @@ export async function PUT(request: NextRequest) {
   try {
     // セッション検証
     const sessionToken =
-      request.headers.get("x-session-token") ||
-      request.cookies.get("session_token")?.value;
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
-      return NextResponse.json(
-        { success: false, message: "認証が必要です" },
-        { status: 401 },
-      );
+      return NextResponse.json({ success: false, message: '認証が必要です' }, { status: 401 });
     }
 
     const sessionData = await validateSession(sessionToken);
     if (!sessionData || !sessionData.user) {
       return NextResponse.json(
-        { success: false, message: "無効なセッションです" },
-        { status: 401 },
+        { success: false, message: '無効なセッションです' },
+        { status: 401 }
       );
     }
 
     // CSRF検証
-    const csrfToken = request.headers.get("x-csrf-token");
+    const csrfToken = request.headers.get('x-csrf-token');
     if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
       return NextResponse.json(
         {
           success: false,
-          message: "CSRF検証に失敗しました。",
+          message: 'CSRF検証に失敗しました。',
         },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -290,9 +263,9 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "注文IDが指定されていません",
+          message: '注文IDが指定されていません',
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -300,7 +273,7 @@ export async function PUT(request: NextRequest) {
 
     try {
       // 注文ステータスを更新 (テーブル構造は migrate-auth で既に作成済み)
-      const updateFields = ["updated_at = NOW()"];
+      const updateFields = ['updated_at = NOW()'];
       const values = [id];
       let paramIndex = 2;
 
@@ -325,20 +298,20 @@ export async function PUT(request: NextRequest) {
       const result = await client.query(
         `
         UPDATE orders
-        SET ${updateFields.join(", ")}
+        SET ${updateFields.join(', ')}
         WHERE id = $1
         RETURNING *
       `,
-        values,
+        values
       );
 
       if (result.rows.length === 0) {
         return NextResponse.json(
           {
             success: false,
-            message: "指定された注文が見つかりません",
+            message: '指定された注文が見つかりません',
           },
-          { status: 404 },
+          { status: 404 }
         );
       }
 
@@ -353,7 +326,7 @@ export async function PUT(request: NextRequest) {
           total_amount: updatedOrder.price,
           order_date: updatedOrder.order_date,
           delivery_date: updatedOrder.delivery_date,
-          status: updatedOrder.status || "pending",
+          status: updatedOrder.status || 'pending',
           has_memo: !!updatedOrder.notes,
           memo: updatedOrder.notes,
           shipped_at: updatedOrder.shipped_at,
@@ -366,14 +339,14 @@ export async function PUT(request: NextRequest) {
       await client.end();
     }
   } catch (error: any) {
-    console.error("Database error:", error);
+    console.error('Database error:', error);
     return NextResponse.json(
       {
         success: false,
-        message: "データベースエラーが発生しました。",
+        message: 'データベースエラーが発生しました。',
         error: error.message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

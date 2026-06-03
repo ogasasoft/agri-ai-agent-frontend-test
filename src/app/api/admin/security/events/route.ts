@@ -8,10 +8,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     // Session validation
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       return createErrorResponse('認証が必要です', 401);
     }
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
         ip_address: '192.168.1.100',
         user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         details: { username: 'test@example.com', reason: 'invalid_password' },
-        created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString() // 30 minutes ago
+        created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
       },
       {
         id: '2',
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
         ip_address: '10.0.1.50',
         user_agent: 'curl/7.64.1',
         details: { endpoint: '/api/auth/login', limit: 10 },
-        created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString() // 15 minutes ago
+        created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 minutes ago
       },
       {
         id: '3',
@@ -51,15 +52,14 @@ export async function GET(request: NextRequest) {
         ip_address: '203.0.113.45',
         user_agent: 'Python-requests/2.25.1',
         details: { pattern: 'password_spray', attempts: 50 },
-        created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString() // 5 minutes ago
-      }
+        created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(), // 5 minutes ago
+      },
     ];
 
     return NextResponse.json({
       success: true,
-      events: mockEvents
+      events: mockEvents,
     });
-
   } catch (error) {
     console.error('Get security events error:', error);
     return createErrorResponse('サーバーエラーが発生しました', 500);

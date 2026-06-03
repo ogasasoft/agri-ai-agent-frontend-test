@@ -47,12 +47,12 @@ export function diagnoseEncodingError(
         'CSVファイルをUTF-8エンコーディングで保存し直してください',
         'Excelの場合: 「ファイル」→「エクスポート」→「ファイルの種類の変更」→「CSV UTF-8」を選択',
         'カラーミーショップの場合: デフォルトのCSVエクスポート形式(Shift_JIS)をそのまま使用可能',
-        'テキストエディタで開いて文字化けしていないか確認してください'
+        'テキストエディタで開いて文字化けしていないか確認してください',
       ],
       developerInfo: {
         encoding: encodingResult,
-        headers: headerAnalysis
-      }
+        headers: headerAnalysis,
+      },
     };
   }
 
@@ -65,8 +65,8 @@ export function diagnoseEncodingError(
     userSolutions: [],
     developerInfo: {
       encoding: encodingResult,
-      headers: headerAnalysis
-    }
+      headers: headerAnalysis,
+    },
   };
 }
 
@@ -80,7 +80,7 @@ export function diagnoseMissingFieldsError(
   const dataSourceName = {
     colormi: 'カラーミーショップ',
     tabechoku: 'たべちょく',
-    unknown: '不明なデータソース'
+    unknown: '不明なデータソース',
   }[headerAnalysis.dataSource];
 
   const solutions: string[] = [];
@@ -104,7 +104,7 @@ export function diagnoseMissingFieldsError(
   }
 
   // 類似フィールドがある場合の案内
-  if (headerAnalysis.suggestions.some(s => s.includes('類似フィールド'))) {
+  if (headerAnalysis.suggestions.some((s) => s.includes('類似フィールド'))) {
     solutions.push('類似する列名が見つかりました。列名を確認して正しい形式に修正してください');
   }
 
@@ -121,8 +121,8 @@ export function diagnoseMissingFieldsError(
     technicalDetails: `検出されたヘッダー: ${headerAnalysis.headers.slice(0, 5).join(', ')}${headerAnalysis.headers.length > 5 ? '...' : ''}`,
     userSolutions: solutions,
     developerInfo: {
-      headers: headerAnalysis
-    }
+      headers: headerAnalysis,
+    },
   };
 }
 
@@ -144,8 +144,8 @@ export function diagnoseFileFormatError(fileName: string, fileSize: number): CSV
       userSolutions: [
         'ファイルの拡張子が「.csv」であることを確認してください',
         'Excelファイル(.xlsx)の場合は「名前を付けて保存」でCSV形式に変換してください',
-        'ファイル名に特殊文字が含まれていないか確認してください'
-      ]
+        'ファイル名に特殊文字が含まれていないか確認してください',
+      ],
     };
   }
 
@@ -159,8 +159,8 @@ export function diagnoseFileFormatError(fileName: string, fileSize: number): CSV
       userSolutions: [
         'CSVファイルにデータが含まれていることを確認してください',
         'ファイルが破損していないか確認してください',
-        '正しいファイルを選択しているか確認してください'
-      ]
+        '正しいファイルを選択しているか確認してください',
+      ],
     };
   }
 
@@ -174,8 +174,8 @@ export function diagnoseFileFormatError(fileName: string, fileSize: number): CSV
       userSolutions: [
         'CSVファイルを複数に分割してアップロードしてください',
         '不要な列や行を削除してファイルサイズを削減してください',
-        'データの期間を短縮して再エクスポートしてください'
-      ]
+        'データの期間を短縮して再エクスポートしてください',
+      ],
     };
   }
 
@@ -185,7 +185,7 @@ export function diagnoseFileFormatError(fileName: string, fileSize: number): CSV
     title: 'ファイル形式は正常です',
     description: `CSVファイル「${fileName}」は正常に読み込み可能です。`,
     technicalDetails: `ファイルサイズ: ${Math.round(fileSize / 1024)}KB`,
-    userSolutions: []
+    userSolutions: [],
   };
 }
 
@@ -214,9 +214,9 @@ export function diagnoseDataValidationError(
       debugData: {
         errorPatterns,
         sampleErrors: validationErrors.slice(0, 5),
-        errorRate: Math.round(errorRate * 100)
-      }
-    }
+        errorRate: Math.round(errorRate * 100),
+      },
+    },
   };
 }
 
@@ -235,7 +235,7 @@ function analyzeValidationErrorPatterns(errors: string[]): {
     missingCustomerName: 0,
     missingPrice: 0,
     invalidPrice: 0,
-    other: 0
+    other: 0,
   };
 
   for (const error of errors) {
@@ -258,7 +258,9 @@ function analyzeValidationErrorPatterns(errors: string[]): {
 /**
  * データ検証エラーの解決策生成
  */
-function generateDataValidationSolutions(errorPatterns: ReturnType<typeof analyzeValidationErrorPatterns>): string[] {
+function generateDataValidationSolutions(
+  errorPatterns: ReturnType<typeof analyzeValidationErrorPatterns>
+): string[] {
   const solutions: string[] = [];
 
   if (errorPatterns.missingOrderCode > 0) {
@@ -302,12 +304,12 @@ export function diagnoseUnknownError(error: Error, context?: any): CSVErrorDiagn
       technicalDetails: error.message,
       userSolutions: [
         'CSVファイルをUTF-8エンコーディングで保存し直してください',
-        'ファイルが破損していないか確認してください'
+        'ファイルが破損していないか確認してください',
       ],
       developerInfo: {
         rawError: error.message,
-        debugData: context
-      }
+        debugData: context,
+      },
     };
   }
 
@@ -321,12 +323,12 @@ export function diagnoseUnknownError(error: Error, context?: any): CSVErrorDiagn
       userSolutions: [
         'CSVファイルの形式が正しいか確認してください',
         'ダブルクォートやカンマが正しく使用されているか確認してください',
-        'ファイルをテキストエディタで開いて内容を確認してください'
+        'ファイルをテキストエディタで開いて内容を確認してください',
       ],
       developerInfo: {
         rawError: error.message,
-        debugData: context
-      }
+        debugData: context,
+      },
     };
   }
 
@@ -339,12 +341,12 @@ export function diagnoseUnknownError(error: Error, context?: any): CSVErrorDiagn
     userSolutions: [
       'しばらく時間をおいて再試行してください',
       'ファイルサイズを小さくして再試行してください',
-      '問題が継続する場合はサポートにお問い合わせください'
+      '問題が継続する場合はサポートにお問い合わせください',
     ],
     developerInfo: {
       rawError: error.message,
-      debugData: context
-    }
+      debugData: context,
+    },
   };
 }
 
@@ -367,7 +369,7 @@ export function formatDiagnosticsForUser(diagnostics: CSVErrorDiagnostics): {
   if (isSuccess) {
     return {
       success: true,
-      message: diagnostics.description
+      message: diagnostics.description,
     };
   }
 
@@ -379,7 +381,8 @@ export function formatDiagnosticsForUser(diagnostics: CSVErrorDiagnostics): {
       title: diagnostics.title,
       description: diagnostics.description,
       solutions: diagnostics.userSolutions,
-      technicalInfo: process.env.NODE_ENV === 'development' ? diagnostics.technicalDetails : undefined
-    }
+      technicalInfo:
+        process.env.NODE_ENV === 'development' ? diagnostics.technicalDetails : undefined,
+    },
   };
 }

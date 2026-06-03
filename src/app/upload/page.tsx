@@ -56,12 +56,12 @@ export default function UploadPage() {
     onDrop,
     accept: {
       'text/csv': ['.csv'],
-      'application/vnd.ms-excel': ['.xls', '.xlsx']
+      'application/vnd.ms-excel': ['.xls', '.xlsx'],
     },
     multiple: false,
     preventDropOnDocument: true, // ドキュメント全体でのドロップを防止
     noClick: false,
-    noKeyboard: false
+    noKeyboard: false,
   });
 
   const parseFileForPreview = async (file: File) => {
@@ -73,7 +73,9 @@ export default function UploadPage() {
       const encodingResult = detectAndConvertEncoding(buffer);
 
       if (encodingResult.hasGarbledText || encodingResult.confidence < 0.3) {
-        alert(`文字エンコーディングの問題が検出されました。\n検出されたエンコーディング: ${encodingResult.detectedEncoding}\n信頼度: ${Math.round(encodingResult.confidence * 100)}%\n\nCSVファイルをUTF-8で保存し直すか、正しいエンコーディングで保存してください。`);
+        alert(
+          `文字エンコーディングの問題が検出されました。\n検出されたエンコーディング: ${encodingResult.detectedEncoding}\n信頼度: ${Math.round(encodingResult.confidence * 100)}%\n\nCSVファイルをUTF-8で保存し直すか、正しいエンコーディングで保存してください。`
+        );
         setIsProcessing(false);
         return;
       }
@@ -98,7 +100,7 @@ export default function UploadPage() {
         file,
         headers,
         rows,
-        allData
+        allData,
       });
       setShowPreview(true);
     } catch (error) {
@@ -120,13 +122,17 @@ export default function UploadPage() {
       total_amount: parseInt(row['金額'] || row['amount'] || '0'),
       order_date: row['注文日'] || row['order_date'] || new Date().toISOString().split('T')[0],
       delivery_date: row['配達希望日'] || row['delivery_date'] || '',
-      status: (row['ステータス'] || row['status'] || 'pending') as 'pending' | 'processing' | 'shipped' | 'delivered',
+      status: (row['ステータス'] || row['status'] || 'pending') as
+        | 'pending'
+        | 'processing'
+        | 'shipped'
+        | 'delivered',
       memo: row['備考'] || row['memo'] || '',
     }));
 
     // セッションストレージに保存
     sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
-    
+
     // 確認画面に遷移
     router.push('/orders/register/confirm?type=csv');
   };
@@ -199,16 +205,10 @@ export default function UploadPage() {
 
           {/* Actions */}
           <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
-            <button
-              onClick={cancelPreview}
-              className="btn-secondary"
-            >
+            <button onClick={cancelPreview} className="btn-secondary">
               キャンセル
             </button>
-            <button
-              onClick={handleConfirm}
-              className="btn-primary flex items-center gap-2"
-            >
+            <button onClick={handleConfirm} className="btn-primary flex items-center gap-2">
               確認画面へ進む
               <ArrowRight className="w-4 h-4" />
             </button>
@@ -243,34 +243,37 @@ export default function UploadPage() {
             {...getRootProps()}
             className={`
               border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-              ${isDragActive 
-                ? 'border-primary-500 bg-primary-50' 
-                : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+              ${
+                isDragActive
+                  ? 'border-primary-500 bg-primary-50'
+                  : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
               }
               ${isProcessing ? 'pointer-events-none opacity-50' : ''}
             `}
           >
             <input {...getInputProps()} />
-            
+
             <div className="flex flex-col items-center">
-              <Upload className={`w-12 h-12 mb-4 ${isDragActive ? 'text-primary-500' : 'text-gray-400'}`} />
-              
+              <Upload
+                className={`w-12 h-12 mb-4 ${isDragActive ? 'text-primary-500' : 'text-gray-400'}`}
+              />
+
               {isProcessing ? (
                 <>
                   <div className="w-6 h-6 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mb-2"></div>
                   <p className="text-lg font-medium text-gray-700">ファイルを処理中...</p>
                 </>
               ) : isDragActive ? (
-                <p className="text-lg font-medium text-primary-600">ファイルをここにドロップしてください</p>
+                <p className="text-lg font-medium text-primary-600">
+                  ファイルをここにドロップしてください
+                </p>
               ) : (
                 <>
                   <p className="text-lg font-medium text-gray-700 mb-2">
                     CSVファイルをドラッグ&ドロップ
                   </p>
                   <p className="text-sm text-gray-500 mb-4">または</p>
-                  <button className="btn-primary">
-                    ファイルを選択
-                  </button>
+                  <button className="btn-primary">ファイルを選択</button>
                 </>
               )}
             </div>

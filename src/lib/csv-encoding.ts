@@ -27,12 +27,12 @@ export interface CSVHeaderAnalysis {
 
 // 日本語CSVでよく使われるエンコーディング（優先順）
 const JAPANESE_ENCODINGS = [
-  'shift_jis',      // カラーミー、多くの日本のECシステム
-  'utf-8',          // 近年の標準、たべちょく
-  'euc-jp',         // 古いUNIXシステム
-  'iso-2022-jp',    // メール添付ファイル
-  'utf-16le',       // Excel出力
-  'utf-16be'        // Mac Excel出力
+  'shift_jis', // カラーミー、多くの日本のECシステム
+  'utf-8', // 近年の標準、たべちょく
+  'euc-jp', // 古いUNIXシステム
+  'iso-2022-jp', // メール添付ファイル
+  'utf-16le', // Excel出力
+  'utf-16be', // Mac Excel出力
 ] as const;
 
 // データソース推定のためのプレビュー関数
@@ -58,16 +58,22 @@ function quickDataSourceCheck(buffer: ArrayBuffer): 'colormi' | 'tabechoku' | 'u
 // 各データソースの特徴的なヘッダーパターン
 const DATA_SOURCE_PATTERNS = {
   colormi: [
-    '売上ID', '受注日', '購入者', '販売価格', '商品ID', 'デバイス', '購入者 名前', '購入者 電話番号', '購入商品 販売価格'
+    '売上ID',
+    '受注日',
+    '購入者',
+    '販売価格',
+    '商品ID',
+    'デバイス',
+    '購入者 名前',
+    '購入者 電話番号',
+    '購入商品 販売価格',
   ],
-  tabechoku: [
-    '注文番号', '顧客名', '希望配達日', '金額', '備考'
-  ]
+  tabechoku: ['注文番号', '顧客名', '希望配達日', '金額', '備考'],
 } as const;
 
 // 文字化けパターンの検出（緩和版）
 const GARBLED_PATTERNS = [
-  /\ufffd{2,}/,                    // 連続した置換文字のみ（2個以上）
+  /\ufffd{2,}/, // 連続した置換文字のみ（2個以上）
   /[\x00-\x08\x0B\x0C\x0E-\x1F]{3,}/, // 連続した制御文字（3個以上）
 ];
 
@@ -82,9 +88,10 @@ export function detectAndConvertEncoding(buffer: ArrayBuffer): EncodingDetection
   const probableDataSource = quickDataSourceCheck(buffer);
 
   // カラーミーの場合、Shift_JISの信頼度を大幅に上げる
-  const encodingPriority = probableDataSource === 'colormi'
-    ? ['shift_jis', 'utf-8', 'euc-jp', 'iso-2022-jp', 'utf-16le', 'utf-16be']
-    : Array.from(JAPANESE_ENCODINGS);
+  const encodingPriority =
+    probableDataSource === 'colormi'
+      ? ['shift_jis', 'utf-8', 'euc-jp', 'iso-2022-jp', 'utf-16le', 'utf-16be']
+      : Array.from(JAPANESE_ENCODINGS);
 
   for (const encoding of encodingPriority) {
     try {
@@ -96,7 +103,11 @@ export function detectAndConvertEncoding(buffer: ArrayBuffer): EncodingDetection
 
       // カラーミーでShift_JISが成功した場合、大幅なボーナス
       let adjustedConfidence = analysis.confidence;
-      if (probableDataSource === 'colormi' && encoding === 'shift_jis' && analysis.confidence > 0.5) {
+      if (
+        probableDataSource === 'colormi' &&
+        encoding === 'shift_jis' &&
+        analysis.confidence > 0.5
+      ) {
         adjustedConfidence = Math.min(1.0, analysis.confidence + 0.3);
       }
 
@@ -104,14 +115,14 @@ export function detectAndConvertEncoding(buffer: ArrayBuffer): EncodingDetection
         bestResult = {
           text,
           encoding,
-          confidence: adjustedConfidence
+          confidence: adjustedConfidence,
         };
       }
     } catch (error) {
       attempts.push({
         encoding,
         success: false,
-        error: error instanceof Error ? error.message : '復号化失敗'
+        error: error instanceof Error ? error.message : '復号化失敗',
       });
     }
   }
@@ -131,14 +142,17 @@ export function detectAndConvertEncoding(buffer: ArrayBuffer): EncodingDetection
     confidence: bestResult.confidence,
     isJapanese: finalAnalysis.isJapanese,
     hasGarbledText: finalAnalysis.hasGarbledText,
-    encodingAttempts: attempts
+    encodingAttempts: attempts,
   };
 }
 
 /**
  * 復号化されたテキストの品質を分析
  */
-function analyzeDecodedText(text: string, encoding: string): {
+function analyzeDecodedText(
+  text: string,
+  encoding: string
+): {
   confidence: number;
   isJapanese: boolean;
   hasGarbledText: boolean;
@@ -193,14 +207,14 @@ function analyzeDecodedText(text: string, encoding: string): {
       hasCSVFormat: firstLine?.includes(',') && firstLine?.includes('"'),
       hasECHeaders: firstLine?.includes('売上ID') || firstLine?.includes('注文番号'),
       rawConfidence: confidence,
-      finalConfidence: Math.max(0, Math.min(1, confidence + 0.2))
+      finalConfidence: Math.max(0, Math.min(1, confidence + 0.2)),
     });
   }
 
   return {
     confidence: Math.max(0, Math.min(1, confidence + 0.2)), // 基準値0.2 + 調整（さらに緩和）
     isJapanese,
-    hasGarbledText
+    hasGarbledText,
   };
 }
 
@@ -209,17 +223,15 @@ function analyzeDecodedText(text: string, encoding: string): {
  */
 export function analyzeCSVHeaders(csvText: string): CSVHeaderAnalysis {
   const firstLine = csvText.split('\n')[0];
-  const headers = firstLine
-    .split(',')
-    .map(h => h.trim().replace(/^"(.*)"$/, '$1')); // クォート除去
+  const headers = firstLine.split(',').map((h) => h.trim().replace(/^"(.*)"$/, '$1')); // クォート除去
 
   let dataSource: 'colormi' | 'tabechoku' | 'unknown' = 'unknown';
   let confidence = 0;
 
   // データソースの推定
   for (const [source, patterns] of Object.entries(DATA_SOURCE_PATTERNS)) {
-    const matchCount = patterns.filter(pattern =>
-      headers.some(header => header.includes(pattern))
+    const matchCount = patterns.filter((pattern) =>
+      headers.some((header) => header.includes(pattern))
     ).length;
 
     const sourceConfidence = matchCount / patterns.length;
@@ -232,8 +244,10 @@ export function analyzeCSVHeaders(csvText: string): CSVHeaderAnalysis {
   // 必須フィールドチェック
   const requiredFields = getRequiredFieldsForDataSource(dataSource);
   const missingFields: string[] = [];
-  const hasRequiredFields = requiredFields.every(field => {
-    const found = headers.some(header => field.patterns.some(pattern => header.includes(pattern)));
+  const hasRequiredFields = requiredFields.every((field) => {
+    const found = headers.some((header) =>
+      field.patterns.some((pattern) => header.includes(pattern))
+    );
     if (!found) {
       missingFields.push(field.name);
     }
@@ -245,11 +259,12 @@ export function analyzeCSVHeaders(csvText: string): CSVHeaderAnalysis {
 
   return {
     headers,
-    possibleEncodings: confidence > 0.6 ? [getPreferredEncoding(dataSource)] : JAPANESE_ENCODINGS.slice(),
+    possibleEncodings:
+      confidence > 0.6 ? [getPreferredEncoding(dataSource)] : JAPANESE_ENCODINGS.slice(),
     dataSource,
     hasRequiredFields,
     missingFields,
-    suggestions
+    suggestions,
   };
 }
 
@@ -266,13 +281,16 @@ function getRequiredFieldsForDataSource(dataSource: string) {
     tabechoku: [
       { name: '注文番号', patterns: ['注文番号', '番号'] },
       { name: '顧客名', patterns: ['お届け先名', '注文者名', '顧客名', '名前'] },
-      { name: '金額', patterns: ['商品代金', 'お支払い額', '生産者へのお支払い額', '金額', '価格'] },
+      {
+        name: '金額',
+        patterns: ['商品代金', 'お支払い額', '生産者へのお支払い額', '金額', '価格'],
+      },
     ],
     unknown: [
       { name: '注文ID', patterns: ['ID', '番号', 'コード'] },
       { name: '顧客名', patterns: ['名前', '顧客', '購入者'] },
       { name: '金額', patterns: ['金額', '価格', '料金'] },
-    ]
+    ],
   };
 
   return fields[dataSource as keyof typeof fields] || fields.unknown;
@@ -285,7 +303,7 @@ function getPreferredEncoding(dataSource: string): string {
   const preferences = {
     colormi: 'shift_jis',
     tabechoku: 'utf-8',
-    unknown: 'shift_jis' // 日本のECシステムの多くがShift_JIS
+    unknown: 'shift_jis', // 日本のECシステムの多くがShift_JIS
   };
 
   return preferences[dataSource as keyof typeof preferences] || 'shift_jis';
@@ -294,7 +312,11 @@ function getPreferredEncoding(dataSource: string): string {
 /**
  * 改善提案の生成
  */
-function generateSuggestions(headers: string[], dataSource: string, missingFields: string[]): string[] {
+function generateSuggestions(
+  headers: string[],
+  dataSource: string,
+  missingFields: string[]
+): string[] {
   const suggestions: string[] = [];
 
   if (missingFields.length > 0) {
@@ -308,13 +330,17 @@ function generateSuggestions(headers: string[], dataSource: string, missingField
   }
 
   if (dataSource === 'unknown') {
-    suggestions.push('データソースが特定できません。ヘッダー行が正しく読み込まれているか確認してください。');
+    suggestions.push(
+      'データソースが特定できません。ヘッダー行が正しく読み込まれているか確認してください。'
+    );
   }
 
   // エンコーディング関連の提案
-  const hasGarbledChars = headers.some(h => GARBLED_PATTERNS.some(p => p.test(h)));
+  const hasGarbledChars = headers.some((h) => GARBLED_PATTERNS.some((p) => p.test(h)));
   if (hasGarbledChars) {
-    suggestions.push('文字化けが検出されました。ファイルの文字エンコーディングを確認してください。');
+    suggestions.push(
+      '文字化けが検出されました。ファイルの文字エンコーディングを確認してください。'
+    );
   }
 
   return suggestions;
@@ -323,17 +349,23 @@ function generateSuggestions(headers: string[], dataSource: string, missingField
 /**
  * 類似フィールドの検索
  */
-function findSimilarFields(headers: string[], missingFields: string[], dataSource: string): string[] {
+function findSimilarFields(
+  headers: string[],
+  missingFields: string[],
+  dataSource: string
+): string[] {
   const requiredFields = getRequiredFieldsForDataSource(dataSource);
   const similarFields: string[] = [];
 
   for (const missing of missingFields) {
-    const requiredField = requiredFields.find(rf => rf.name === missing);
+    const requiredField = requiredFields.find((rf) => rf.name === missing);
     if (requiredField) {
       for (const header of headers) {
-        if (requiredField.patterns.some(pattern =>
-          header.includes(pattern.substring(0, Math.max(2, pattern.length - 1)))
-        )) {
+        if (
+          requiredField.patterns.some((pattern) =>
+            header.includes(pattern.substring(0, Math.max(2, pattern.length - 1)))
+          )
+        ) {
           similarFields.push(`"${header}" (${missing}の代替候補)`);
         }
       }
@@ -346,22 +378,25 @@ function findSimilarFields(headers: string[], missingFields: string[], dataSourc
 /**
  * デバッグ情報の生成
  */
-export function generateEncodingDebugInfo(result: EncodingDetectionResult, analysis: CSVHeaderAnalysis) {
+export function generateEncodingDebugInfo(
+  result: EncodingDetectionResult,
+  analysis: CSVHeaderAnalysis
+) {
   return {
     encoding: {
       detected: result.detectedEncoding,
       confidence: result.confidence,
       isJapanese: result.isJapanese,
       hasGarbledText: result.hasGarbledText,
-      allAttempts: result.encodingAttempts
+      allAttempts: result.encodingAttempts,
     },
     csv: {
       dataSource: analysis.dataSource,
       headerCount: analysis.headers.length,
       headers: analysis.headers.slice(0, 10), // 最初の10個のみ
       hasRequiredFields: analysis.hasRequiredFields,
-      missingFields: analysis.missingFields
+      missingFields: analysis.missingFields,
     },
-    suggestions: analysis.suggestions
+    suggestions: analysis.suggestions,
   };
 }

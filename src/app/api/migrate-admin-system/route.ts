@@ -4,10 +4,10 @@ import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   // Starting admin system migration
-  
+
   try {
     const client = await getDbClient();
-    
+
     try {
       // 1. Add admin role to users table
       await client.query(`
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       `);
 
       // 5. Create super admin user
-      
+
       // Check if admin user already exists
       const existingAdmin = await client.query(
         'SELECT id FROM users WHERE username = $1 OR email = $2',
@@ -75,8 +75,9 @@ export async function POST(request: NextRequest) {
       if (existingAdmin.rows.length === 0) {
         // Create new super admin user
         const { hash, salt } = await hashPassword('Ogasa1995');
-        
-        const adminResult = await client.query(`
+
+        const adminResult = await client.query(
+          `
           INSERT INTO users (
             username, email, password_hash, salt, 
             role, is_super_admin, is_active,
@@ -84,25 +85,22 @@ export async function POST(request: NextRequest) {
           )
           VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
           RETURNING id, username, email
-        `, [
-          'superadmin',
-          'silentogasasoft@gmail.com',
-          hash,
-          salt,
-          'super_admin',
-          true,
-          true
-        ]);
+        `,
+          ['superadmin', 'silentogasasoft@gmail.com', hash, salt, 'super_admin', true, true]
+        );
 
         const adminUser = adminResult.rows[0];
         // Super admin created successfully
 
         // Insert default system settings
-        await client.query(`
+        await client.query(
+          `
           INSERT INTO system_settings (category, key, value, description, created_by) VALUES
           ('general', 'site_name', 'Agri AI 管理システム', 'サイト名', $1),
           ('general', 'max_orders_per_day', '1000', '1日あたりの最大注文数', $1)
-        `, [adminUser.id]);
+        `,
+          [adminUser.id]
+        );
 
         // Insert API integration placeholders
         await client.query(`
@@ -112,11 +110,14 @@ export async function POST(request: NextRequest) {
         `);
       } else {
         // Admin user already exists, updating role
-        await client.query(`
+        await client.query(
+          `
           UPDATE users 
           SET role = 'super_admin', is_super_admin = true, email = $2
           WHERE username = $1 OR email = $2
-        `, ['superadmin', 'silentogasasoft@gmail.com']);
+        `,
+          ['superadmin', 'silentogasasoft@gmail.com']
+        );
       }
 
       // 6. Create indexes for performance
@@ -130,38 +131,41 @@ export async function POST(request: NextRequest) {
 
       // Get final stats
       const usersCount = await client.query('SELECT COUNT(*) FROM users');
-      const adminCount = await client.query('SELECT COUNT(*) FROM users WHERE is_super_admin = true');
+      const adminCount = await client.query(
+        'SELECT COUNT(*) FROM users WHERE is_super_admin = true'
+      );
       const settingsCount = await client.query('SELECT COUNT(*) FROM system_settings');
 
       // Admin system migration completed successfully
-      
-      return NextResponse.json({ 
-        success: true, 
+
+      return NextResponse.json({
+        success: true,
         message: 'Admin system migration completed successfully',
         features: [
           'Super admin user created (silentogasasoft@gmail.com)',
           'Role-based access control',
           'System settings management',
           'API integrations framework',
-          'Admin audit logging'
+          'Admin audit logging',
         ],
         stats: {
           total_users: usersCount.rows[0].count,
           admin_users: adminCount.rows[0].count,
-          system_settings: settingsCount.rows[0].count
-        }
+          system_settings: settingsCount.rows[0].count,
+        },
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
     console.error('❌ Admin migration error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      message: 'Admin system migration failed',
-      error: error.message 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Admin system migration failed',
+        error: error.message,
+      },
+      { status: 500 }
+    );
   }
 }

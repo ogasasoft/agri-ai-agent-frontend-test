@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateAdminSession, logAdminAction, getClientInfo, isSuperAdmin } from '@/lib/admin-auth';
+import {
+  validateAdminSession,
+  logAdminAction,
+  getClientInfo,
+  isSuperAdmin,
+} from '@/lib/admin-auth';
 import { getDbClient } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -7,26 +12,33 @@ export const dynamic = 'force-dynamic';
 // GET - Get all API integrations
 export async function GET(request: NextRequest) {
   try {
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
-    
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+
     if (!sessionToken) {
-      return NextResponse.json({
-        success: false,
-        message: '認証が必要です。'
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: '認証が必要です。',
+        },
+        { status: 401 }
+      );
     }
 
     const adminUser = await validateAdminSession(sessionToken);
-    
+
     if (!adminUser || !isSuperAdmin(adminUser)) {
-      return NextResponse.json({
-        success: false,
-        message: 'スーパー管理者権限が必要です。'
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'スーパー管理者権限が必要です。',
+        },
+        { status: 403 }
+      );
     }
 
     const client = await getDbClient();
-    
+
     try {
       const result = await client.query(`
         SELECT id, name, display_name, base_url, 
@@ -51,66 +63,87 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        integrations: result.rows
+        integrations: result.rows,
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
     console.error('Admin integrations error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'サーバーエラーが発生しました。'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'サーバーエラーが発生しました。',
+      },
+      { status: 500 }
+    );
   }
 }
 
 // PUT - Update API integration
 export async function PUT(request: NextRequest) {
   try {
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
-    
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+
     if (!sessionToken) {
-      return NextResponse.json({
-        success: false,
-        message: '認証が必要です。'
-      }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: '認証が必要です。',
+        },
+        { status: 401 }
+      );
     }
 
     const adminUser = await validateAdminSession(sessionToken);
-    
+
     if (!adminUser || !isSuperAdmin(adminUser)) {
-      return NextResponse.json({
-        success: false,
-        message: 'スーパー管理者権限が必要です。'
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'スーパー管理者権限が必要です。',
+        },
+        { status: 403 }
+      );
     }
 
     // CSRF検証 - adminSessionがある場合はcsrf_tokenも存在するはず
     const csrfToken = request.headers.get('x-csrf-token');
     if (!csrfToken) {
-      return NextResponse.json({
-        success: false,
-        message: 'CSRF検証に失敗しました。'
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'CSRF検証に失敗しました。',
+        },
+        { status: 403 }
+      );
     }
 
-    const { 
-      id, base_url, api_key, api_secret, webhook_url, 
-      configuration, shop_id, seller_id, webhook_secret 
+    const {
+      id,
+      base_url,
+      api_key,
+      api_secret,
+      webhook_url,
+      configuration,
+      shop_id,
+      seller_id,
+      webhook_secret,
     } = await request.json();
 
     if (!id) {
-      return NextResponse.json({
-        success: false,
-        message: 'IDは必須です。'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'IDは必須です。',
+        },
+        { status: 400 }
+      );
     }
 
     const client = await getDbClient();
-    
+
     try {
       // Build update query dynamically to handle optional fields
       const updateFields = [];
@@ -151,10 +184,13 @@ export async function PUT(request: NextRequest) {
       const result = await client.query(query, values);
 
       if (result.rows.length === 0) {
-        return NextResponse.json({
-          success: false,
-          message: 'API連携が見つかりません。'
-        }, { status: 404 });
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'API連携が見つかりません。',
+          },
+          { status: 404 }
+        );
       }
 
       // Log admin action
@@ -177,18 +213,19 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'API連携を更新しました。',
-        integration
+        integration,
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
     console.error('Admin update integration error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'サーバーエラーが発生しました。'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'サーバーエラーが発生しました。',
+      },
+      { status: 500 }
+    );
   }
 }

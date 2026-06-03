@@ -9,11 +9,15 @@ interface OrderFiltersProps {
   hideStatusFilter?: boolean;
 }
 
-export function OrderFilters({ filters, onFiltersChange, hideStatusFilter = false }: OrderFiltersProps) {
+export function OrderFilters({
+  filters,
+  onFiltersChange,
+  hideStatusFilter = false,
+}: OrderFiltersProps) {
   const handleFilterChange = (key: keyof OrderFilters, value: string) => {
     onFiltersChange({
       ...filters,
-      [key]: value
+      [key]: value,
     });
   };
 
@@ -23,7 +27,7 @@ export function OrderFilters({ filters, onFiltersChange, hideStatusFilter = fals
       dateTo: '',
       status: 'all',
       hasDeliveryDate: 'all',
-      hasMemo: 'all'
+      hasMemo: 'all',
     });
   };
 
@@ -42,9 +46,7 @@ export function OrderFilters({ filters, onFiltersChange, hideStatusFilter = fals
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            注文日（開始）
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">注文日（開始）</label>
           <input
             type="date"
             value={filters.dateFrom}
@@ -54,9 +56,7 @@ export function OrderFilters({ filters, onFiltersChange, hideStatusFilter = fals
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            注文日（終了）
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">注文日（終了）</label>
           <input
             type="date"
             value={filters.dateTo}
@@ -65,29 +65,25 @@ export function OrderFilters({ filters, onFiltersChange, hideStatusFilter = fals
           />
         </div>
 
-{!hideStatusFilter && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            ステータス
-          </label>
-          <select
-            value={filters.status}
-            onChange={(e) => handleFilterChange('status', e.target.value)}
-            className="input-field w-full text-sm"
-          >
-            <option value="all">すべて</option>
-            <option value="pending">未処理</option>
-            <option value="processing">処理中</option>
-            <option value="shipped">発送済</option>
-            <option value="delivered">配達完了</option>
-          </select>
-        </div>
+        {!hideStatusFilter && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ステータス</label>
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              className="input-field w-full text-sm"
+            >
+              <option value="all">すべて</option>
+              <option value="pending">未処理</option>
+              <option value="processing">処理中</option>
+              <option value="shipped">発送済</option>
+              <option value="delivered">配達完了</option>
+            </select>
+          </div>
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            到着希望日
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">到着希望日</label>
           <select
             value={filters.hasDeliveryDate}
             onChange={(e) => handleFilterChange('hasDeliveryDate', e.target.value)}
@@ -100,9 +96,7 @@ export function OrderFilters({ filters, onFiltersChange, hideStatusFilter = fals
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            備考
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">備考</label>
           <select
             value={filters.hasMemo}
             onChange={(e) => handleFilterChange('hasMemo', e.target.value)}

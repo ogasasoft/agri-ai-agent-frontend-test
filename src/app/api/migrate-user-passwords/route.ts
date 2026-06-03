@@ -4,7 +4,7 @@ import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     client = await getDbClient();
 
@@ -42,16 +42,18 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'User passwords migration completed successfully'
+      message: 'User passwords migration completed successfully',
     });
-
   } catch (error) {
     console.error('Migration error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'Migration failed',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Migration failed',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   } finally {
     if (client) {
       await client.end();

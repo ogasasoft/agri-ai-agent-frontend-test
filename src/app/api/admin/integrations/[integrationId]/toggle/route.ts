@@ -10,9 +10,9 @@ export async function POST(
   { params }: { params: { integrationId: string } }
 ) {
   try {
-    const sessionToken = request.headers.get('x-session-token') || 
-                         request.cookies.get('session_token')?.value;
-    
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+
     if (!sessionToken) {
       return createErrorResponse('認証が必要です。', 401);
     }
@@ -65,10 +65,10 @@ export async function POST(
             integrationId,
             integrationName: integration.name,
             previousStatus: integration.is_active,
-            newStatus: newStatus
+            newStatus: newStatus,
           }),
           request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
-          request.headers.get('user-agent') || 'unknown'
+          request.headers.get('user-agent') || 'unknown',
         ]
       );
 
@@ -78,16 +78,14 @@ export async function POST(
         integration: {
           id: integrationId,
           name: integration.name,
-          is_active: newStatus
-        }
+          is_active: newStatus,
+        },
       });
 
       return addSecurityHeaders(response);
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
     console.error('Toggle integration error:', error);
     return createErrorResponse('統合設定の切り替えに失敗しました。', 500);

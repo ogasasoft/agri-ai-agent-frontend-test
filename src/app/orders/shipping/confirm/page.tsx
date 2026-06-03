@@ -2,7 +2,16 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckCircle, Package, User, Phone, MapPin, Calendar, FileText, ArrowLeft } from 'lucide-react';
+import {
+  CheckCircle,
+  Package,
+  User,
+  Phone,
+  MapPin,
+  Calendar,
+  FileText,
+  ArrowLeft,
+} from 'lucide-react';
 import type { Order } from '@/types/order';
 
 function ShippingConfirmContent() {
@@ -23,7 +32,10 @@ function ShippingConfirmContent() {
     if (notesParam) setNotes(decodeURIComponent(notesParam));
 
     if (orderIdsParam) {
-      const orderIds = orderIdsParam.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+      const orderIds = orderIdsParam
+        .split(',')
+        .map((id) => parseInt(id))
+        .filter((id) => !isNaN(id));
       if (orderIds.length > 0) {
         fetchOrders(orderIds);
       } else {
@@ -38,7 +50,7 @@ function ShippingConfirmContent() {
     try {
       const response = await fetch('/api/orders');
       const data = await response.json();
-      
+
       let allOrders = [];
       if (data.success && Array.isArray(data.orders)) {
         allOrders = data.orders;
@@ -47,10 +59,8 @@ function ShippingConfirmContent() {
       }
 
       // 指定されたIDの注文のみをフィルタリング
-      const targetOrders = allOrders.filter((order: Order) => 
-        orderIds.includes(order.id)
-      );
-      
+      const targetOrders = allOrders.filter((order: Order) => orderIds.includes(order.id));
+
       setOrders(targetOrders);
     } catch (error) {
       console.error('注文データの取得に失敗しました:', error);
@@ -79,9 +89,9 @@ function ShippingConfirmContent() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          order_ids: orders.map(o => o.id),
+          order_ids: orders.map((o) => o.id),
           delivery_type: deliveryType,
-          notes
+          notes,
         }),
       });
 
@@ -93,12 +103,11 @@ function ShippingConfirmContent() {
 
       if (result.success) {
         // 成功した注文IDを取得して完了画面に遷移
-        const successOrderIds = orders.map(o => o.id).join(',');
+        const successOrderIds = orders.map((o) => o.id).join(',');
         router.push(`/orders/shipping/complete?orderIds=${successOrderIds}`);
       } else {
         alert('発送処理に失敗しました: ' + (result.message || '不明なエラー'));
       }
-
     } catch (error) {
       console.error('発送確認の処理に失敗しました:', error);
       alert('発送確認の処理に失敗しました。もう一度お試しください。');
@@ -109,10 +118,14 @@ function ShippingConfirmContent() {
 
   const getDeliveryTypeText = (type: string) => {
     switch (type) {
-      case 'normal': return '常温';
-      case 'cool': return '冷蔵';
-      case 'frozen': return '冷凍';
-      default: return type;
+      case 'normal':
+        return '常温';
+      case 'cool':
+        return '冷蔵';
+      case 'frozen':
+        return '冷凍';
+      default:
+        return type;
     }
   };
 
@@ -126,7 +139,7 @@ function ShippingConfirmContent() {
     return new Date(dateString).toLocaleDateString('ja-JP', {
       month: 'numeric',
       day: 'numeric',
-      weekday: 'short'
+      weekday: 'short',
     });
   };
 
@@ -145,10 +158,7 @@ function ShippingConfirmContent() {
           <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">注文が見つかりません</h3>
           <p className="text-gray-600 mb-4">指定された注文データが存在しません。</p>
-          <button
-            onClick={() => router.push('/orders/shipping/pending')}
-            className="btn-primary"
-          >
+          <button onClick={() => router.push('/orders/shipping/pending')} className="btn-primary">
             発送待一覧に戻る
           </button>
         </div>
@@ -214,17 +224,13 @@ function ShippingConfirmContent() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">配送設定</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                配送タイプ
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">配送タイプ</label>
               <div className="bg-gray-50 px-4 py-2 rounded-lg">
                 <span className="text-gray-900">{getDeliveryTypeText(deliveryType)}</span>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                注文件数
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">注文件数</label>
               <div className="bg-gray-50 px-4 py-2 rounded-lg">
                 <span className="text-gray-900">{orders.length}件</span>
               </div>
@@ -232,9 +238,7 @@ function ShippingConfirmContent() {
           </div>
           {notes && (
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                備考
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">備考</label>
               <div className="bg-gray-50 px-4 py-2 rounded-lg">
                 <span className="text-gray-900">{notes}</span>
               </div>
@@ -248,7 +252,8 @@ function ShippingConfirmContent() {
             <span className="font-medium">発送前の最終確認</span>
           </div>
           <p className="text-sm text-blue-600">
-            以下の内容で発送処理を実行します。内容をご確認の上、「発送処理を実行」ボタンを押してください。<br />
+            以下の内容で発送処理を実行します。内容をご確認の上、「発送処理を実行」ボタンを押してください。
+            <br />
             処理後は注文ステータスが「発送済み」に変更されます。
           </p>
         </div>
@@ -302,7 +307,9 @@ function ShippingConfirmContent() {
                 <div>
                   <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
                     <Calendar className="w-3 h-3" />
-                    <span>到着希望日: {order.delivery_date ? formatDate(order.delivery_date) : '未指定'}</span>
+                    <span>
+                      到着希望日: {order.delivery_date ? formatDate(order.delivery_date) : '未指定'}
+                    </span>
                   </div>
                   {order.memo && (
                     <div className="flex items-start gap-2 text-gray-600 text-sm">
@@ -322,9 +329,13 @@ function ShippingConfirmContent() {
 
 export default function ShippingConfirmPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-    </div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      }
+    >
       <ShippingConfirmContent />
     </Suspense>
   );
