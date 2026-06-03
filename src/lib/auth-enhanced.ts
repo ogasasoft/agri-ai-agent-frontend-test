@@ -6,13 +6,9 @@ import { validateSession, logAuditEvent, User, Session } from './auth';
 import { getDbClient } from '@/lib/db';
 
 export function getClientInfo(request: NextRequest): { ipAddress: string; userAgent: string } {
-  const ipAddress = request.ip || 
-                   request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                   request.headers.get('x-real-ip') || 
-                   'unknown';
-  
+  const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || request.headers.get('x-real-ip') || 'unknown';
   const userAgent = request.headers.get('user-agent') || 'unknown';
-  
+
   return { ipAddress, userAgent };
 }
 
