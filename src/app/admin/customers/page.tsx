@@ -28,10 +28,6 @@ export default function CustomersManagement() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
-  useEffect(() => {
-    loadCustomers();
-  }, []);
-
   const loadCustomers = async () => {
     try {
       const response = await fetch('/api/admin/customers');
@@ -45,6 +41,10 @@ export default function CustomersManagement() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadCustomers();
+  }, []);
 
   const handleDeleteCustomer = async (customerId: number) => {
     if (!confirm('この顧客データを削除しますか？')) return;
