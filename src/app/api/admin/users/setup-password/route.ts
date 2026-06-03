@@ -3,6 +3,7 @@ import { Client } from 'pg';
 import bcrypt from 'bcryptjs';
 import { validateAdminSession } from '@/lib/admin-auth';
 import { createErrorResponse } from '@/lib/security';
+import { getClientIp } from '@/lib/ip-utils';
 import { getDbClient } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Client } from 'pg';
 import { validateAdminSession } from '@/lib/admin-auth';
 import { createErrorResponse } from '@/lib/security';
+import { getClientIp } from '@/lib/ip-utils';
 import { getDbClient } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
       JSON.stringify({
         viewed_users_count: result.rows.length
       }),
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+      getClientIp(request),
       request.headers.get('user-agent') || 'unknown'
     ]);
 
