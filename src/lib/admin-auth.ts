@@ -1,5 +1,6 @@
 import { Client } from 'pg';
 import { NextRequest } from 'next/server';
+import { getClientIp } from '@/lib/get-client-ip';
 import { validateSession } from './auth';
 import { getDbClient } from '@/lib/db';
 
@@ -75,10 +76,7 @@ export async function logAdminAction(
 }
 
 export function getClientInfo(request: NextRequest): { ipAddress: string; userAgent: string } {
-  const ipAddress = request.ip || 
-                   request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                   request.headers.get('x-real-ip') || 
-                   'unknown';
+  const ipAddress = getClientIp(request);
   
   const userAgent = request.headers.get('user-agent') || 'unknown';
   

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getClientIp } from '@/lib/get-client-ip';
 import { Client } from 'pg';
 import bcrypt from 'bcryptjs';
 import { validateAdminSession } from '@/lib/admin-auth';
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
         customer_email: customerEmail,
         action: 'password_updated'
       }),
-      request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+      getClientIp(request),
       request.headers.get('user-agent') || 'unknown'
     ]);
 

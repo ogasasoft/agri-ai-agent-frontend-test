@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import { NextRequest } from 'next/server';
 import { getDbClient } from '@/lib/db';
+import { getClientIp } from '@/lib/get-client-ip';
 
 export interface User {
   id: number;
@@ -308,10 +309,7 @@ export async function changePassword(
 }
 
 export function getClientInfo(request: NextRequest): { ipAddress: string; userAgent: string } {
-  const ipAddress = request.ip || 
-                   request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                   request.headers.get('x-real-ip') || 
-                   'unknown';
+  const ipAddress = getClientIp(request);
   
   const userAgent = request.headers.get('user-agent') || 'unknown';
   
