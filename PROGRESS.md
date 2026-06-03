@@ -34,6 +34,10 @@
   - dashboard-stats, admin-customers 完了
 - [x] AIチャットテスト修正 (0/1 → 16/16)
   - CSRF検証、OpenAI API モック実装
+- [x] Next.js 16 NextRequest.ip 修正 (2026-06-04)
+  - request.ip を削除し、x-forwarded-for と x-real-ip ヘッダー使用へ
+  - 8ファイル修正 (lib/auth.ts, lib/auth-enhanced.ts, lib/admin-auth.ts, middleware.ts, 4つのAPI routes)
+  - 全199テストパス、TypeScript型チェッククリア
 
 ## テスト結果（最新）
 
@@ -52,6 +56,7 @@
 3. **配送管理**: yamato-csv, yamato-settings, shipping API の完全な実装とテスト
 4. **管理者機能**: dashboard-stats と admin-customers の認証モック修正
 5. **AIチャット**: CSRF検証実装、OpenAI API モックの詳細化
+6. **Next.js 16互換性**: NextRequest.ip 削除対応 (breaking change fix)
 
 ## テスト・Lint結果
 
