@@ -39,29 +39,35 @@ export function Sidebar({ isChatOpen = true, setIsChatOpen }: SidebarProps = {})
   }, []);
 
   useEffect(() => {
-    if (mounted) {
-      fetchUserInfo();
-    }
-  }, [mounted]);
+    if (!mounted) return;
 
-  const fetchUserInfo = async () => {
-    try {
-      const response = await fetch('/api/auth/me', {
-        method: 'GET',
-        credentials: 'include',
-        cache: 'no-cache'
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
+    let cancelled = false;
+    const fetchUserInfo = async () => {
+      try {
+        const response = await fetch('/api/auth/me', {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-cache'
+        });
+        
+        if (!cancelled && response.ok) {
+          const data = await response.json();
+          setUser(data.user);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Failed to fetch user info:', error);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-    } catch (error) {
-      console.error('Failed to fetch user info:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchUserInfo();
+    return () => { cancelled = true; };
+  }, [mounted]);
 
   const handleLogout = async () => {
     if (confirm('ログアウトしますか？')) {
