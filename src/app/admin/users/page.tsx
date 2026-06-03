@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   UserPlus,
   Users,
@@ -77,20 +77,7 @@ export default function UsersPage() {
   const [creatingCustomerId, setCreatingCustomerId] = useState(false);
   const [showPasswords, setShowPasswords] = useState(false);
 
-  useEffect(() => {
-    loadUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (showPasswords) {
-      setLoading(true);
-      loadUsers();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPasswords]);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const endpoint = showPasswords ? '/api/admin/users/passwords' : '/api/admin/users';
       const response = await fetch(endpoint, {
@@ -110,12 +97,20 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showPasswords]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  useEffect(() => {
+    if (showPasswords) {
+      loadUsers();
+    }
+  }, [showPasswords, loadUsers]);
 
   const togglePasswordView = () => {
     setShowPasswords(!showPasswords);
-    setLoading(true);
-    loadUsers();
   };
 
   const createUser = async (e: React.FormEvent) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Settings,
   Power,
@@ -70,11 +70,7 @@ export default function APIIntegrationsManagement() {
   const [editingIntegration, setEditingIntegration] = useState<APIIntegration | null>(null);
   const [testingConnection, setTestingConnection] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadIntegrations();
-  }, []);
-
-  const loadIntegrations = async () => {
+  const loadIntegrations = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/integrations');
       if (response.ok) {
@@ -86,7 +82,11 @@ export default function APIIntegrationsManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadIntegrations();
+  }, [loadIntegrations]);
 
   const handleUpdateIntegration = async (integration: APIIntegration) => {
     try {

@@ -53,7 +53,9 @@ export default function CustomersManagement() {
   };
 
   useEffect(() => {
-    loadCustomers();
+    (async () => {
+      await loadCustomers();
+    })();
   }, []);
 
   const handleDeleteCustomer = async (customerId: number) => {

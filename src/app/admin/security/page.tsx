@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Shield,
   AlertTriangle,
@@ -51,11 +51,7 @@ export default function SecurityPage() {
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadSecurityData();
-  }, []);
-
-  const loadSecurityData = async () => {
+  const loadSecurityData = useCallback(async () => {
     try {
       const [eventsResponse, statsResponse, rateLimitsResponse] = await Promise.all([
         fetch('/api/admin/security/events', {
@@ -97,7 +93,11 @@ export default function SecurityPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadSecurityData();
+  }, [loadSecurityData]);
 
   const refreshData = async () => {
     setRefreshing(true);
