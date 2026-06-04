@@ -16,7 +16,7 @@ interface APIIntegration {
   api_secret?: string;
   webhook_url?: string;
   is_active: boolean;
-  configuration: any;
+  configuration: IntegrationConfig | Record<string, unknown>;
   last_sync_at?: string;
   created_at: string;
   updated_at: string;
@@ -28,6 +28,21 @@ interface IntegrationConfig {
   webhook_enabled?: boolean;
   sync_categories?: string[];
   field_mapping?: { [key: string]: string };
+}
+
+interface IntegrationTemplateField {
+  key: string;
+  label: string;
+  type: string;
+  required: boolean;
+}
+
+interface IntegrationTemplate {
+  displayName: string;
+  description: string;
+  icon: string;
+  color: string;
+  fields: IntegrationTemplateField[];
 }
 
 const INTEGRATION_TEMPLATES = {
@@ -190,7 +205,7 @@ export default function APIIntegrationsManagement() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {integrations.map((integration) => {
           const template = INTEGRATION_TEMPLATES[integration.name as keyof typeof INTEGRATION_TEMPLATES];
-          const config: IntegrationConfig = integration.configuration || {};
+          const config = integration.configuration as IntegrationConfig;
           
           return (
             <div key={integration.id} className="bg-white shadow rounded-lg overflow-hidden">
@@ -274,7 +289,7 @@ function EditIntegrationForm({
   onChange 
 }: {
   integration: APIIntegration;
-  template: any;
+  template: IntegrationTemplate;
   onSave: (integration: APIIntegration) => void;
   onCancel: () => void;
   onChange: (integration: APIIntegration) => void;
@@ -285,7 +300,7 @@ function EditIntegrationForm({
       <div>
         <h4 className="text-sm font-medium text-gray-900 mb-3">API設定</h4>
         <div className="space-y-3">
-          {template?.fields?.map((field: any) => (
+          {template?.fields?.map((field: IntegrationTemplateField) => (
             <div key={field.key}>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {field.label}
@@ -293,7 +308,7 @@ function EditIntegrationForm({
               </label>
               <input
                 type={field.type}
-                value={integration[field.key as keyof APIIntegration] || ''}
+                value={(integration[field.key as keyof APIIntegration] as string | number | undefined) || ''}
                 onChange={(e) => onChange({
                   ...integration,
                   [field.key]: e.target.value
@@ -316,7 +331,7 @@ function EditIntegrationForm({
             </label>
             <input
               type="number"
-              value={integration.configuration?.sync_interval || 3600}
+              value={(integration.configuration as IntegrationConfig)?.sync_interval || 3600}
               onChange={(e) => onChange({
                 ...integration,
                 configuration: {
@@ -333,7 +348,7 @@ function EditIntegrationForm({
             <input
               type="checkbox"
               id={`auto-import-${integration.id}`}
-              checked={integration.configuration?.auto_import || false}
+              checked={(integration.configuration as IntegrationConfig)?.auto_import || false}
               onChange={(e) => onChange({
                 ...integration,
                 configuration: {
