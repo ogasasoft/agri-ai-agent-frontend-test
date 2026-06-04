@@ -42,10 +42,6 @@ export default function SecurityPage() {
   const [filterSeverity, setFilterSeverity] = useState<string>('all');
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadSecurityData();
-  }, []);
-
   const loadSecurityData = async () => {
     try {
       const [eventsResponse, statsResponse, rateLimitsResponse] = await Promise.all([
@@ -89,6 +85,11 @@ export default function SecurityPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadSecurityData();
+  }, []);
 
   const refreshData = async () => {
     setRefreshing(true);
