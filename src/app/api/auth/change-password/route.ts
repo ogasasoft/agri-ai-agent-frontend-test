@@ -74,9 +74,9 @@ export async function POST(request: NextRequest) {
       message: result.message
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     const systemError = new AuthErrorBuilder('パスワード変更処理中にエラーが発生しました')
-      .addProcessingStep('Password Change Operation', 'failed', { error: error.message })
+      .addProcessingStep('Password Change Operation', 'failed', { error: error instanceof Error ? error.message : "Internal server error" })
       .addSuggestion('一時的なサーバーエラーの可能性があります。しばらく時間をおいてから再試行してください')
       .addSuggestion('問題が続く場合は、管理者にお問い合わせください')
       .build();

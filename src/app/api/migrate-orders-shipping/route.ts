@@ -62,14 +62,17 @@ export async function POST(request: NextRequest) {
       ]
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Migration error:', error);
+
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    const errorStack = error instanceof Error ? error.stack : undefined;
 
     return NextResponse.json({
       success: false,
       message: 'Migration failed',
-      error: error.message,
-      stack: error.stack
+      error: errorMessage,
+      stack: errorStack
     }, { status: 500 });
 
   } finally {

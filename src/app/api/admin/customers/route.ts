@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
     } finally {
       await client.end();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Admin customers error:", error);
     return NextResponse.json(
       {
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
     } finally {
       await client.end();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Admin create customer error:", error);
     return NextResponse.json(
       {

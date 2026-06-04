@@ -37,13 +37,13 @@ export async function POST(request: NextRequest) {
       insights
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('AI insights error:', error);
     return NextResponse.json(
       { 
         success: false, 
         message: 'AI分析でエラーが発生しました',
-        error: error.message 
+        error: error instanceof Error ? error.message : "Internal server error" 
       }, 
       { status: 500 }
     );

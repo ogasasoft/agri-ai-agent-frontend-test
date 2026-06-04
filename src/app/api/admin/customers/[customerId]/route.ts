@@ -94,7 +94,7 @@ export async function DELETE(
       await client.end();
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete customer error:', error);
     return createErrorResponse('顧客の削除に失敗しました。', 500);
   }

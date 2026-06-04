@@ -230,7 +230,7 @@ export async function POST(
       await client.end();
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Sync integration error:', error);
     return createErrorResponse('統合設定の同期に失敗しました。', 500);
   }

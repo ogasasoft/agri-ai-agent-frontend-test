@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       user: adminUser
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Admin me error:', error);
     return NextResponse.json({
       success: false,

@@ -88,7 +88,7 @@ export async function POST(
       await client.end();
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Toggle integration error:', error);
     return createErrorResponse('統合設定の切り替えに失敗しました。', 500);
   }

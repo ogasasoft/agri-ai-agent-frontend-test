@@ -155,7 +155,7 @@ export async function POST(
       await client.end();
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Test integration error:', error);
     return createErrorResponse('統合設定のテストに失敗しました。', 500);
   }

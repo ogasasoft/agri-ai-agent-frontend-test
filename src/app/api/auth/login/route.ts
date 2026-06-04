@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     logAuthAttempt("SUCCESS", username, { ipAddress, userAgent });
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // システムエラーの詳細分析
     const context = {
       ipAddress: getClientInfo(request).ipAddress,
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
     const systemError = new AuthErrorBuilder("システムエラーが発生しました")
       .setAuthContext(context)
       .addProcessingStep("Request Processing", "failed", {
-        error: error.message,
+        error: error instanceof Error ? error.message : "Internal server error",
       })
       .addSuggestion(
         "一時的なサーバーエラーの可能性があります。しばらく時間をおいてから再試行してください",

@@ -142,14 +142,14 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({ response: "AI機能が使用できません。" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Chat API error:", error);
     return NextResponse.json(
       {
         success: false,
         response: "AI機能が使用できません。",
         // 本番環境では詳細エラー情報を隠す
-        ...(process.env.NODE_ENV === "development" && { error: error.message }),
+        ...(process.env.NODE_ENV === "development" && { error: error instanceof Error ? error.message : "Internal server error" }),
       },
       { status: 500 },
     );

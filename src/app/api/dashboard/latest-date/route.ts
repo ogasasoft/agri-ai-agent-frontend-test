@@ -60,8 +60,8 @@ export async function GET(request: NextRequest) {
       await client.end();
     }
 
-  } catch (error: any) {
-    logDatabaseOperation('SELECT', 'orders', false, { error: error.message }, userId);
+  } catch (error: unknown) {
+    logDatabaseOperation('SELECT', 'orders', false, { error: error instanceof Error ? error.message : "Internal server error" }, userId);
 
     const dbError = DatabaseErrorBuilder.queryError(
       'SELECT latest shipped date',

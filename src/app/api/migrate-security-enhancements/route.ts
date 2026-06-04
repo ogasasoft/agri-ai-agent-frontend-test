@@ -139,12 +139,12 @@ export async function POST(request: NextRequest) {
       await client.end();
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Migration error:', error);
     return NextResponse.json({ 
       success: false, 
       message: 'Security enhancements migration failed',
-      error: error.message 
+      error: error instanceof Error ? error.message : "Internal server error" 
     }, { status: 500 });
   }
 }

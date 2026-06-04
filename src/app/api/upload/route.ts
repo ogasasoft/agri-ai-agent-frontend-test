@@ -466,8 +466,8 @@ export async function POST(request: NextRequest) {
           notes: extractFieldFromRow(row, detectedDataSource, 'notes').trim()
         });
 
-      } catch (error: any) {
-        validationErrors.push(`行${lineNo}: ${error.message}`);
+      } catch (error: unknown) {
+        validationErrors.push(`行${lineNo}: ${error instanceof Error ? error.message : "Internal server error"}`);
       }
     }
 
@@ -522,14 +522,14 @@ export async function POST(request: NextRequest) {
       skipped_details: saveResult.skippedDetails
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     debugLogger.error('CSV Upload Failed', error, context);
     timer(); // タイマー終了
 
     // 詳細なエラー診断
-    const unknownErrorDiagnostics = diagnoseUnknownError(error, {
+    const unknownErrorDiagnostics = diagnoseUnknownError(error instanceof Error ? error : new Error(String(error)), {
       requestId,
-      userId: (context as any).userId,
+      userId: (context as { userId?: string }).userId,
       fileName: file?.name || 'unknown',
       fileSize: file?.size || 0
     });

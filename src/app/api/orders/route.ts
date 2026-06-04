@@ -87,12 +87,12 @@ export async function GET(request: NextRequest) {
     } finally {
       await client.end();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logDatabaseOperation(
       "SELECT",
       "orders",
       false,
-      { error: error.message },
+      { error: error instanceof Error ? error.message : "Internal server error" },
       userId,
     );
 
@@ -210,15 +210,16 @@ export async function POST(request: NextRequest) {
     } finally {
       await client.end();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Database error:", error);
 
     // Handle specific database errors
-    if (error.code === "23505") {
+    const dbError = error as { code?: string; constraint?: string };
+    if (dbError.code === "23505") {
       // Unique constraint violation
       if (
-        error.constraint === "orders_order_code_key" ||
-        error.constraint === "orders_order_code_user_id_key"
+        dbError.constraint === "orders_order_code_key" ||
+        dbError.constraint === "orders_order_code_user_id_key"
       ) {
         return NextResponse.json(
           {
@@ -228,7 +229,7 @@ export async function POST(request: NextRequest) {
           { status: 409 },
         );
       }
-    } else if (error.code === "23502") {
+    } else if (dbError.code === "23502") {
       // Not null constraint violation
       return NextResponse.json(
         {
@@ -243,7 +244,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         message: "データベースエラーが発生しました。",
-        error: error.message,
+        error: error instanceof Error ? error.message : "Internal server error",
       },
       { status: 500 },
     );
@@ -365,13 +366,13 @@ export async function PUT(request: NextRequest) {
     } finally {
       await client.end();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Database error:", error);
     return NextResponse.json(
       {
         success: false,
         message: "データベースエラーが発生しました。",
-        error: error.message,
+        error: error instanceof Error ? error.message : "Internal server error",
       },
       { status: 500 },
     );

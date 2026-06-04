@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
       await client.end();
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Admin integrations error:', error);
     return NextResponse.json({
       success: false,
@@ -184,7 +184,7 @@ export async function PUT(request: NextRequest) {
       await client.end();
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Admin update integration error:', error);
     return NextResponse.json({
       success: false,

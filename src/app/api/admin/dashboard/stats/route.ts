@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       await client.end();
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Admin dashboard stats error:', error);
     return NextResponse.json({
       success: false,

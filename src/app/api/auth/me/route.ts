@@ -39,10 +39,10 @@ export async function GET(request: NextRequest) {
       session: sessionData.session,
       isAdmin: sessionData.user.is_super_admin || false,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     const systemError = new AuthErrorBuilder("サーバーエラーが発生しました。")
       .addProcessingStep("Session Validation", "failed", {
-        error: error.message,
+        error: error instanceof Error ? error.message : "Internal server error",
       })
       .addSuggestion(
         "セッションが破損している可能性があります。再ログインしてください",

@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       await client.end();
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Shipping cancel API error:', error);
 
     const dbError = DatabaseErrorBuilder.queryError(

@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       await client.end();
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Bulk delete customers error:', error);
     return createErrorResponse('顧客の一括削除に失敗しました。', 500);
   }
