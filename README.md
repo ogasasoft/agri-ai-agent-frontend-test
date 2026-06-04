@@ -1,6 +1,6 @@
 # Agri AI Agent Frontend
 
-農業EC統合管理システム - Next.js 14 + TypeScript + PostgreSQL
+農業EC統合管理システム - Next.js 16 + TypeScript 6 + PostgreSQL
 
 ## 🌟 概要
 
@@ -20,9 +20,10 @@
 
 ### フロントエンド
 
-- **Next.js 14** - App Router使用
-- **TypeScript** - 型安全性
-- **Tailwind CSS** - スタイリング
+- **Next.js 16** - App Router使用
+- **TypeScript 6** - 型安全性
+- **React 18** - UIライブラリ
+- **Tailwind CSS 3** - スタイリング
 - **Lucide React** - アイコン
 - **Zustand** - 状態管理
 - **React Hook Form + Zod** - フォームバリデーション
@@ -107,21 +108,23 @@ npm run dev
 
 ### 一般ユーザー
 
-- **ユーザー名**: `admin`
-- **パスワード**: `admin123`
+- **ユーザー名**: （環境変数で設定）
+- **パスワード**: （環境変数で設定）
 - **アクセスURL**: `http://localhost:3000/login`
 
 ### スーパー管理者
 
-- **Email**: `silentogasasoft@gmail.com`
-- **パスワード**: `Ogasa1995`
+- **Email**: （環境変数で設定）
+- **パスワード**: （環境変数で設定）
 - **管理者画面**: `http://localhost:3000/admin`
+
+> ⚠️ 本番環境では必ず強力なパスワードを設定してください
 
 ## 📁 プロジェクト構造
 
 ```
 src/
-├── app/                    # Next.js 14 App Router
+├── app/                    # Next.js 16 App Router
 │   ├── admin/             # 管理者画面
 │   │   ├── customers/     # 顧客管理
 │   │   ├── prompts/       # AIプロンプト設定
