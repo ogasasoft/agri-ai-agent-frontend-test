@@ -1,6 +1,6 @@
 # Agri AI Agent Frontend
 
-農業EC統合管理システム - Next.js 16 + TypeScript 6 + PostgreSQL
+農業EC統合管理システム - Next.js 16 + TypeScript 5.4 + PostgreSQL
 
 ## 🌟 概要
 
@@ -21,8 +21,8 @@
 ### フロントエンド
 
 - **Next.js 16** - App Router使用
-- **TypeScript 6** - 型安全性
-- **React 18** - UIライブラリ
+- **TypeScript 5.4** - 型安全性
+- **React 19** - UIライブラリ
 - **Tailwind CSS 3** - スタイリング
 - **Lucide React** - アイコン
 - **Zustand** - 状態管理
