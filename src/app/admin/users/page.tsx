@@ -68,19 +68,6 @@ export default function UsersPage() {
   const [creatingCustomerId, setCreatingCustomerId] = useState(false);
   const [showPasswords, setShowPasswords] = useState(false);
 
-  useEffect(() => {
-    loadUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (showPasswords) {
-      setLoading(true);
-      loadUsers();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPasswords]);
-
   const loadUsers = async () => {
     try {
       const endpoint = showPasswords ? '/api/admin/users/passwords' : '/api/admin/users';
@@ -103,10 +90,21 @@ export default function UsersPage() {
     }
   };
 
+  useEffect(() => {
+    loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps react-hooks/set-state-in-effect
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps react-hooks/set-state-in-effect
+    if (showPasswords) {
+      loadUsers();
+    }
+  }, [showPasswords]);
+
   const togglePasswordView = () => {
     setShowPasswords(!showPasswords);
-    setLoading(true);
-    loadUsers();
+    // loadUsers will be called automatically in the useEffect when showPasswords changes
   };
 
   const createUser = async (e: React.FormEvent) => {

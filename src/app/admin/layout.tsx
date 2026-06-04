@@ -26,11 +26,6 @@ export default function AdminLayout({
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    checkAdminAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const checkAdminAuth = async () => {
     try {
       const response = await fetch('/api/admin/me');
@@ -47,6 +42,12 @@ export default function AdminLayout({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    checkAdminAuth();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -77,7 +78,7 @@ export default function AdminLayout({
     { name: 'セキュリティ監視', href: '/admin/security', icon: Shield, superAdminOnly: true },
   ];
 
-  const filteredNavigation = navigation.filter(item => 
+  const filteredNavigation = navigation.filter(item =>
     !item.superAdminOnly || adminUser.is_super_admin
   );
 
@@ -96,9 +97,9 @@ export default function AdminLayout({
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <SidebarContent 
-              navigation={filteredNavigation} 
-              pathname={pathname} 
+            <SidebarContent
+              navigation={filteredNavigation}
+              pathname={pathname}
               adminUser={adminUser}
               onLogout={handleLogout}
             />
@@ -109,9 +110,9 @@ export default function AdminLayout({
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4 shadow-sm">
-          <SidebarContent 
-            navigation={filteredNavigation} 
-            pathname={pathname} 
+          <SidebarContent
+            navigation={filteredNavigation}
+            pathname={pathname}
             adminUser={adminUser}
             onLogout={handleLogout}
           />
@@ -141,14 +142,14 @@ export default function AdminLayout({
   );
 }
 
-function SidebarContent({ 
-  navigation, 
-  pathname, 
-  adminUser, 
-  onLogout 
-}: { 
-  navigation: any[]; 
-  pathname: string; 
+function SidebarContent({
+  navigation,
+  pathname,
+  adminUser,
+  onLogout
+}: {
+  navigation: any[];
+  pathname: string;
   adminUser: AdminUser;
   onLogout: () => void;
 }) {
@@ -175,7 +176,7 @@ function SidebarContent({
               {navigation.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
-                
+
                 return (
                   <li key={item.name}>
                     <a
@@ -214,7 +215,7 @@ function SidebarContent({
             </p>
           </div>
         </div>
-        
+
         <button
           onClick={onLogout}
           className="group flex w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700 hover:text-red-700 hover:bg-red-50"

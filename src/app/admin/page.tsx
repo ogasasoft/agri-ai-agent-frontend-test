@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Users, Database, ShoppingCart, TrendingUp, 
-  Activity, AlertCircle, CheckCircle, Clock 
+import {
+  Users, Database, ShoppingCart, TrendingUp,
+  Activity, AlertCircle, CheckCircle, Clock
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -30,10 +30,6 @@ export default function AdminDashboard() {
   const [activities, setActivities] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
   const loadDashboardData = async () => {
     try {
       const [statsResponse, activitiesResponse] = await Promise.all([
@@ -56,6 +52,11 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps react-hooks/set-state-in-effect
+  }, []);
 
   if (loading) {
     return (
@@ -151,7 +152,7 @@ export default function AdminDashboard() {
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
               システム状態
             </h3>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -160,7 +161,7 @@ export default function AdminDashboard() {
                 </div>
                 <span className="text-sm font-medium text-green-600">正常</span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
@@ -168,7 +169,7 @@ export default function AdminDashboard() {
                 </div>
                 <span className="text-sm font-medium text-green-600">正常</span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <AlertCircle className="h-5 w-5 text-yellow-500 mr-2" />
@@ -176,7 +177,7 @@ export default function AdminDashboard() {
                 </div>
                 <span className="text-sm font-medium text-yellow-600">設定中</span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <Clock className="h-5 w-5 text-blue-500 mr-2" />
@@ -196,7 +197,7 @@ export default function AdminDashboard() {
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
               最近の活動
             </h3>
-            
+
             <div className="flow-root">
               <ul className="-mb-8 space-y-3">
                 {activities.length > 0 ? activities.map((activity, index) => (
@@ -241,7 +242,7 @@ export default function AdminDashboard() {
           <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
             管理者アクション
           </h3>
-          
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <a
               href="/admin/users"

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Search, Plus, Edit, Trash2, Eye, Download, 
-  Filter, MoreHorizontal, User, Mail, Phone, MapPin 
+import {
+  Search, Plus, Edit, Trash2, Eye, Download,
+  Filter, MoreHorizontal, User, Mail, Phone, MapPin
 } from 'lucide-react';
 
 interface Customer {
@@ -28,10 +28,6 @@ export default function CustomersManagement() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
-  useEffect(() => {
-    loadCustomers();
-  }, []);
-
   const loadCustomers = async () => {
     try {
       const response = await fetch('/api/admin/customers');
@@ -46,8 +42,13 @@ export default function CustomersManagement() {
     }
   };
 
+  useEffect(() => {
+    loadCustomers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps react-hooks/set-state-in-effect
+  }, []);
+
   const handleDeleteCustomer = async (customerId: number) => {
-    if (!confirm('この顧客データを削除しますか？')) return;
+    if (!confirm('この顧客データを削除しますか?')) return;
 
     try {
       const response = await fetch(`/api/admin/customers/${customerId}`, {
@@ -66,7 +67,7 @@ export default function CustomersManagement() {
 
   const handleBulkDelete = async () => {
     if (selectedCustomers.length === 0) return;
-    if (!confirm(`選択した${selectedCustomers.length}件の顧客データを削除しますか？`)) return;
+    if (!confirm(`選択した${selectedCustomers.length}件の顧客データを削除しますか?`)) return;
 
     try {
       const response = await fetch('/api/admin/customers/bulk-delete', {
@@ -138,7 +139,7 @@ export default function CustomersManagement() {
             />
           </div>
         </div>
-        
+
         <div className="flex gap-2">
           <button className="inline-flex items-center gap-x-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
             <Filter className="h-4 w-4" />
