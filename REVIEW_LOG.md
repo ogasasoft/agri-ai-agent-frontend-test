@@ -1,4 +1,14 @@
-# REVIEW_LOG.md
+## 2026-06-05 レビュー記録
+- 判定: NEEDS_FIX
+- ブランチ: fix/security-vulnerabilities-2026-06-04
+- 指摘事項:
+  - [Critical] ESLint 9 へのメジャーアップデートが含まれている。「セキュリティ脆弱性の修正」という目的と異なる変更。
+  - [Critical] TypeScript ESLint のバージョンが 8.60.1 → 7.18.0 にダウングレードされている。
+  - [Warning] ESLint 9 への移行（FlatCompat ベース → ネイティブ flat config）は、前回のレビューで指摘した通り、別 PR として分離すべき変更。
+- 修正指示:
+  1. まず `fix/eslint-config-next16-compat` ブランチから ESLint 9 への移行を別 PR として分離
+  2. 次に `fix/security-vulnerabilities-2026-06-04` ブランチをリファクタリングし、依存関係のアップデートのみに限定
+  3. 最終的なセキュリティ脆弱性修正 PR は、next 16.2.1 → 16.2.7、postcss 8.4.0 → 8.5.15 の変更のみ
 
 ## 2026-06-04 レビュー記録
 - 判定: NEEDS_FIX
