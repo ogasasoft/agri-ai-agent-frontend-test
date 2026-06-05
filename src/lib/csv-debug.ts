@@ -84,37 +84,27 @@ export class CSVDebugHelper {
   }
 
   static logCSVAnalysis(analysis: CSVAnalysisResult, dataSource: string) {
-    console.log(`📊 === CSV Analysis Report for ${dataSource} ===`);
     
-    console.log('📋 Headers:');
     analysis.headers.forEach((header, index) => {
       const emptyCount = analysis.emptyFields[header] || 0;
       const emptyPercentage = analysis.totalRows > 0 ? ((emptyCount / analysis.totalRows) * 100).toFixed(1) : '0';
-      console.log(`  ${index + 1}: "${header}" (${emptyPercentage}% empty)`);
     });
 
     if (analysis.duplicateHeaders.length > 0) {
-      console.log('⚠️ 重複ヘッダー:', analysis.duplicateHeaders);
     }
 
-    console.log('📄 Sample Data (first 3 rows):');
     analysis.sampleRows.forEach((row, index) => {
-      console.log(`  Row ${index + 1}:`);
       analysis.headers.forEach(header => {
         const value = row[header] || '';
         const displayValue = value.length > 30 ? value.substring(0, 30) + '...' : value;
-        console.log(`    "${header}": "${displayValue}"`);
       });
     });
 
     if (analysis.suspiciousData.length > 0) {
-      console.log('🚨 怪しいデータ:');
       analysis.suspiciousData.slice(0, 10).forEach(item => { // 最初の10件のみ表示
-        console.log(`  Row ${item.row}, Field "${item.field}": "${item.value}" - ${item.reason}`);
       });
       
       if (analysis.suspiciousData.length > 10) {
-        console.log(`  ... and ${analysis.suspiciousData.length - 10} more suspicious entries`);
       }
     }
   }
@@ -124,15 +114,12 @@ export class CSVDebugHelper {
     dataSource: string,
     mappingResult: Record<string, string>
   ) {
-    console.log(`🗺️ Field Mapping Validation for ${dataSource}:`);
     
     const requiredFields = ['order_code', 'customer_name', 'price'];
     const missingFields: string[] = [];
     
-    console.log('📋 Mapping Results:');
     Object.entries(mappingResult).forEach(([field, value]) => {
       const status = value ? '✅' : '❌';
-      console.log(`  ${field}: "${value}" ${status}`);
       
       if (requiredFields.includes(field) && !value) {
         missingFields.push(field);
@@ -140,14 +127,12 @@ export class CSVDebugHelper {
     });
 
     if (missingFields.length > 0) {
-      console.log('🚨 Missing Required Fields:', missingFields);
       
       // 類似フィールド名の提案
       const availableHeaders = Object.keys(row);
       missingFields.forEach(missing => {
         const suggestions = this.findSimilarHeaders(missing, availableHeaders);
         if (suggestions.length > 0) {
-          console.log(`  💡 Suggestions for "${missing}":`, suggestions);
         }
       });
     }

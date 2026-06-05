@@ -1,3 +1,5 @@
+/// <reference types="jest" />
+
 // エラーハンドリングテスト用ヘルパー関数
 import { NextRequest, NextResponse } from 'next/server';
 

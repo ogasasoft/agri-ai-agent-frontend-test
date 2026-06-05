@@ -1,3 +1,5 @@
+/// <reference types="jest" />
+
 // エラーハンドリングテスト用ヘルパー関数のテスト
 import {
   StructuredErrorResponse,

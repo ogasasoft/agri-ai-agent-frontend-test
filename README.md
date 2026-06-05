@@ -1,6 +1,6 @@
 # Agri AI Agent Frontend
 
-農業EC統合管理システム - Next.js 9.3.3 + TypeScript 5.4 + PostgreSQL
+農業EC統合管理システム - Next.js 16.2.7 + TypeScript 6.0 + PostgreSQL
 
 ## 🌟 概要
 
