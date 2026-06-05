@@ -11,7 +11,7 @@ interface LogData {
   level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
   message: string;
   context?: LogContext;
-  data?: any;
+  data?: unknown;
   timestamp?: string;
   stack?: string;
 }
@@ -31,9 +31,9 @@ class DebugLogger {
     return `[${timestamp}] ${logData.level} ${context} ${logData.message}`;
   }
 
-  debug(message: string, data?: any, context?: LogContext) {
+  debug(message: string, data?: unknown, context?: LogContext) {
     if (!this.isDebugMode) return;
-    
+
     const logData: LogData = {
       level: 'DEBUG',
       message,
@@ -46,7 +46,7 @@ class DebugLogger {
     }
   }
 
-  info(message: string, data?: any, context?: LogContext) {
+  info(message: string, data?: unknown, context?: LogContext) {
     if (!this.isDebugMode) return;
 
     const logData: LogData = {
@@ -61,7 +61,7 @@ class DebugLogger {
     }
   }
 
-  warn(message: string, data?: any, context?: LogContext) {
+  warn(message: string, data?: unknown, context?: LogContext) {
     const logData: LogData = {
       level: 'WARN',
       message,
@@ -76,65 +76,67 @@ class DebugLogger {
     }
   }
 
-  error(message: string, error?: any, context?: LogContext) {
+  error(message: string, error?: unknown, context?: LogContext) {
     const logData: LogData = {
       level: 'ERROR',
       message,
       context,
       data: error,
       timestamp: new Date().toISOString(),
-      stack: error?.stack
+      stack: error instanceof Error ? error.stack : undefined
     };
 
     console.error('❌ ' + this.formatLog(logData));
     if (error) {
       console.error('📊 Error Details:', error);
-      if (error.stack) {
+      if (error instanceof Error && error.stack) {
         console.error('📚 Stack Trace:', error.stack);
       }
     }
   }
 
   // CSV専用のデバッグ機能
-  csvDebug(phase: string, data: any, context?: LogContext) {
+  csvDebug(phase: string, data: unknown, context?: LogContext) {
     if (!this.isDebugMode) return;
-    
-    
+
+
     if (phase === 'headers' && Array.isArray(data)) {
       data.forEach((header, index) => {
       });
     }
-    
-    if (phase === 'mapping' && typeof data === 'object') {
+
+    if (phase === 'mapping' && typeof data === 'object' && data !== null) {
       Object.entries(data).forEach(([field, value]) => {
       });
     }
-    
+
     if (phase === 'validation_errors' && Array.isArray(data)) {
       const errorCounts = data.reduce((acc: Record<string, number>, error: string) => {
         const errorType = error.split(':')[1]?.trim() || 'unknown';
         acc[errorType] = (acc[errorType] || 0) + 1;
         return acc;
       }, {});
-      
+
       Object.entries(errorCounts).forEach(([errorType, count]) => {
       });
     }
   }
 
   // API リクエスト/レスポンスのトレース
-  apiTrace(phase: 'REQUEST' | 'RESPONSE' | 'ERROR', data: any, context?: LogContext) {
+  apiTrace(phase: 'REQUEST' | 'RESPONSE' | 'ERROR', data: unknown, context?: LogContext) {
     if (!this.isDebugMode) return;
-    
+
     const emoji = phase === 'REQUEST' ? '📤' : phase === 'RESPONSE' ? '📥' : '💥';
+    if (data && typeof data === 'object' && data !== null) {
+    }
   }
 
   // パフォーマンス測定
   startTimer(label: string): () => void {
     if (!this.isDebugMode) return () => {};
-    
+
     const start = performance.now();
-    
+
     return () => {
       const end = performance.now();
       const duration = end - start;
@@ -148,7 +150,7 @@ export const debugLogger = new DebugLogger();
 // 便利なヘルパー関数
 export const logCSVProcessing = (
   phase: 'start' | 'headers' | 'parsing' | 'validation' | 'mapping' | 'saving' | 'complete',
-  data: any,
+  data: unknown,
   context?: LogContext
 ) => {
   debugLogger.csvDebug(phase, data, context);
@@ -157,7 +159,7 @@ export const logCSVProcessing = (
 export const logAPICall = (
   method: string,
   url: string,
-  data?: any,
+  data?: unknown,
   context?: LogContext
 ) => {
   debugLogger.apiTrace('REQUEST', { method, url, ...data }, context);
@@ -165,14 +167,14 @@ export const logAPICall = (
 
 export const logAPIResponse = (
   status: number,
-  data?: any,
+  data?: unknown,
   context?: LogContext
 ) => {
   debugLogger.apiTrace('RESPONSE', { status, ...data }, context);
 };
 
 export const logAPIError = (
-  error: any,
+  error: unknown,
   context?: LogContext
 ) => {
   debugLogger.apiTrace('ERROR', error, context);

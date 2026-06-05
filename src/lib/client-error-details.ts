@@ -1,11 +1,24 @@
 // フロントエンド専用のエラー詳細分析システム
 import { debugLogger } from './debug-logger';
 
+interface ProcessingStep {
+  step: string;
+  status: 'completed' | 'failed' | 'skipped';
+  details?: Record<string, unknown>;
+  error?: string;
+}
+
+interface UserAction {
+  label: string;
+  action: 'retry' | 'refresh' | 'navigate' | 'contact_support';
+  params?: Record<string, unknown>;
+}
+
 interface ClientErrorContext {
   userId?: string;
   currentPage?: string;
   userAction?: string;
-  formData?: Record<string, any>;
+  formData?: Record<string, unknown>;
   componentName?: string;
   browserInfo?: {
     userAgent: string;
@@ -14,30 +27,23 @@ interface ClientErrorContext {
   };
 }
 
+interface ClientDebugInfo {
+  timestamp: string;
+  component?: string;
+  action?: string;
+  page?: string;
+  browser?: string;
+  processing_steps?: ProcessingStep[];
+}
+
 interface ClientErrorResponse {
   success: false;
   message: string;
   error_code: string;
-  details?: any;
-  debug_info?: {
-    timestamp: string;
-    component?: string;
-    action?: string;
-    page?: string;
-    browser?: string;
-    processing_steps?: Array<{
-      step: string;
-      status: 'completed' | 'failed' | 'skipped';
-      details?: any;
-      error?: string;
-    }>;
-  };
+  details?: Record<string, unknown>;
+  debug_info?: ClientDebugInfo;
   suggestions?: string[];
-  user_actions?: Array<{
-    label: string;
-    action: 'retry' | 'refresh' | 'navigate' | 'contact_support';
-    params?: any;
-  }>;
+  user_actions?: UserAction[];
 }
 
 export class ClientErrorBuilder {
@@ -70,7 +76,7 @@ export class ClientErrorBuilder {
   addProcessingStep(
     step: string,
     status: 'completed' | 'failed' | 'skipped',
-    details?: any,
+    details?: Record<string, unknown>,
     error?: string
   ): this {
     if (this.errorResponse.debug_info) {
@@ -92,7 +98,7 @@ export class ClientErrorBuilder {
   addUserAction(
     label: string,
     action: 'retry' | 'refresh' | 'navigate' | 'contact_support',
-    params?: any
+    params?: Record<string, unknown>
   ): this {
     this.errorResponse.user_actions?.push({ label, action, params });
     return this;
@@ -112,7 +118,7 @@ export class FormErrorBuilder extends ClientErrorBuilder {
   static validationError(
     formName: string,
     errors: Record<string, string[]>,
-    formData: Record<string, any>,
+    formData: Record<string, unknown>,
     context: ClientErrorContext
   ): ClientErrorResponse {
     const errorCount = Object.keys(errors).length;
@@ -141,8 +147,8 @@ export class FormErrorBuilder extends ClientErrorBuilder {
 
   static submissionError(
     formName: string,
-    apiResponse: any,
-    formData: Record<string, any>,
+    apiResponse: unknown,
+    formData: Record<string, unknown>,
     context: ClientErrorContext
   ): ClientErrorResponse {
     const builder = new FormErrorBuilder('フォーム送信に失敗しました');
@@ -151,13 +157,13 @@ export class FormErrorBuilder extends ClientErrorBuilder {
       .setContext({ ...context, userAction: 'form_submit' })
       .addProcessingStep('Form Validation', 'completed')
       .addProcessingStep('API Request', 'failed', {
-        status: apiResponse?.status,
-        error: apiResponse?.message || apiResponse?.error,
+        status: (apiResponse as { status?: number; message?: string; error?: string })?.status,
+        error: (apiResponse as { status?: number; message?: string; error?: string })?.message || (apiResponse as { status?: number; message?: string; error?: string })?.error,
         form_name: formName
       });
 
     // APIエラーレスポンスを分析
-    const suggestions = FormErrorBuilder.analyzeAPIError(apiResponse, formName);
+    const suggestions = FormErrorBuilder.analyzeAPIError(apiResponse as { status?: number; message?: string; error?: string }, formName);
     suggestions.forEach(suggestion => builder.addSuggestion(suggestion));
 
     // ユーザーアクションを追加
@@ -199,7 +205,10 @@ export class FormErrorBuilder extends ClientErrorBuilder {
     return suggestions;
   }
 
-  private static analyzeAPIError(apiResponse: any, formName: string): string[] {
+  private static analyzeAPIError(
+    apiResponse: { status?: number; message?: string; error?: string },
+    formName: string
+  ): string[] {
     const suggestions: string[] = [];
     const status = apiResponse?.status;
     const message = apiResponse?.message?.toLowerCase() || '';
@@ -212,7 +221,7 @@ export class FormErrorBuilder extends ClientErrorBuilder {
       suggestions.push('重複するデータが存在します。別の値を入力してください');
     } else if (status === 429) {
       suggestions.push('送信回数が制限に達しました。しばらく時間をおいてください');
-    } else if (status >= 500) {
+    } else if (status !== undefined && status >= 500) {
       suggestions.push('サーバーエラーが発生しました。時間をおいて再試行してください');
     }
 
@@ -232,7 +241,7 @@ export class DataFetchErrorBuilder extends ClientErrorBuilder {
 
   static apiError(
     endpoint: string,
-    error: any,
+    error: unknown,
     context: ClientErrorContext
   ): ClientErrorResponse {
     const builder = new DataFetchErrorBuilder('データの取得に失敗しました');
@@ -241,12 +250,12 @@ export class DataFetchErrorBuilder extends ClientErrorBuilder {
       .setContext({ ...context, userAction: 'data_fetch' })
       .addProcessingStep('API Request', 'failed', {
         endpoint,
-        error: error.message,
-        status: error.status
+        error: (error as { message?: string; status?: number })?.message,
+        status: (error as { message?: string; status?: number })?.status
       });
 
     // エラーの種類に応じて提案を生成
-    const suggestions = DataFetchErrorBuilder.analyzeDataError(error, endpoint);
+    const suggestions = DataFetchErrorBuilder.analyzeDataError(error as { status?: number; message?: string }, endpoint);
     suggestions.forEach(suggestion => builder.addSuggestion(suggestion));
 
     // ユーザーアクションを追加
@@ -257,7 +266,7 @@ export class DataFetchErrorBuilder extends ClientErrorBuilder {
     return builder.build();
   }
 
-  private static analyzeDataError(error: any, endpoint: string): string[] {
+  private static analyzeDataError(error: { status?: number; message?: string }, endpoint: string): string[] {
     const suggestions: string[] = [];
     const status = error.status;
 
@@ -265,7 +274,7 @@ export class DataFetchErrorBuilder extends ClientErrorBuilder {
       suggestions.push('ログインが必要です');
     } else if (status === 404) {
       suggestions.push('データが見つかりません。削除された可能性があります');
-    } else if (status >= 500) {
+    } else if (status !== undefined && status >= 500) {
       suggestions.push('サーバーに問題が発生しています。時間をおいて再試行してください');
     } else if (!navigator.onLine) {
       suggestions.push('インターネット接続を確認してください');
@@ -278,7 +287,7 @@ export class DataFetchErrorBuilder extends ClientErrorBuilder {
 // クライアントエラーログ機能
 export const logClientError = (
   errorType: 'FORM_ERROR' | 'API_ERROR' | 'COMPONENT_ERROR' | 'NAVIGATION_ERROR',
-  error: any,
+  error: Error,
   context: ClientErrorContext
 ) => {
   const logData = {
@@ -298,7 +307,7 @@ export const logClientError = (
 // ユーザーアクション実行関数
 export const executeUserAction = (
   action: 'retry' | 'refresh' | 'navigate' | 'contact_support',
-  params?: any,
+  params?: Record<string, unknown>,
   callback?: () => void
 ) => {
   switch (action) {
@@ -317,7 +326,7 @@ export const executeUserAction = (
 
     case 'navigate':
       if (params?.url) {
-        window.location.href = params.url;
+        window.location.href = params.url as string;
       }
       break;
 

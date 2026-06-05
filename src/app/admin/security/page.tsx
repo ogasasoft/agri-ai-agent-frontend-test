@@ -13,7 +13,7 @@ interface SecurityEvent {
   severity: 'low' | 'medium' | 'high' | 'critical';
   ip_address: string;
   user_agent: string;
-  details: any;
+  details: Record<string, unknown>;
   created_at: string;
 }
 

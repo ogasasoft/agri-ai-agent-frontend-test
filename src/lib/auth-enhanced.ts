@@ -46,7 +46,7 @@ export interface SecurityEvent {
   ip_address?: string;
   user_agent?: string;
   target_username?: string;
-  details?: any;
+  details?: Record<string, unknown>;
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
 

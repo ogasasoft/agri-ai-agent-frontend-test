@@ -16,7 +16,7 @@ export interface CSVErrorDiagnostics {
     encoding?: EncodingDetectionResult;
     headers?: CSVHeaderAnalysis;
     rawError?: string;
-    debugData?: any;
+    debugData?: unknown;
   };
 }
 

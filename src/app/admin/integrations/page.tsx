@@ -16,7 +16,7 @@ interface APIIntegration {
   api_secret?: string;
   webhook_url?: string;
   is_active: boolean;
-  configuration: any;
+  configuration: Record<string, unknown>;
   last_sync_at?: string;
   created_at: string;
   updated_at: string;
@@ -30,7 +30,20 @@ interface IntegrationConfig {
   field_mapping?: { [key: string]: string };
 }
 
-const INTEGRATION_TEMPLATES = {
+interface IntegrationTemplate {
+  displayName: string;
+  description: string;
+  icon: string;
+  color: string;
+  fields: Array<{
+    key: string;
+    label: string;
+    type: string;
+    required: boolean;
+  }>;
+}
+
+const INTEGRATION_TEMPLATES: Record<string, IntegrationTemplate> = {
   colormi: {
     displayName: 'カラーミーショップ',
     description: 'カラーミーショップからの商品・注文データの自動同期',
@@ -196,7 +209,7 @@ export default function APIIntegrationsManagement() {
           return (
             <div key={integration.id} className="bg-white shadow rounded-lg overflow-hidden">
               {/* Header */}
-              <div className={`px-6 py-4 bg-${template?.color || 'gray'}-50 border-b border-gray-200`}>
+              <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <span className="text-2xl mr-3">{template?.icon || '🔌'}</span>
@@ -275,7 +288,7 @@ function EditIntegrationForm({
   onChange
 }: {
   integration: APIIntegration;
-  template: any;
+  template: IntegrationTemplate;
   onSave: (integration: APIIntegration) => void;
   onCancel: () => void;
   onChange: (integration: APIIntegration) => void;
@@ -286,7 +299,7 @@ function EditIntegrationForm({
       <div>
         <h4 className="text-sm font-medium text-gray-900 mb-3">API設定</h4>
         <div className="space-y-3">
-          {template?.fields?.map((field: any) => (
+          {template?.fields?.map((field: { key: string; label: string; type: string; required: boolean }) => (
             <div key={field.key}>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {field.label}
@@ -299,7 +312,7 @@ function EditIntegrationForm({
                   ...integration,
                   [field.key]: e.target.value
                 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder={`${field.label}を入力`}
               />
             </div>

@@ -1,29 +1,36 @@
 // API エラー詳細レスポンス機能
+// 基本プロパティ
+interface ProcessingStep {
+  step: string;
+  status: 'completed' | 'failed' | 'skipped';
+  details?: Record<string, unknown>;
+  error?: string;
+}
+
+interface DataAnalysis {
+  total_rows?: number;
+  processed_rows?: number;
+  failed_rows?: number;
+  headers?: string[];
+  sample_data?: unknown;
+  validation_errors?: string[];
+}
+
+interface DebugInfo {
+  timestamp: string;
+  request_id?: string;
+  user_id?: string;
+  operation?: string;
+  processing_steps?: ProcessingStep[];
+  data_analysis?: DataAnalysis;
+}
+
 export interface DetailedErrorResponse {
   success: false;
   message: string;
   error_code: string;
-  details?: any;
-  debug_info?: {
-    timestamp: string;
-    request_id?: string;
-    user_id?: string;
-    operation?: string;
-    processing_steps?: Array<{
-      step: string;
-      status: 'completed' | 'failed' | 'skipped';
-      details?: any;
-      error?: string;
-    }>;
-    data_analysis?: {
-      total_rows?: number;
-      processed_rows?: number;
-      failed_rows?: number;
-      headers?: string[];
-      sample_data?: any;
-      validation_errors?: string[];
-    };
-  };
+  details?: Record<string, unknown>;
+  debug_info?: DebugInfo;
   suggestions?: string[];
 }
 
@@ -67,7 +74,7 @@ export class ErrorDetailBuilder {
   addProcessingStep(
     step: string,
     status: 'completed' | 'failed' | 'skipped',
-    details?: any,
+    details?: Record<string, unknown>,
     error?: string
   ): this {
     if (this.errorResponse.debug_info) {
@@ -81,14 +88,7 @@ export class ErrorDetailBuilder {
     return this;
   }
 
-  setDataAnalysis(analysis: {
-    total_rows?: number;
-    processed_rows?: number;
-    failed_rows?: number;
-    headers?: string[];
-    sample_data?: any;
-    validation_errors?: string[];
-  }): this {
+  setDataAnalysis(analysis: DataAnalysis): this {
     if (this.errorResponse.debug_info) {
       this.errorResponse.debug_info.data_analysis = analysis;
     }
@@ -105,7 +105,7 @@ export class ErrorDetailBuilder {
     return this;
   }
 
-  setDetails(details: any): this {
+  setDetails(details: Record<string, unknown>): this {
     this.errorResponse.details = details;
     return this;
   }
@@ -132,13 +132,13 @@ export class CSVErrorBuilder extends ErrorDetailBuilder {
     dataSource: string
   ): DetailedErrorResponse {
     const builder = new CSVErrorBuilder(`必須フィールドが見つかりません: ${missingFields.join(', ')}`);
-    
+
     builder
       .setOperation('CSV_FIELD_MAPPING')
       .addProcessingStep('Parse CSV Headers', 'completed', { headers: availableHeaders })
-      .addProcessingStep('Map Required Fields', 'failed', { 
+      .addProcessingStep('Map Required Fields', 'failed', {
         missing_fields: missingFields,
-        data_source: dataSource 
+        data_source: dataSource
       })
       .setDataAnalysis({
         headers: availableHeaders,
@@ -147,7 +147,7 @@ export class CSVErrorBuilder extends ErrorDetailBuilder {
 
     // 修正提案の生成
     const suggestions: string[] = [];
-    
+
     if (dataSource === 'colormi') {
       suggestions.push('カラーミーのCSVファイルは「売上明細」形式を使用してください');
       suggestions.push('必要なヘッダー: 売上ID, 購入者 名前, 購入商品 販売価格(消費税込)');
@@ -165,7 +165,7 @@ export class CSVErrorBuilder extends ErrorDetailBuilder {
     });
 
     builder.addSuggestions(suggestions);
-    
+
     return builder.build();
   }
 
@@ -175,11 +175,11 @@ export class CSVErrorBuilder extends ErrorDetailBuilder {
     processedRows: number
   ): DetailedErrorResponse {
     const builder = new CSVErrorBuilder('データの検証に失敗しました');
-    
+
     builder
       .setOperation('CSV_DATA_VALIDATION')
       .addProcessingStep('Parse CSV', 'completed', { total_rows: totalRows })
-      .addProcessingStep('Validate Data', 'failed', { 
+      .addProcessingStep('Validate Data', 'failed', {
         validation_errors: validationErrors.length,
         processed_rows: processedRows
       })
@@ -208,10 +208,10 @@ function findSimilarHeaders(target: string, headers: string[]): string[] {
   };
 
   const targetKeywords = keywordMap[target] || [target];
-  
+
   return headers
-    .filter(header => 
-      targetKeywords.some(keyword => 
+    .filter(header =>
+      targetKeywords.some(keyword =>
         header.toLowerCase().includes(keyword.toLowerCase())
       )
     )
@@ -220,7 +220,7 @@ function findSimilarHeaders(target: string, headers: string[]): string[] {
 
 function analyzeValidationErrors(errors: string[]): Record<string, number> {
   const errorTypes: Record<string, number> = {};
-  
+
   errors.forEach(error => {
     if (error.includes('必須')) {
       const field = error.match(/([^は]+)が必須/)?.[1];
@@ -228,29 +228,29 @@ function analyzeValidationErrors(errors: string[]): Record<string, number> {
         errorTypes[`missing_${field}`] = (errorTypes[`missing_${field}`] || 0) + 1;
       }
     }
-    
+
     if (error.includes('形式')) {
       errorTypes['format_error'] = (errorTypes['format_error'] || 0) + 1;
     }
   });
-  
+
   return errorTypes;
 }
 
 function generateValidationSuggestions(errorTypes: Record<string, number>): string[] {
   const suggestions: string[] = [];
-  
+
   if (errorTypes['missing_金額'] > 5) {
     suggestions.push('多くの行で金額が不足しています。価格情報を含むカラムが正しく選択されているか確認してください');
   }
-  
+
   if (errorTypes['missing_注文番号'] > 3) {
     suggestions.push('注文番号が不足している行があります。売上IDまたは注文コードのカラムを確認してください');
   }
-  
+
   if (errorTypes['format_error'] > 2) {
     suggestions.push('データ形式エラーが多発しています。CSVファイルの文字コードをUTF-8で保存し直してください');
   }
-  
+
   return suggestions;
 }

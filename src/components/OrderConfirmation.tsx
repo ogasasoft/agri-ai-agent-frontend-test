@@ -3,7 +3,7 @@
 import { Order } from '@/types/order';
 
 interface OrderConfirmationProps {
-  orderData: any;
+  orderData: Order[];
   orderType: 'manual' | 'csv';
   onConfirm: () => void;
   onBack: () => void;
@@ -43,7 +43,7 @@ export default function OrderConfirmation({
                   </tr>
                 </thead>
                 <tbody>
-                  {orderData.slice(0, 5).map((order: any, index: number) => (
+                  {orderData.slice(0, 5).map((order: Order, index: number) => (
                     <tr key={index} className="border-t border-gray-200">
                       <td className="px-4 py-2 text-sm">{order.order_number}</td>
                       <td className="px-4 py-2 text-sm">{order.customer_name}</td>
@@ -159,7 +159,7 @@ export default function OrderConfirmation({
                   </tr>
                 </thead>
                 <tbody>
-                  {orderData.items.map((item: any, index: number) => (
+                  {orderData.items.map((item: OrderItem, index: number) => (
                     <tr key={index} className="border-t border-gray-200">
                       <td className="px-4 py-2 text-sm">{item.product_name}</td>
                       <td className="px-4 py-2 text-sm">{item.quantity}</td>

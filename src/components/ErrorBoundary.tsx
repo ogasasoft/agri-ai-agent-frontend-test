@@ -4,6 +4,12 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { ClientErrorBuilder, logClientError } from '@/lib/client-error-details';
 
+interface UserAction {
+  label: string;
+  action: 'retry' | 'refresh' | 'navigate' | 'contact_support';
+  params?: Record<string, unknown>;
+}
+
 interface Props {
   children: ReactNode;
   fallback?: (error: Error, errorInfo: ErrorInfo) => ReactNode;
@@ -13,7 +19,7 @@ interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: ErrorInfo | null;
-  errorDetails: any;
+  errorDetails: ClientErrorResponse | null;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -184,7 +190,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
                     {this.state.errorDetails.user_actions && (
                       <div className="mt-6 space-y-2">
-                        {this.state.errorDetails.user_actions.map((userAction: any, index: number) => (
+                        {this.state.errorDetails.user_actions.map((userAction: UserAction, index: number) => (
                           <button
                             key={index}
                             onClick={() => this.handleUserAction(userAction)}
