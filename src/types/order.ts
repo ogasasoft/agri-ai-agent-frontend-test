@@ -13,6 +13,7 @@ export interface Order {
   ec_source?: string;
   shipped_at?: string;
   tracking_number?: string;
+  items?: OrderItem[];
   created_at: string;
   updated_at: string;
 }

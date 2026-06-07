@@ -10,15 +10,27 @@ interface OrderConfirmationProps {
   isSubmitting?: boolean;
 }
 
-export default function OrderConfirmation({ 
-  orderData, 
-  orderType, 
-  onConfirm, 
-  onBack, 
-  isSubmitting = false 
+export default function OrderConfirmation({
+  orderData,
+  orderType,
+  onConfirm,
+  onBack,
+  isSubmitting = false
 }: OrderConfirmationProps) {
   const formatCurrency = (amount: number) => `¥${amount.toLocaleString()}`;
-  
+
+  const getSingleOrder = (): Order | null => {
+    if (orderType === 'csv') {
+      // CSV import: expect single order object
+      return orderData.length === 1 ? orderData[0] : null;
+    } else {
+      // Manual entry: expect single order object
+      return orderData.length === 1 ? orderData[0] : null;
+    }
+  };
+
+  const singleOrder = getSingleOrder();
+
   if (orderType === 'csv') {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -43,7 +55,7 @@ export default function OrderConfirmation({
                   </tr>
                 </thead>
                 <tbody>
-                  {orderData.slice(0, 5).map((order: Order, index: number) => (
+                  {orderData.slice(0, 5).map((order, index) => (
                     <tr key={index} className="border-t border-gray-200">
                       <td className="px-4 py-2 text-sm">{order.order_number}</td>
                       <td className="px-4 py-2 text-sm">{order.customer_name}</td>
@@ -65,7 +77,7 @@ export default function OrderConfirmation({
               <div className="flex justify-between items-center">
                 <span className="text-lg font-medium text-blue-900">合計金額</span>
                 <span className="text-2xl font-bold text-blue-600">
-                  {formatCurrency(orderData.reduce((sum: number, order: any) => sum + order.total_amount, 0))}
+                  {formatCurrency(orderData.reduce((sum, order) => sum + (order.total_amount || 0), 0))}
                 </span>
               </div>
             </div>
@@ -89,6 +101,21 @@ export default function OrderConfirmation({
   }
 
   // Manual order confirmation
+  if (!singleOrder) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="px-6 py-4">
+            <h1 className="text-2xl font-semibold text-gray-900">エラー</h1>
+            <p className="text-sm text-gray-600 mt-1">
+              有効な注文データが見つかりませんでした
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -106,40 +133,40 @@ export default function OrderConfirmation({
             <div className="bg-gray-50 rounded-lg p-4 space-y-3">
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">注文番号:</span>
-                <span className="text-sm font-medium">{orderData.order_number}</span>
+                <span className="text-sm font-medium">{singleOrder.order_number}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">顧客名:</span>
-                <span className="text-sm font-medium">{orderData.customer_name}</span>
+                <span className="text-sm font-medium">{singleOrder.customer_name}</span>
               </div>
-              {orderData.customer_phone && (
+              {singleOrder.customer_phone && (
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">電話番号:</span>
-                  <span className="text-sm font-medium">{orderData.customer_phone}</span>
+                  <span className="text-sm font-medium">{singleOrder.customer_phone}</span>
                 </div>
               )}
-              {orderData.customer_address && (
+              {singleOrder.customer_address && (
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">住所:</span>
-                  <span className="text-sm font-medium">{orderData.customer_address}</span>
+                  <span className="text-sm font-medium">{singleOrder.customer_address}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">注文日:</span>
-                <span className="text-sm font-medium">{orderData.order_date}</span>
+                <span className="text-sm font-medium">{singleOrder.order_date}</span>
               </div>
-              {orderData.delivery_date && (
+              {singleOrder.delivery_date && (
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">配達希望日:</span>
-                  <span className="text-sm font-medium">{orderData.delivery_date}</span>
+                  <span className="text-sm font-medium">{singleOrder.delivery_date}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">ステータス:</span>
                 <span className="text-sm font-medium">
-                  {orderData.status === 'pending' ? '未処理' :
-                   orderData.status === 'processing' ? '処理中' :
-                   orderData.status === 'shipped' ? '発送済' : '配達完了'}
+                  {singleOrder.status === 'pending' ? '未処理' :
+                   singleOrder.status === 'processing' ? '処理中' :
+                   singleOrder.status === 'shipped' ? '発送済' : '配達完了'}
                 </span>
               </div>
             </div>
@@ -159,7 +186,7 @@ export default function OrderConfirmation({
                   </tr>
                 </thead>
                 <tbody>
-                  {orderData.items.map((item: OrderItem, index: number) => (
+                  {singleOrder.items?.map((item: any, index: number) => (
                     <tr key={index} className="border-t border-gray-200">
                       <td className="px-4 py-2 text-sm">{item.product_name}</td>
                       <td className="px-4 py-2 text-sm">{item.quantity}</td>
@@ -177,17 +204,17 @@ export default function OrderConfirmation({
             <div className="flex justify-between items-center">
               <span className="text-lg font-medium text-blue-900">合計金額</span>
               <span className="text-2xl font-bold text-blue-600">
-                {formatCurrency(orderData.total_amount)}
+                {formatCurrency(singleOrder.total_amount)}
               </span>
             </div>
           </div>
 
           {/* Memo */}
-          {orderData.memo && (
+          {singleOrder.memo && (
             <div>
               <h2 className="text-lg font-medium text-gray-900 mb-2">備考</h2>
               <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-sm text-gray-700">{orderData.memo}</p>
+                <p className="text-sm text-gray-700">{singleOrder.memo}</p>
               </div>
             </div>
           )}

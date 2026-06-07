@@ -36,7 +36,7 @@ interface ClientDebugInfo {
   processing_steps?: ProcessingStep[];
 }
 
-interface ClientErrorResponse {
+export interface ClientErrorResponse {
   success: false;
   message: string;
   error_code: string;

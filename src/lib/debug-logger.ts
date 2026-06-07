@@ -123,11 +123,12 @@ class DebugLogger {
   }
 
   // API リクエスト/レスポンスのトレース
-  apiTrace(phase: 'REQUEST' | 'RESPONSE' | 'ERROR', data: unknown, context?: LogContext) {
+  apiTrace(phase: 'REQUEST' | 'RESPONSE' | 'ERROR', data: unknown, context?: LogContext, extraData?: unknown) {
     if (!this.isDebugMode) return;
 
     const emoji = phase === 'REQUEST' ? '📤' : phase === 'RESPONSE' ? '📥' : '💥';
-    if (data && typeof data === 'object' && data !== null) {
+    const logData = extraData ? { ...data as Record<string, unknown>, ...extraData as Record<string, unknown> } : data;
+    if (logData && typeof logData === 'object' && logData !== null) {
     }
   }
 
@@ -162,7 +163,7 @@ export const logAPICall = (
   data?: unknown,
   context?: LogContext
 ) => {
-  debugLogger.apiTrace('REQUEST', { method, url, ...data }, context);
+  debugLogger.apiTrace('REQUEST', { method, url }, context, data);
 };
 
 export const logAPIResponse = (
@@ -170,7 +171,7 @@ export const logAPIResponse = (
   data?: unknown,
   context?: LogContext
 ) => {
-  debugLogger.apiTrace('RESPONSE', { status, ...data }, context);
+  debugLogger.apiTrace('RESPONSE', { status }, context, data);
 };
 
 export const logAPIError = (

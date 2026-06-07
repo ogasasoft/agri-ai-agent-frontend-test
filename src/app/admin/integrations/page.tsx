@@ -16,7 +16,7 @@ interface APIIntegration {
   api_secret?: string;
   webhook_url?: string;
   is_active: boolean;
-  configuration: Record<string, unknown>;
+  configuration: IntegrationConfig;
   last_sync_at?: string;
   created_at: string;
   updated_at: string;
@@ -28,6 +28,16 @@ interface IntegrationConfig {
   webhook_enabled?: boolean;
   sync_categories?: string[];
   field_mapping?: { [key: string]: string };
+}
+
+function safeMergeConfig(record: Record<string, unknown>): IntegrationConfig {
+  return {
+    sync_interval: typeof record.sync_interval === 'number' ? record.sync_interval : 3600,
+    auto_import: typeof record.auto_import === 'boolean' ? record.auto_import : false,
+    webhook_enabled: record.webhook_enabled as boolean | undefined,
+    sync_categories: Array.isArray(record.sync_categories) ? record.sync_categories as string[] : undefined,
+    field_mapping: record.field_mapping && typeof record.field_mapping === 'object' ? record.field_mapping as { [key: string]: string } : undefined
+  };
 }
 
 interface IntegrationTemplate {
@@ -204,7 +214,7 @@ export default function APIIntegrationsManagement() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {integrations.map((integration) => {
           const template = INTEGRATION_TEMPLATES[integration.name as keyof typeof INTEGRATION_TEMPLATES];
-          const config: IntegrationConfig = integration.configuration || {};
+          const config = safeMergeConfig(integration.configuration);
 
           return (
             <div key={integration.id} className="bg-white shadow rounded-lg overflow-hidden">
@@ -263,7 +273,7 @@ export default function APIIntegrationsManagement() {
                 ) : (
                   <ViewIntegrationDetails
                     integration={integration}
-                    config={config}
+                    config={safeMergeConfig(integration.configuration) as IntegrationConfig}
                     onEdit={() => setEditingIntegration(integration)}
                     onTestConnection={() => handleTestConnection(integration)}
                     onSyncData={() => handleSyncData(integration.id)}
@@ -307,11 +317,13 @@ function EditIntegrationForm({
               </label>
               <input
                 type={field.type}
-                value={integration[field.key as keyof APIIntegration] || ''}
-                onChange={(e) => onChange({
-                  ...integration,
-                  [field.key]: e.target.value
-                })}
+                value={field.type === 'checkbox' && integration[field.key as keyof APIIntegration] === true ? 'checked' : (integration[field.key as keyof APIIntegration] || '')}
+                onChange={(e) => {
+                  const newValue = field.type === 'checkbox' ? e.target.checked : e.target.value;
+                  const updated: any = { ...integration };
+                  updated[field.key] = newValue;
+                  onChange(updated);
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder={`${field.label}を入力`}
               />
