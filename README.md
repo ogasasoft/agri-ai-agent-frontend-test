@@ -173,11 +173,19 @@ npm run start        # プロダクションサーバー起動
 # 品質管理
 npm run typecheck    # TypeScript 型チェック
 npm run lint         # ESLint 実行
+npm test             # テスト実行（199テスト）
 
 # デプロイ（Vercel）
 vercel               # ステージングデプロイ
 vercel --prod        # プロダクションデプロイ
 ```
+
+## 📚 APIドキュメント
+
+詳細なAPIエンドポイント、リクエスト/レスポンス例、認証情報、エラーハンドリングについては
+[API.md](./API.md) を参照してください。
+
+- [API.md](./API.md) - 完全なAPIドキュメント
 
 ## 🌐 デプロイ
 
