@@ -2,7 +2,7 @@
 'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { ClientErrorBuilder, logClientError, ClientErrorResponse as ErrorResponseClass } from '@/lib/client-error-details';
+import { ClientErrorBuilder, logClientError, ClientErrorResponse } from '@/lib/client-error-details';
 
 interface UserAction {
   label: string;

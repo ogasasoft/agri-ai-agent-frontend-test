@@ -30,13 +30,14 @@ interface IntegrationConfig {
   field_mapping?: { [key: string]: string };
 }
 
-function safeMergeConfig(record: Record<string, unknown>): IntegrationConfig {
+function safeMergeConfig(record: unknown): IntegrationConfig {
+  const config = record as Record<string, unknown>;
   return {
-    sync_interval: typeof record.sync_interval === 'number' ? record.sync_interval : 3600,
-    auto_import: typeof record.auto_import === 'boolean' ? record.auto_import : false,
-    webhook_enabled: record.webhook_enabled as boolean | undefined,
-    sync_categories: Array.isArray(record.sync_categories) ? record.sync_categories as string[] : undefined,
-    field_mapping: record.field_mapping && typeof record.field_mapping === 'object' ? record.field_mapping as { [key: string]: string } : undefined
+    sync_interval: typeof config.sync_interval === 'number' ? config.sync_interval : 3600,
+    auto_import: typeof config.auto_import === 'boolean' ? config.auto_import : false,
+    webhook_enabled: config.webhook_enabled as boolean | undefined,
+    sync_categories: Array.isArray(config.sync_categories) ? config.sync_categories as string[] : undefined,
+    field_mapping: config.field_mapping && typeof config.field_mapping === 'object' ? config.field_mapping as { [key: string]: string } : undefined
   };
 }
 
@@ -214,7 +215,7 @@ export default function APIIntegrationsManagement() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {integrations.map((integration) => {
           const template = INTEGRATION_TEMPLATES[integration.name as keyof typeof INTEGRATION_TEMPLATES];
-          const config = safeMergeConfig(integration.configuration);
+          const config = safeMergeConfig(integration.configuration as unknown as Record<string, unknown>);
 
           return (
             <div key={integration.id} className="bg-white shadow rounded-lg overflow-hidden">
@@ -273,7 +274,7 @@ export default function APIIntegrationsManagement() {
                 ) : (
                   <ViewIntegrationDetails
                     integration={integration}
-                    config={safeMergeConfig(integration.configuration) as IntegrationConfig}
+                    config={safeMergeConfig(integration.configuration as unknown as Record<string, unknown>) as IntegrationConfig}
                     onEdit={() => setEditingIntegration(integration)}
                     onTestConnection={() => handleTestConnection(integration)}
                     onSyncData={() => handleSyncData(integration.id)}
@@ -317,7 +318,7 @@ function EditIntegrationForm({
               </label>
               <input
                 type={field.type}
-                value={field.type === 'checkbox' && integration[field.key as keyof APIIntegration] === true ? 'checked' : (integration[field.key as keyof APIIntegration] || '')}
+                value={field.type === 'checkbox' && integration[field.key as keyof APIIntegration] === true ? 'checked' : (String(integration[field.key as keyof APIIntegration] || ''))}
                 onChange={(e) => {
                   const newValue = field.type === 'checkbox' ? e.target.checked : e.target.value;
                   const updated: any = { ...integration };
