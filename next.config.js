@@ -5,12 +5,10 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  experimental: {
-    serverComponentsExternalPackages: ['pg', 'bcryptjs']
-  },
   // Fix React hydration issues
   reactStrictMode: true,
-  swcMinify: true,
+  // serverComponentsExternalPackages moved to serverExternalPackages (Next.js 15+)
+  serverExternalPackages: ['pg', 'bcryptjs'],
   // セキュリティのため、環境変数をクライアントサイドに露出しない
   // env: {
   //   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
