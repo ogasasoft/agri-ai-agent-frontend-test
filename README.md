@@ -327,7 +327,7 @@ npm run dev
 ### ✅ 現在の状態
 
 - **Build Status**: ✅ 成功
-- **Test Status**: ✅ 199 passed
+- **Test Status**: ✅ 199 passed, 0 skipped
 - **TypeScript**: ✅ 0 errors
 - **ESLint**: ✅ No errors
 - **Quality Score**: 25/25 (Excellent)
@@ -344,7 +344,7 @@ npm run dev
 
 - コード品質: ✅ 優秀 (25/25)
 - ビルド: ✅ 成功
-- テスト: ✅ 199 passed
+- テスト: ✅ 199 passed, 0 skipped
 - 重大な問題: ✅ なし
 - アップグレード済み依存関係: ✅ 完了
 
