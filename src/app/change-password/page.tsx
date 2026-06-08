@@ -24,11 +24,6 @@ function ChangePasswordForm() {
 
   const isForced = searchParams.get('forced') === 'true';
 
-  useEffect(() => {
-    fetchUserInfo();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const fetchUserInfo = async () => {
     try {
       const response = await fetch('/api/auth/me');
@@ -42,6 +37,11 @@ function ChangePasswordForm() {
       router.push('/login');
     }
   };
+
+  useEffect(() => {
+    fetchUserInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

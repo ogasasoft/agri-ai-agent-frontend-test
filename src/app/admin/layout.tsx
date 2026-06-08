@@ -45,7 +45,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     checkAdminAuth();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

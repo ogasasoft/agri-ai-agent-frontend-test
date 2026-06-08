@@ -44,7 +44,7 @@ export default function CustomersManagement() {
 
   useEffect(() => {
     loadCustomers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps react-hooks/set-state-in-effect
+     
   }, []);
 
   const handleDeleteCustomer = async (customerId: number) => {

@@ -92,11 +92,11 @@ export default function UsersPage() {
 
   useEffect(() => {
     loadUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps react-hooks/set-state-in-effect
+     
     if (showPasswords) {
       loadUsers();
     }

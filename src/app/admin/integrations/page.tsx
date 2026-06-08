@@ -101,7 +101,7 @@ export default function APIIntegrationsManagement() {
 
   useEffect(() => {
     loadIntegrations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps react-hooks/set-state-in-effect
+     
   }, []);
 
   const handleUpdateIntegration = async (integration: APIIntegration) => {

@@ -1,15 +1,11 @@
-import nextConfig from "eslint-config-next";
+import nextJsConfig from 'eslint-config-next';
 
-const eslintConfig = [
-  ...nextConfig,
+/** @type {import('eslint').Linter.Config[]} */
+export default [
+  ...nextJsConfig,
   {
     rules: {
-      "@next/next/no-html-link-for-pages": "off",
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
-  {
-    ignores: ["node_modules/", ".next/", "coverage/"],
-  },
 ];
-
-export default eslintConfig;
