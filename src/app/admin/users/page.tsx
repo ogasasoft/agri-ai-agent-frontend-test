@@ -96,11 +96,10 @@ export default function UsersPage() {
   }, []);
 
   useEffect(() => {
-     
     if (showPasswords) {
       loadUsers();
     }
-  }, [showPasswords]);
+  }, [showPasswords, loadUsers]);
 
   const togglePasswordView = () => {
     setShowPasswords(!showPasswords);

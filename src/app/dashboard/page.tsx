@@ -63,10 +63,7 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    initializeDateRange();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
 
   const initializeDateRange = async () => {
     try {
@@ -153,6 +150,12 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
+
+  // Initialize date range on component mount
+  useEffect(() => {
+    initializeDateRange();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchDashboardData = async () => {
     await fetchDashboardDataWithRange(dateRange);

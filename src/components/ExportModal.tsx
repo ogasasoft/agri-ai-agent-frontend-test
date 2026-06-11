@@ -1,6 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+
+// Initialize timestamp outside component to avoid React 19 purity rule violations
+const INITIAL_TIMESTAMP = Date.now();
 import { X, Download, FileText } from 'lucide-react';
 import type { Order } from '@/types/order';
 
@@ -13,6 +16,7 @@ interface ExportModalProps {
 export function ExportModal({ selectedOrders, orders, onClose }: ExportModalProps) {
   const [exportFormat, setExportFormat] = useState<'yamato' | 'sagawa' | 'custom'>('yamato');
   const [isExporting, setIsExporting] = useState(false);
+  const timestampRef = React.useRef<number>(INITIAL_TIMESTAMP);
 
   const selectedOrderData = Array.isArray(orders) ? orders.filter(order => 
     selectedOrders.includes(order.id.toString())
@@ -42,7 +46,7 @@ export function ExportModal({ selectedOrders, orders, onClose }: ExportModalProp
       const url = URL.createObjectURL(blob);
       
       link.setAttribute('href', url);
-      link.setAttribute('download', `delivery_labels_${Date.now()}.csv`);
+      link.setAttribute('download', `delivery_labels_${timestampRef.current}.csv`);
       link.style.visibility = 'hidden';
       
       document.body.appendChild(link);

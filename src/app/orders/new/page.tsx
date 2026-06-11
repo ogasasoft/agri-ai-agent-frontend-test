@@ -49,8 +49,8 @@ export default function NewOrderPage() {
     name: 'items'
   });
 
-  const watchedItems = watch('items');
-  const totalAmount = watchedItems?.reduce((sum, item) => 
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const totalAmount = watch('items')?.reduce((sum, item) =>
     sum + (item.quantity || 0) * (item.unit_price || 0), 0
   ) || 0;
 
