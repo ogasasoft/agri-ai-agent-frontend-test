@@ -22,10 +22,6 @@ export default function ShippingPendingPage() {
   });
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
   const fetchOrders = async () => {
     try {
       // セッショントークンを取得

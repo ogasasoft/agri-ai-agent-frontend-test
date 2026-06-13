@@ -21,10 +21,6 @@ export default function ShippingCompletedPage() {
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [canceling, setCanceling] = useState(false);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
   const fetchOrders = async () => {
     try {
       const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0];

@@ -28,30 +28,6 @@ function ShippingCompleteContent() {
   const [orderIds, setOrderIds] = useState<number[]>([]);
   const [autoDownloaded, setAutoDownloaded] = useState(false);
 
-  useEffect(() => {
-    const orderIdsParam = searchParams.get('orderIds');
-    const ids = orderIdsParam?.split(',').map(id => parseInt(id)) || [];
-    setOrderIds(ids);
-
-    if (ids.length > 0) {
-      processShipping(ids);
-    } else {
-      router.push('/orders/shipping/pending');
-    }
-  }, [searchParams, router]);
-
-  // Auto-download CSV when shipping result is ready
-  useEffect(() => {
-    if (shippingResult?.download_ready &&
-        shippingResult?.csv_content &&
-        shippingResult?.filename &&
-        !autoDownloaded) {
-      setAutoDownloaded(true);
-      downloadYamatoB2CSV();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shippingResult, autoDownloaded]);
-
   const processShipping = async (ids: number[]) => {
     try {
       setLoading(true);

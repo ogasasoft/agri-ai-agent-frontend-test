@@ -45,7 +45,16 @@ export default function UploadPage() {
     };
   }, []);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const parseFileForPreview = async (file: File) => {
+    setIsProcessing(true);
+
+    try {
+      // エンコーディング自動検出・変換
+      const buffer = await file.arrayBuffer();
+      const encodingResult = detectAndConvertEncoding(buffer);
+
+
+[219 more lines in file. Use offset=70 to continue.]
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
       parseFileForPreview(file);

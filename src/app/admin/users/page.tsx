@@ -92,14 +92,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     loadUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadUsers]);
-
-  useEffect(() => {
-    if (showPasswords) {
-      loadUsers();
-    }
-  }, [showPasswords, loadUsers]);
+  }, [showPasswords]);
 
   const togglePasswordView = () => {
     setShowPasswords(!showPasswords);

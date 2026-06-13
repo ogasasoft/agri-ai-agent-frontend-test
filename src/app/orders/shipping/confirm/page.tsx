@@ -25,7 +25,7 @@ function ShippingConfirmContent() {
     if (orderIdsParam) {
       const orderIds = orderIdsParam.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
       if (orderIds.length > 0) {
-        fetchOrders(orderIds);
+        await fetchOrders(orderIds);
       } else {
         router.push('/orders/shipping/pending');
       }

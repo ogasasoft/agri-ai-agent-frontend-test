@@ -25,46 +25,6 @@ function LoginForm() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (mounted) {
-      if (autoLogin) {
-        // Try auto-login with remember token
-        attemptAutoLogin();
-      }
-      // Note: No need to check auth status on login page
-      // Users are expected to be logged out when accessing login
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mounted, autoLogin]);
-
-  // checkAuthStatus removed - not needed on login page
-
-  const checkUserRoleAndRedirect = async () => {
-    try {
-      // First check user info to get admin flag
-      const userResponse = await fetch('/api/auth/me', {
-        credentials: 'include'
-      });
-      
-      if (userResponse.ok) {
-        const userData = await userResponse.json();
-        if (userData.success && userData.isAdmin) {
-          // User is admin, redirect to admin page
-          router.push('/admin');
-        } else {
-          // Regular user, redirect to default path
-          router.push(redirectPath);
-        }
-      } else {
-        // Auth check failed, redirect to default path
-        router.push(redirectPath);
-      }
-    } catch (error) {
-      // If check fails, redirect to default path
-      router.push(redirectPath);
-    }
-  };
-
   const attemptAutoLogin = async () => {
     setLoading(true);
     try {
@@ -89,6 +49,44 @@ function LoginForm() {
       setLoading(false);
     }
   };
+
+  const checkUserRoleAndRedirect = async () => {
+    try {
+      // First check user info to get admin flag
+      const userResponse = await fetch('/api/auth/me', {
+        credentials: 'include'
+      });
+
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        if (userData.success && userData.isAdmin) {
+          // User is admin, redirect to admin page
+          router.push('/admin');
+        } else {
+          // Regular user, redirect to default path
+          router.push(redirectPath);
+        }
+      } else {
+        // Auth check failed, redirect to default path
+        router.push(redirectPath);
+      }
+    } catch (error) {
+      // If check fails, redirect to default path
+      router.push(redirectPath);
+    }
+  };
+
+  useEffect(() => {
+    if (mounted) {
+      if (autoLogin) {
+        // Try auto-login with remember token
+        attemptAutoLogin();
+      }
+      // Note: No need to check auth status on login page
+      // Users are expected to be logged out when accessing login
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, autoLogin]);
 
   const handleInputChange = (field: keyof typeof formData, value: string | boolean) => {
     // Trim whitespace from username and password fields

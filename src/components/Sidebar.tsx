@@ -34,6 +34,25 @@ export function Sidebar({ isChatOpen = true, setIsChatOpen }: SidebarProps = {})
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
+  const fetchUserInfo = async () => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-cache'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user info:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -43,8 +62,6 @@ export function Sidebar({ isChatOpen = true, setIsChatOpen }: SidebarProps = {})
       fetchUserInfo();
     }
   }, [mounted]);
-
-  const fetchUserInfo = async () => {
     try {
       const response = await fetch('/api/auth/me', {
         method: 'GET',
