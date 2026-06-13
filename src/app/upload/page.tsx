@@ -20,6 +20,97 @@ export default function UploadPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept: {
+      'text/csv': ['.csv'],
+      'application/vnd.ms-excel': ['.xls', '.xlsx']
+    },
+    multiple: false,
+    preventDropOnDocument: true, // ドキュメント全体でのドロップを防止
+    noClick: false,
+    noKeyboard: false
+  });
+
+  const parseFileForPreview = useCallback(async (file: File) => {
+    setIsProcessing(true);
+
+    try {
+      // エンコーディング自動検出・変換
+      const buffer = await file.arrayBuffer();
+      const encodingResult = detectAndConvertEncoding(buffer);
+
+      if (encodingResult.hasGarbledText || encodingResult.confidence < 0.3) {
+        alert(`文字エンコーディングの問題が検出されました。\n検出されたエンコーディング: ${encodingResult.detectedEncoding}\n信頼度: ${Math.round(encodingResult.confidence * 100)}%\n\nCSVファイルをUTF-8で保存し直すか、正しいエンコーディングで保存してください。`);
+        setIsProcessing(false);
+        return;
+      }
+
+      const text = encodingResult.text;
+
+      const parseResult = Papa.parse<Record<string, string>>(text, {
+        header: true,
+        skipEmptyLines: true,
+      });
+
+      if (parseResult.errors && parseResult.errors.length > 0) {
+        alert(`CSV解析エラー: ${parseResult.errors[0].message}`);
+        setIsProcessing(false);
+        return;
+      }
+
+      const headers = parseResult.meta?.fields || [];
+      const allData = parseResult.data;
+      const rows = allData.slice(0, 10); // 最初の10行のみプレビュー
+
+      setParsedData({
+        file,
+        headers,
+        rows,
+        allData
+      });
+      setShowPreview(true);
+    } catch (error) {
+      alert(`ファイル読み込みエラー: ${error instanceof Error ? error.message : '不明なエラー'}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [setIsProcessing, setParsedData, setShowPreview]);
+
+  const cancelPreview = useCallback(() => {
+    setParsedData(null);
+    setShowPreview(false);
+  }, [setParsedData, setShowPreview]);
+
+  const handleConfirm = useCallback(() => {
+    if (!parsedData) return;
+
+    // CSVデータを変換して注文データ形式に
+    const orderData = parsedData.allData.map((row, index) => ({
+      order_number: row['注文番号'] || row['order_number'] || `CSV-${Date.now()}-${index + 1}`,
+      customer_name: row['顧客名'] || row['customer_name'] || '',
+      customer_phone: row['電話番号'] || row['phone'] || '',
+      customer_address: row['住所'] || row['address'] || '',
+      total_amount: parseInt(row['金額'] || row['amount'] || '0'),
+      order_date: row['注文日'] || row['order_date'] || new Date().toISOString().split('T')[0],
+      delivery_date: row['配達希望日'] || row['delivery_date'] || '',
+      status: (row['ステータス'] || row['status'] || 'pending') as 'pending' | 'processing' | 'shipped' | 'delivered',
+      memo: row['備考'] || row['memo'] || '',
+    }));
+
+    // セッションストレージに保存
+    sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
+
+    // 確認画面に遷移
+    router.push('/orders/register/confirm?type=csv');
+  }, [parsedData, router]);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0];
+      parseFileForPreview(file);
+    }
+  }, [parseFileForPreview]);
+
   // ブラウザのデフォルトのドラッグ&ドロップ動作を防止
   useEffect(() => {
     const preventDefaultDrag = (e: DragEvent) => {
@@ -44,106 +135,6 @@ export default function UploadPage() {
       document.removeEventListener('drop', preventDefaultDrop, false);
     };
   }, []);
-
-  const parseFileForPreview = async (file: File) => {
-    setIsProcessing(true);
-
-    try {
-      // エンコーディング自動検出・変換
-      const buffer = await file.arrayBuffer();
-      const encodingResult = detectAndConvertEncoding(buffer);
-
-
-[219 more lines in file. Use offset=70 to continue.]
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      parseFileForPreview(file);
-    }
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'text/csv': ['.csv'],
-      'application/vnd.ms-excel': ['.xls', '.xlsx']
-    },
-    multiple: false,
-    preventDropOnDocument: true, // ドキュメント全体でのドロップを防止
-    noClick: false,
-    noKeyboard: false
-  });
-
-  const parseFileForPreview = async (file: File) => {
-    setIsProcessing(true);
-
-    try {
-      // エンコーディング自動検出・変換
-      const buffer = await file.arrayBuffer();
-      const encodingResult = detectAndConvertEncoding(buffer);
-
-      if (encodingResult.hasGarbledText || encodingResult.confidence < 0.3) {
-        alert(`文字エンコーディングの問題が検出されました。\n検出されたエンコーディング: ${encodingResult.detectedEncoding}\n信頼度: ${Math.round(encodingResult.confidence * 100)}%\n\nCSVファイルをUTF-8で保存し直すか、正しいエンコーディングで保存してください。`);
-        setIsProcessing(false);
-        return;
-      }
-
-      const text = encodingResult.text;
-
-      const parseResult = Papa.parse<Record<string, string>>(text, {
-        header: true,
-        skipEmptyLines: true,
-      });
-
-      if (parseResult.errors && parseResult.errors.length > 0) {
-        alert(`CSV解析エラー: ${parseResult.errors[0].message}`);
-        return;
-      }
-
-      const headers = parseResult.meta?.fields || [];
-      const allData = parseResult.data;
-      const rows = allData.slice(0, 10); // 最初の10行のみプレビュー
-
-      setParsedData({
-        file,
-        headers,
-        rows,
-        allData
-      });
-      setShowPreview(true);
-    } catch (error) {
-      alert(`ファイル読み込みエラー: ${error instanceof Error ? error.message : '不明なエラー'}`);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleConfirm = () => {
-    if (!parsedData) return;
-
-    // CSVデータを変換して注文データ形式に
-    const orderData = parsedData.allData.map((row, index) => ({
-      order_number: row['注文番号'] || row['order_number'] || `CSV-${Date.now()}-${index + 1}`,
-      customer_name: row['顧客名'] || row['customer_name'] || '',
-      customer_phone: row['電話番号'] || row['phone'] || '',
-      customer_address: row['住所'] || row['address'] || '',
-      total_amount: parseInt(row['金額'] || row['amount'] || '0'),
-      order_date: row['注文日'] || row['order_date'] || new Date().toISOString().split('T')[0],
-      delivery_date: row['配達希望日'] || row['delivery_date'] || '',
-      status: (row['ステータス'] || row['status'] || 'pending') as 'pending' | 'processing' | 'shipped' | 'delivered',
-      memo: row['備考'] || row['memo'] || '',
-    }));
-
-    // セッションストレージに保存
-    sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
-    
-    // 確認画面に遷移
-    router.push('/orders/register/confirm?type=csv');
-  };
-
-  const cancelPreview = () => {
-    setParsedData(null);
-    setShowPreview(false);
-  };
 
   if (showPreview && parsedData) {
     return (

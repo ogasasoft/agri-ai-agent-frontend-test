@@ -16,7 +16,7 @@ interface ExportModalProps {
 export function ExportModal({ selectedOrders, orders, onClose }: ExportModalProps) {
   const [exportFormat, setExportFormat] = useState<'yamato' | 'sagawa' | 'custom'>('yamato');
   const [isExporting, setIsExporting] = useState(false);
-  const timestampRef = React.useRef<number>(INITIAL_TIMESTAMP);
+  const timestampRef = useRef<number>(INITIAL_TIMESTAMP);
 
   const selectedOrderData = Array.isArray(orders) ? orders.filter(order => 
     selectedOrders.includes(order.id.toString())

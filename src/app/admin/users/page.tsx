@@ -72,7 +72,10 @@ export default function UsersPage() {
     try {
       const endpoint = showPasswords ? '/api/admin/users/passwords' : '/api/admin/users';
       const response = await fetch(endpoint, {
-        headers: getAuthHeaders()
+        headers: {
+          'x-session-token': getCookieValue('session_token'),
+          'x-csrf-token': getCookieValue('csrf_token'),
+        }
       });
 
       if (response.ok) {
@@ -92,7 +95,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     loadUsers();
-  }, [showPasswords]);
+  }, [showPasswords, loadUsers]);
 
   const togglePasswordView = () => {
     setShowPasswords(!showPasswords);

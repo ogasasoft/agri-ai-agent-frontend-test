@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Package, User, Phone, MapPin, Calendar, FileText, ArrowLeft } from 'lucide-react';
 import type { Order } from '@/types/order';
@@ -14,6 +14,32 @@ function ShippingConfirmContent() {
   const [deliveryType, setDeliveryType] = useState<'normal' | 'cool' | 'frozen'>('normal');
   const [notes, setNotes] = useState('');
 
+  const fetchOrders = useCallback(async (orderIds: number[]) => {
+    try {
+      const response = await fetch('/api/orders');
+      const data = await response.json();
+
+      let allOrders = [];
+      if (data.success && Array.isArray(data.orders)) {
+        allOrders = data.orders;
+      } else if (Array.isArray(data)) {
+        allOrders = data;
+      }
+
+      // 指定されたIDの注文のみをフィルタリング
+      const targetOrders = allOrders.filter((order: Order) =>
+        orderIds.includes(order.id)
+      );
+
+      setOrders(targetOrders);
+    } catch (error) {
+      console.error('注文データの取得に失敗しました:', error);
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [setOrders, setLoading]);
+
   useEffect(() => {
     const orderIdsParam = searchParams.get('orderIds');
     const deliveryTypeParam = searchParams.get('deliveryType') as 'normal' | 'cool' | 'frozen';
@@ -25,40 +51,14 @@ function ShippingConfirmContent() {
     if (orderIdsParam) {
       const orderIds = orderIdsParam.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
       if (orderIds.length > 0) {
-        await fetchOrders(orderIds);
+        fetchOrders(orderIds);
       } else {
         router.push('/orders/shipping/pending');
       }
     } else {
       router.push('/orders/shipping/pending');
     }
-  }, [searchParams, router]);
-
-  const fetchOrders = async (orderIds: number[]) => {
-    try {
-      const response = await fetch('/api/orders');
-      const data = await response.json();
-      
-      let allOrders = [];
-      if (data.success && Array.isArray(data.orders)) {
-        allOrders = data.orders;
-      } else if (Array.isArray(data)) {
-        allOrders = data;
-      }
-
-      // 指定されたIDの注文のみをフィルタリング
-      const targetOrders = allOrders.filter((order: Order) => 
-        orderIds.includes(order.id)
-      );
-      
-      setOrders(targetOrders);
-    } catch (error) {
-      console.error('注文データの取得に失敗しました:', error);
-      setOrders([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [searchParams, router, fetchOrders]);
 
   const handleConfirmShipping = async () => {
     if (orders.length === 0) return;
