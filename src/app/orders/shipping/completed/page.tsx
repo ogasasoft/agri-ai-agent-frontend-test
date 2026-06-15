@@ -16,7 +16,7 @@ export default function ShippingCompletedPage() {
     dateTo: '',
     status: 'shipped', // デフォルトで発送済みを選択
     hasDeliveryDate: 'all',
-    hasMemo: 'all'
+    hasMemo: 'all',
   });
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [canceling, setCanceling] = useState(false);
@@ -28,8 +28,8 @@ export default function ShippingCompletedPage() {
       const response = await fetch('/api/orders', {
         credentials: 'include',
         headers: {
-          'x-session-token': sessionToken || ''
-        }
+          'x-session-token': sessionToken || '',
+        },
       });
       const data = await response.json();
 
@@ -74,7 +74,7 @@ export default function ShippingCompletedPage() {
           'x-csrf-token': csrfToken,
         },
         body: JSON.stringify({
-          order_ids: selectedOrders.map(id => parseInt(id))
+          order_ids: selectedOrders.map((id) => parseInt(id)),
         }),
       });
 
@@ -95,18 +95,20 @@ export default function ShippingCompletedPage() {
     }
   };
 
-  const filteredOrders = Array.isArray(orders) ? orders.filter(order => {
-    // 発送済みのみ表示
-    if (order.status !== 'shipped') return false;
+  const filteredOrders = Array.isArray(orders)
+    ? orders.filter((order) => {
+        // 発送済みのみ表示
+        if (order.status !== 'shipped') return false;
 
-    if (filters.dateFrom && order.order_date < filters.dateFrom) return false;
-    if (filters.dateTo && order.order_date > filters.dateTo) return false;
-    if (filters.hasDeliveryDate === 'yes' && !order.delivery_date) return false;
-    if (filters.hasDeliveryDate === 'no' && order.delivery_date) return false;
-    if (filters.hasMemo === 'yes' && !order.has_memo) return false;
-    if (filters.hasMemo === 'no' && order.has_memo) return false;
-    return true;
-  }) : [];
+        if (filters.dateFrom && order.order_date < filters.dateFrom) return false;
+        if (filters.dateTo && order.order_date > filters.dateTo) return false;
+        if (filters.hasDeliveryDate === 'yes' && !order.delivery_date) return false;
+        if (filters.hasDeliveryDate === 'no' && order.delivery_date) return false;
+        if (filters.hasMemo === 'yes' && !order.has_memo) return false;
+        if (filters.hasMemo === 'no' && order.has_memo) return false;
+        return true;
+      })
+    : [];
 
   if (loading) {
     return (
@@ -131,9 +133,7 @@ export default function ShippingCompletedPage() {
             </button>
             <div>
               <h1 className="text-2xl font-semibold text-gray-900">発送済み注文</h1>
-              <p className="text-sm text-gray-600 mt-1">
-                発送済み: {filteredOrders.length}件
-              </p>
+              <p className="text-sm text-gray-600 mt-1">発送済み: {filteredOrders.length}件</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -160,8 +160,8 @@ export default function ShippingCompletedPage() {
 
       {/* Filters */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <OrderFilters 
-          filters={filters} 
+        <OrderFilters
+          filters={filters}
           onFiltersChange={setFilters}
           hideStatusFilter={true} // 発送済み画面では状態フィルターを隠す
         />
@@ -173,9 +173,7 @@ export default function ShippingCompletedPage() {
           <div className="text-center">
             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">発送済み注文がありません</h3>
-            <p className="text-gray-600">
-              まだ発送済みの注文がありません。
-            </p>
+            <p className="text-gray-600">まだ発送済みの注文がありません。</p>
           </div>
         </div>
       )}

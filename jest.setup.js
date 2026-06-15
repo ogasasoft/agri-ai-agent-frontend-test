@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
@@ -10,26 +10,26 @@ jest.mock('next/navigation', () => ({
       back: jest.fn(),
       forward: jest.fn(),
       refresh: jest.fn(),
-    }
+    };
   },
   useSearchParams() {
-    return new URLSearchParams()
+    return new URLSearchParams();
   },
   usePathname() {
-    return '/'
+    return '/';
   },
-}))
+}));
 
 // Mock environment variables
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db'
-process.env.OPENAI_API_KEY = 'test-openai-key'
+process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db';
+process.env.OPENAI_API_KEY = 'test-openai-key';
 
 // Global test utilities
-global.fetch = jest.fn()
+global.fetch = jest.fn();
 
 beforeEach(() => {
-  fetch.mockClear()
-})
+  fetch.mockClear();
+});
 
 // Mock console methods to reduce noise in tests
 global.console = {
@@ -39,4 +39,4 @@ global.console = {
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),
-}
+};

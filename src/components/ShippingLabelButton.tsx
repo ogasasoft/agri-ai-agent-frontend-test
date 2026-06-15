@@ -23,7 +23,7 @@ export default function ShippingLabelButton({
   selectedOrders,
   onShippingComplete,
   disabled = false,
-  buttonText = "発送書類作成"
+  buttonText = '発送書類作成',
 }: ShippingLabelButtonProps) {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
@@ -34,9 +34,11 @@ export default function ShippingLabelButton({
     if (selectedOrders.length === 0) return;
 
     // 確認画面に遷移
-    const orderIds = selectedOrders.map(order => order.id).join(',');
+    const orderIds = selectedOrders.map((order) => order.id).join(',');
     const encodedNotes = encodeURIComponent(notes);
-    router.push(`/orders/shipping/confirm?orderIds=${orderIds}&deliveryType=${deliveryType}&notes=${encodedNotes}`);
+    router.push(
+      `/orders/shipping/confirm?orderIds=${orderIds}&deliveryType=${deliveryType}&notes=${encodedNotes}`
+    );
   };
 
   return (
@@ -54,12 +56,10 @@ export default function ShippingLabelButton({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-4">発送伝票作成</h3>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  配送タイプ
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">配送タイプ</label>
                 <select
                   value={deliveryType}
                   onChange={(e) => setDeliveryType(e.target.value as any)}
@@ -72,9 +72,7 @@ export default function ShippingLabelButton({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  備考
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">備考</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
@@ -92,10 +90,7 @@ export default function ShippingLabelButton({
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setShowModal(false)}
-                className="btn-secondary"
-              >
+              <button onClick={() => setShowModal(false)} className="btn-secondary">
                 キャンセル
               </button>
               <button

@@ -19,6 +19,7 @@ Most API endpoints require authentication. Authentication is handled via JWT tok
 **Description:** Authenticates a user and returns a JWT access token.
 
 **Request Body:**
+
 ```json
 {
   "email": "string",
@@ -27,6 +28,7 @@ Most API endpoints require authentication. Authentication is handled via JWT tok
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -38,6 +40,7 @@ Most API endpoints require authentication. Authentication is handled via JWT tok
 ```
 
 **Error Response (401 Unauthorized):**
+
 ```json
 {
   "success": false,
@@ -55,6 +58,7 @@ Most API endpoints require authentication. Authentication is handled via JWT tok
 **Description:** Attempts to automatically log in using saved credentials from Remember Me functionality.
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -71,11 +75,13 @@ Most API endpoints require authentication. Authentication is handled via JWT tok
 **Description:** Returns the currently authenticated user's information.
 
 **Headers:**
+
 ```
 Cookie: token=<jwt-token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -98,6 +104,7 @@ Cookie: token=<jwt-token>
 **Description:** Logs out the current user by clearing authentication cookies.
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -114,6 +121,7 @@ Cookie: token=<jwt-token>
 **Description:** Changes the authenticated user's password.
 
 **Request Body:**
+
 ```json
 {
   "currentPassword": "string",
@@ -122,6 +130,7 @@ Cookie: token=<jwt-token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -140,6 +149,7 @@ Cookie: token=<jwt-token>
 **Description:** Retrieves a paginated list of orders with filtering and sorting options.
 
 **Query Parameters:**
+
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Items per page (default: 20)
 - `status` (optional): Filter by order status
@@ -147,6 +157,7 @@ Cookie: token=<jwt-token>
 - `endDate` (optional): Filter orders before this date
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -183,6 +194,7 @@ Cookie: token=<jwt-token>
 **Description:** Retrieves detailed information about a specific order.
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -233,6 +245,7 @@ Cookie: token=<jwt-token>
 **Description:** Sends a message to the AI assistant and receives a response with order analysis and recommendations.
 
 **Request Body:**
+
 ```json
 {
   "message": "Analyze my recent orders and suggest improvements"
@@ -240,6 +253,7 @@ Cookie: token=<jwt-token>
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -249,9 +263,7 @@ Cookie: token=<jwt-token>
       "totalOrders": 10,
       "avgOrderValue": 12500,
       "topProducts": ["Organic Apples", "Fresh Vegetables"],
-      "recommendations": [
-        "Consider bundling organic apples with vegetables for better sales"
-      ]
+      "recommendations": ["Consider bundling organic apples with vegetables for better sales"]
     },
     "timestamp": "2026-06-07T14:30:00Z"
   }
@@ -267,6 +279,7 @@ Cookie: token=<jwt-token>
 **Description:** Retrieves aggregated AI-generated insights about customer orders and trends.
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -309,12 +322,14 @@ Cookie: token=<jwt-token>
 **Description:** Retrieves a paginated list of customers with filtering options.
 
 **Query Parameters:**
+
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Items per page (default: 20)
 - `search` (optional): Search by name or email
 - `role` (optional): Filter by role
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -349,6 +364,7 @@ Cookie: token=<jwt-token>
 **Description:** Retrieves detailed information about a specific customer.
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -391,6 +407,7 @@ Cookie: token=<jwt-token>
 **Description:** Retrieves aggregated statistics for the admin dashboard.
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -415,6 +432,7 @@ Cookie: token=<jwt-token>
 **Description:** Retrieves recent admin activities for the dashboard.
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -450,6 +468,7 @@ Cookie: token=<jwt-token>
 **Description:** Retrieves rate limit statistics for security monitoring.
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -478,11 +497,13 @@ Cookie: token=<jwt-token>
 **Description:** Retrieves recent security events and alerts.
 
 **Query Parameters:**
+
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Items per page (default: 20)
 - `type` (optional): Filter by event type
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -517,6 +538,7 @@ Cookie: token=<jwt-token>
 **Description:** Retrieves Yamato shipping API configuration.
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -547,6 +569,7 @@ All API endpoints follow a consistent error response format:
 ```
 
 **Common Error Codes:**
+
 - `AUTHENTICATION_FAILED`: Invalid or missing authentication token
 - `NOT_AUTHORIZED`: Insufficient permissions
 - `NOT_FOUND`: Resource not found
@@ -579,8 +602,8 @@ const response = await fetch('http://localhost:3000/api/auth/login', {
   },
   body: JSON.stringify({
     email: 'admin@example.com',
-    password: 'password'
-  })
+    password: 'password',
+  }),
 });
 
 const data = await response.json();
@@ -588,8 +611,8 @@ const data = await response.json();
 // Get Orders
 const ordersResponse = await fetch('http://localhost:3000/api/orders', {
   headers: {
-    'Cookie': `token=${data.data.token}`
-  }
+    Cookie: `token=${data.data.token}`,
+  },
 });
 
 const ordersData = await ordersResponse.json();

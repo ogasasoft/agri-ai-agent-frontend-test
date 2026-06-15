@@ -1,37 +1,42 @@
-import { POST } from '@/app/api/auth/login/route'
-import { createMockRequest, MockDbClient, createMockUser, resetTestDatabase } from '../../setup/test-utils'
+import { POST } from '@/app/api/auth/login/route';
+import {
+  createMockRequest,
+  MockDbClient,
+  createMockUser,
+  resetTestDatabase,
+} from '../../setup/test-utils';
 
 // Mock dependencies
 jest.mock('pg', () => ({
-  Client: jest.fn().mockImplementation(() => MockDbClient.getInstance())
-}))
+  Client: jest.fn().mockImplementation(() => MockDbClient.getInstance()),
+}));
 
 jest.mock('@/lib/auth-enhanced', () => ({
   authenticateUserEnhanced: jest.fn(),
   getClientInfo: jest.fn().mockReturnValue({
     ipAddress: '127.0.0.1',
-    userAgent: 'Jest Test Agent'
-  })
-}))
+    userAgent: 'Jest Test Agent',
+  }),
+}));
 
 // Mock bcryptjs
 jest.mock('bcryptjs', () => ({
   compare: jest.fn(),
   hash: jest.fn(),
-  genSalt: jest.fn()
-}))
+  genSalt: jest.fn(),
+}));
 
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
 
 describe('/api/auth/login', () => {
-  let mockClient: MockDbClient
-  const { authenticateUserEnhanced } = require('@/lib/auth-enhanced')
+  let mockClient: MockDbClient;
+  const { authenticateUserEnhanced } = require('@/lib/auth-enhanced');
 
   beforeEach(async () => {
-    await resetTestDatabase()
-    mockClient = MockDbClient.getInstance()
-    authenticateUserEnhanced.mockClear()
-  })
+    await resetTestDatabase();
+    mockClient = MockDbClient.getInstance();
+    authenticateUserEnhanced.mockClear();
+  });
 
   describe('POST /api/auth/login', () => {
     it('should successfully login with valid credentials', async () => {
@@ -41,11 +46,11 @@ describe('/api/auth/login', () => {
         username: 'testuser',
         password_hash: 'hashed-password',
         is_active: true,
-        failed_login_attempts: 0
-      })
+        failed_login_attempts: 0,
+      });
 
-      mockClient.setMockData('users', [mockUser])
-      bcrypt.compare.mockResolvedValue(true)
+      mockClient.setMockData('users', [mockUser]);
+      bcrypt.compare.mockResolvedValue(true);
       authenticateUserEnhanced.mockResolvedValue({
         success: true,
         message: 'ログイン成功',
@@ -53,67 +58,67 @@ describe('/api/auth/login', () => {
         session: {
           user_id: 1,
           session_token: 'test-session-token',
-          csrf_token: 'test-csrf-token'
+          csrf_token: 'test-csrf-token',
         },
-        requiresPasswordChange: false
-      })
+        requiresPasswordChange: false,
+      });
 
       const request = createMockRequest({
         method: 'POST',
         body: {
           username: 'testuser',
           password: 'password123',
-          rememberMe: false
-        }
-      })
+          rememberMe: false,
+        },
+      });
 
       // Act
-      const response = await POST(request)
-      const data = await response.json()
+      const response = await POST(request);
+      const data = await response.json();
 
       // Assert
-      expect(response.status).toBe(200)
-      expect(data.success).toBe(true)
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
       expect(data.user).toEqual(
         expect.objectContaining({
           id: 1,
-          username: 'testuser'
+          username: 'testuser',
         })
-      )
+      );
       expect(data.session).toEqual(
         expect.objectContaining({
           user_id: 1,
           session_token: expect.any(String),
-          csrf_token: expect.any(String)
+          csrf_token: expect.any(String),
         })
-      )
-    })
+      );
+    });
 
     it('should reject login with invalid username', async () => {
       // Arrange
-      mockClient.setMockData('users', [])
+      mockClient.setMockData('users', []);
       authenticateUserEnhanced.mockResolvedValue({
         success: false,
-        message: 'ユーザーが見つかりません'
-      })
+        message: 'ユーザーが見つかりません',
+      });
 
       const request = createMockRequest({
         method: 'POST',
         body: {
           username: 'nonexistent',
-          password: 'password123'
-        }
-      })
+          password: 'password123',
+        },
+      });
 
       // Act
-      const response = await POST(request)
-      const data = await response.json()
+      const response = await POST(request);
+      const data = await response.json();
 
       // Assert
-      expect(response.status).toBe(401)
-      expect(data.success).toBe(false)
-      expect(data.message).toContain('ユーザー名またはパスワードが正しくありません')
-    })
+      expect(response.status).toBe(401);
+      expect(data.success).toBe(false);
+      expect(data.message).toContain('ユーザー名またはパスワードが正しくありません');
+    });
 
     it('should reject login with invalid password', async () => {
       // Arrange
@@ -122,101 +127,101 @@ describe('/api/auth/login', () => {
         username: 'testuser',
         password_hash: 'hashed-password',
         is_active: true,
-        failed_login_attempts: 0
-      })
+        failed_login_attempts: 0,
+      });
 
-      mockClient.setMockData('users', [mockUser])
-      bcrypt.compare.mockResolvedValue(false)
+      mockClient.setMockData('users', [mockUser]);
+      bcrypt.compare.mockResolvedValue(false);
       authenticateUserEnhanced.mockResolvedValue({
         success: false,
-        message: 'パスワードが間違っています'
-      })
+        message: 'パスワードが間違っています',
+      });
 
       const request = createMockRequest({
         method: 'POST',
         body: {
           username: 'testuser',
-          password: 'wrongpassword'
-        }
-      })
+          password: 'wrongpassword',
+        },
+      });
 
       // Act
-      const response = await POST(request)
-      const data = await response.json()
+      const response = await POST(request);
+      const data = await response.json();
 
       // Assert
-      expect(response.status).toBe(401)
-      expect(data.success).toBe(false)
-      expect(data.message).toContain('ユーザー名またはパスワードが正しくありません')
-    })
+      expect(response.status).toBe(401);
+      expect(data.success).toBe(false);
+      expect(data.message).toContain('ユーザー名またはパスワードが正しくありません');
+    });
 
     it('should reject login for inactive user', async () => {
       // Arrange
       const mockUser = createMockUser({
         id: 1,
         username: 'testuser',
-        is_active: false
-      })
+        is_active: false,
+      });
 
-      mockClient.setMockData('users', [mockUser])
+      mockClient.setMockData('users', [mockUser]);
       authenticateUserEnhanced.mockResolvedValue({
         success: false,
-        message: 'アカウントが無効化されています'
-      })
+        message: 'アカウントが無効化されています',
+      });
 
       const request = createMockRequest({
         method: 'POST',
         body: {
           username: 'testuser',
-          password: 'password123'
-        }
-      })
+          password: 'password123',
+        },
+      });
 
       // Act
-      const response = await POST(request)
-      const data = await response.json()
+      const response = await POST(request);
+      const data = await response.json();
 
       // Assert
-      expect(response.status).toBe(401)
-      expect(data.success).toBe(false)
-      expect(data.message).toContain('ユーザー名またはパスワードが正しくありません')
-    })
+      expect(response.status).toBe(401);
+      expect(data.success).toBe(false);
+      expect(data.message).toContain('ユーザー名またはパスワードが正しくありません');
+    });
 
     it('should reject login for locked user', async () => {
       // Arrange
-      const futureTime = new Date(Date.now() + 60000).toISOString() // 1 minute in future
+      const futureTime = new Date(Date.now() + 60000).toISOString(); // 1 minute in future
       const mockUser = createMockUser({
         id: 1,
         username: 'testuser',
         is_active: true,
         failed_login_attempts: 5,
-        locked_until: futureTime
-      })
+        locked_until: futureTime,
+      });
 
-      mockClient.setMockData('users', [mockUser])
+      mockClient.setMockData('users', [mockUser]);
       authenticateUserEnhanced.mockResolvedValue({
         success: false,
         message: 'アカウントがロックされています',
-        lockoutInfo: { level: 2 }
-      })
+        lockoutInfo: { level: 2 },
+      });
 
       const request = createMockRequest({
         method: 'POST',
         body: {
           username: 'testuser',
-          password: 'password123'
-        }
-      })
+          password: 'password123',
+        },
+      });
 
       // Act
-      const response = await POST(request)
-      const data = await response.json()
+      const response = await POST(request);
+      const data = await response.json();
 
       // Assert
-      expect(response.status).toBe(423)
-      expect(data.success).toBe(false)
-      expect(data.message).toContain('アカウント')
-    })
+      expect(response.status).toBe(423);
+      expect(data.success).toBe(false);
+      expect(data.message).toContain('アカウント');
+    });
 
     it('should handle remember me functionality', async () => {
       // Arrange
@@ -225,11 +230,11 @@ describe('/api/auth/login', () => {
         username: 'testuser',
         password_hash: 'hashed-password',
         is_active: true,
-        failed_login_attempts: 0
-      })
+        failed_login_attempts: 0,
+      });
 
-      mockClient.setMockData('users', [mockUser])
-      bcrypt.compare.mockResolvedValue(true)
+      mockClient.setMockData('users', [mockUser]);
+      bcrypt.compare.mockResolvedValue(true);
       authenticateUserEnhanced.mockResolvedValue({
         success: true,
         message: 'ログイン成功',
@@ -237,75 +242,75 @@ describe('/api/auth/login', () => {
         session: {
           user_id: 1,
           session_token: 'test-session-token',
-          csrf_token: 'test-csrf-token'
+          csrf_token: 'test-csrf-token',
         },
         rememberToken: {
           token: 'test-remember-token',
           selector: 'test-selector',
-          validator: 'test-validator'
+          validator: 'test-validator',
         },
-        requiresPasswordChange: false
-      })
+        requiresPasswordChange: false,
+      });
 
       const request = createMockRequest({
         method: 'POST',
         body: {
           username: 'testuser',
           password: 'password123',
-          rememberMe: true
-        }
-      })
+          rememberMe: true,
+        },
+      });
 
       // Act
-      const response = await POST(request)
-      const data = await response.json()
+      const response = await POST(request);
+      const data = await response.json();
 
       // Assert
-      expect(response.status).toBe(200)
-      expect(data.success).toBe(true)
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
       expect(data.rememberToken).toEqual(
         expect.objectContaining({
           token: expect.any(String),
-          selector: expect.any(String)
+          selector: expect.any(String),
         })
-      )
-      
+      );
+
       // Check Set-Cookie header for remember token
-      const setCookieHeader = response.headers.get('Set-Cookie')
-      expect(setCookieHeader).toContain('remember_token=')
-    })
+      const setCookieHeader = response.headers.get('Set-Cookie');
+      expect(setCookieHeader).toContain('remember_token=');
+    });
 
     it('should validate required fields', async () => {
       // Test missing username
       const request1 = createMockRequest({
         method: 'POST',
         body: {
-          password: 'password123'
-        }
-      })
+          password: 'password123',
+        },
+      });
 
-      const response1 = await POST(request1)
-      const data1 = await response1.json()
+      const response1 = await POST(request1);
+      const data1 = await response1.json();
 
-      expect(response1.status).toBe(400)
-      expect(data1.success).toBe(false)
-      expect(data1.message).toBe('ユーザー名とパスワードは必須です。')
+      expect(response1.status).toBe(400);
+      expect(data1.success).toBe(false);
+      expect(data1.message).toBe('ユーザー名とパスワードは必須です。');
 
       // Test missing password
       const request2 = createMockRequest({
         method: 'POST',
         body: {
-          username: 'testuser'
-        }
-      })
+          username: 'testuser',
+        },
+      });
 
-      const response2 = await POST(request2)
-      const data2 = await response2.json()
+      const response2 = await POST(request2);
+      const data2 = await response2.json();
 
-      expect(response2.status).toBe(400)
-      expect(data2.success).toBe(false)
-      expect(data2.message).toBe('ユーザー名とパスワードは必須です。')
-    })
+      expect(response2.status).toBe(400);
+      expect(data2.success).toBe(false);
+      expect(data2.message).toBe('ユーザー名とパスワードは必須です。');
+    });
 
     it('should handle email login', async () => {
       // Arrange
@@ -315,11 +320,11 @@ describe('/api/auth/login', () => {
         email: 'test@example.com',
         password_hash: 'hashed-password',
         is_active: true,
-        failed_login_attempts: 0
-      })
+        failed_login_attempts: 0,
+      });
 
-      mockClient.setMockData('users', [mockUser])
-      bcrypt.compare.mockResolvedValue(true)
+      mockClient.setMockData('users', [mockUser]);
+      bcrypt.compare.mockResolvedValue(true);
       authenticateUserEnhanced.mockResolvedValue({
         success: true,
         message: 'ログイン成功',
@@ -327,27 +332,27 @@ describe('/api/auth/login', () => {
         session: {
           user_id: 1,
           session_token: 'test-session-token',
-          csrf_token: 'test-csrf-token'
+          csrf_token: 'test-csrf-token',
         },
-        requiresPasswordChange: false
-      })
+        requiresPasswordChange: false,
+      });
 
       const request = createMockRequest({
         method: 'POST',
         body: {
           username: 'test@example.com', // Using email as username
-          password: 'password123'
-        }
-      })
+          password: 'password123',
+        },
+      });
 
       // Act
-      const response = await POST(request)
-      const data = await response.json()
+      const response = await POST(request);
+      const data = await response.json();
 
       // Assert
-      expect(response.status).toBe(200)
-      expect(data.success).toBe(true)
-      expect(data.user.email).toBe('test@example.com')
-    })
-  })
-})
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.user.email).toBe('test@example.com');
+    });
+  });
+});

@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import {
-  Users, Database, Shield, BarChart3,
-  LogOut, Menu, X, Home, Plug
-} from 'lucide-react';
+import { Users, Database, Shield, BarChart3, LogOut, Menu, X, Home, Plug } from 'lucide-react';
 
 interface AdminUser {
   id: number;
@@ -15,11 +12,7 @@ interface AdminUser {
   is_super_admin: boolean;
 }
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
@@ -45,7 +38,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     checkAdminAuth();
-     
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -78,8 +71,8 @@ export default function AdminLayout({
     { name: 'セキュリティ監視', href: '/admin/security', icon: Shield, superAdminOnly: true },
   ];
 
-  const filteredNavigation = navigation.filter(item =>
-    !item.superAdminOnly || adminUser.is_super_admin
+  const filteredNavigation = navigation.filter(
+    (item) => !item.superAdminOnly || adminUser.is_super_admin
   );
 
   return (
@@ -87,7 +80,10 @@ export default function AdminLayout({
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+          <div
+            className="fixed inset-0 bg-gray-600 bg-opacity-75"
+            onClick={() => setSidebarOpen(false)}
+          />
           <div className="relative flex w-full max-w-xs flex-1 flex-col bg-white">
             <div className="absolute top-0 right-0 p-2">
               <button
@@ -127,16 +123,12 @@ export default function AdminLayout({
         >
           <Menu className="h-6 w-6" />
         </button>
-        <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
-          管理者パネル
-        </div>
+        <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">管理者パネル</div>
       </div>
 
       {/* Main content */}
       <div className="lg:pl-72">
-        <div className="px-4 py-6 sm:px-6 lg:px-8">
-          {children}
-        </div>
+        <div className="px-4 py-6 sm:px-6 lg:px-8">{children}</div>
       </div>
     </div>
   );
@@ -146,7 +138,7 @@ function SidebarContent({
   navigation,
   pathname,
   adminUser,
-  onLogout
+  onLogout,
 }: {
   navigation: any[];
   pathname: string;
@@ -207,9 +199,7 @@ function SidebarContent({
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">
-              {adminUser.username}
-            </p>
+            <p className="text-sm font-semibold text-gray-900 truncate">{adminUser.username}</p>
             <p className="text-xs text-gray-500 truncate">
               {adminUser.is_super_admin ? 'スーパー管理者' : '管理者'}
             </p>

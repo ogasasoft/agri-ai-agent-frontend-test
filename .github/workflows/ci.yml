@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, 'feature/*', 'update/*' ]
+    branches: [main, 'feature/*', 'update/*']
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
     inputs:
       test-only:

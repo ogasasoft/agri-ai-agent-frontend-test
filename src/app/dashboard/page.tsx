@@ -11,7 +11,7 @@ import {
   TrendingDown,
   ShoppingBag,
   BarChart3,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -59,11 +59,9 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [dateRange, setDateRange] = useState({
     from: '',
-    to: ''
+    to: '',
   });
   const [loading, setLoading] = useState(true);
-
-
 
   const initializeDateRange = async () => {
     try {
@@ -72,8 +70,8 @@ export default function DashboardPage() {
       const response = await fetch('/api/dashboard/latest-date', {
         credentials: 'include',
         headers: {
-          'x-session-token': sessionToken || ''
-        }
+          'x-session-token': sessionToken || '',
+        },
       });
 
       if (response.ok) {
@@ -84,7 +82,7 @@ export default function DashboardPage() {
 
         const newDateRange = {
           from: oneMonthAgo.toISOString().split('T')[0],
-          to: latestDate.toISOString().split('T')[0]
+          to: latestDate.toISOString().split('T')[0],
         };
 
         setDateRange(newDateRange);
@@ -99,7 +97,7 @@ export default function DashboardPage() {
 
         const fallbackRange = {
           from: oneMonthAgo.toISOString().split('T')[0],
-          to: today.toISOString().split('T')[0]
+          to: today.toISOString().split('T')[0],
         };
 
         setDateRange(fallbackRange);
@@ -115,7 +113,7 @@ export default function DashboardPage() {
 
       const fallbackRange = {
         from: oneMonthAgo.toISOString().split('T')[0],
-        to: today.toISOString().split('T')[0]
+        to: today.toISOString().split('T')[0],
       };
 
       setDateRange(fallbackRange);
@@ -128,15 +126,12 @@ export default function DashboardPage() {
     try {
       const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0];
 
-      const response = await fetch(
-        `/api/dashboard/stats?from=${range.from}&to=${range.to}`,
-        {
-          credentials: 'include',
-          headers: {
-            'x-session-token': sessionToken || ''
-          }
-        }
-      );
+      const response = await fetch(`/api/dashboard/stats?from=${range.from}&to=${range.to}`, {
+        credentials: 'include',
+        headers: {
+          'x-session-token': sessionToken || '',
+        },
+      });
 
       if (response.ok) {
         const result = await response.json();
@@ -166,14 +161,10 @@ export default function DashboardPage() {
 
     const csvRows = [
       ['日付', '注文件数', '売上金額'],
-      ...data.dailyTrend.map(day => [
-        day.date,
-        day.orderCount,
-        day.revenue
-      ])
+      ...data.dailyTrend.map((day) => [day.date, day.orderCount, day.revenue]),
     ];
 
-    const csvContent = csvRows.map(row => row.join(',')).join('\n');
+    const csvContent = csvRows.map((row) => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -190,7 +181,7 @@ export default function DashboardPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
-      currency: 'JPY'
+      currency: 'JPY',
     }).format(amount);
   };
 
@@ -221,9 +212,12 @@ export default function DashboardPage() {
   }
 
   const { stats, dailyTrend, topCustomers, customerAnalysis, weekdayStats } = data;
-  const repeatRate = (customerAnalysis.newCustomers + customerAnalysis.repeatCustomers) > 0
-    ? (customerAnalysis.repeatCustomers / (customerAnalysis.newCustomers + customerAnalysis.repeatCustomers)) * 100
-    : 0;
+  const repeatRate =
+    customerAnalysis.newCustomers + customerAnalysis.repeatCustomers > 0
+      ? (customerAnalysis.repeatCustomers /
+          (customerAnalysis.newCustomers + customerAnalysis.repeatCustomers)) *
+        100
+      : 0;
 
   return (
     <div className="p-6">
@@ -241,14 +235,14 @@ export default function DashboardPage() {
               <input
                 type="date"
                 value={dateRange.from}
-                onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                onChange={(e) => setDateRange((prev) => ({ ...prev, from: e.target.value }))}
                 className="input-field text-sm"
               />
               <span className="text-gray-500">〜</span>
               <input
                 type="date"
                 value={dateRange.to}
-                onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                onChange={(e) => setDateRange((prev) => ({ ...prev, to: e.target.value }))}
                 className="input-field text-sm"
               />
             </div>
@@ -262,10 +256,7 @@ export default function DashboardPage() {
               更新
             </button>
 
-            <button
-              onClick={exportToCsv}
-              className="btn-primary flex items-center gap-2"
-            >
+            <button onClick={exportToCsv} className="btn-primary flex items-center gap-2">
               <Download className="w-4 h-4" />
               CSV出力
             </button>
@@ -285,7 +276,9 @@ export default function DashboardPage() {
                   ) : (
                     <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
                   )}
-                  <span className={`text-sm ${stats.orderGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span
+                    className={`text-sm ${stats.orderGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                  >
                     {formatPercent(stats.orderGrowth)}
                   </span>
                 </div>
@@ -307,7 +300,9 @@ export default function DashboardPage() {
                   ) : (
                     <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
                   )}
-                  <span className={`text-sm ${stats.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span
+                    className={`text-sm ${stats.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                  >
                     {formatPercent(stats.revenueGrowth)}
                   </span>
                 </div>
@@ -333,9 +328,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm font-medium text-gray-600">ユニーク顧客数</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.uniqueCustomers}</p>
-                <p className="text-xs text-gray-500 mt-2">
-                  リピート率: {repeatRate.toFixed(1)}%
-                </p>
+                <p className="text-xs text-gray-500 mt-2">リピート率: {repeatRate.toFixed(1)}%</p>
               </div>
               <Users className="w-8 h-8 text-orange-600" />
             </div>
@@ -361,7 +354,7 @@ export default function DashboardPage() {
                       <div
                         className="bg-blue-500 h-2 rounded-full"
                         style={{
-                          width: `${Math.min((day.revenue / Math.max(...dailyTrend.map(d => d.revenue))) * 100, 100)}%`
+                          width: `${Math.min((day.revenue / Math.max(...dailyTrend.map((d) => d.revenue))) * 100, 100)}%`,
                         }}
                       />
                     </div>
@@ -431,15 +424,13 @@ export default function DashboardPage() {
               <div className="space-y-3">
                 {weekdayStats.map((day) => (
                   <div key={day.weekday} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 w-8">
-                      {getWeekdayName(day.weekday)}
-                    </span>
+                    <span className="text-sm text-gray-600 w-8">{getWeekdayName(day.weekday)}</span>
                     <div className="flex items-center gap-3 flex-1 ml-4">
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
                           className="bg-green-500 h-2 rounded-full"
                           style={{
-                            width: `${Math.min((day.orderCount / Math.max(...weekdayStats.map(d => d.orderCount))) * 100, 100)}%`
+                            width: `${Math.min((day.orderCount / Math.max(...weekdayStats.map((d) => d.orderCount))) * 100, 100)}%`,
                           }}
                         />
                       </div>
@@ -466,7 +457,9 @@ export default function DashboardPage() {
               </div>
               <div className="bg-green-50 rounded-lg p-4">
                 <p className="text-sm text-gray-600 mb-1">リピーター</p>
-                <p className="text-2xl font-bold text-green-600">{customerAnalysis.repeatCustomers}</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {customerAnalysis.repeatCustomers}
+                </p>
               </div>
             </div>
           </div>

@@ -39,7 +39,7 @@ class DebugLogger {
       message,
       context,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     if (data) {
@@ -54,7 +54,7 @@ class DebugLogger {
       message,
       context,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     if (data) {
@@ -67,7 +67,7 @@ class DebugLogger {
       message,
       context,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     console.warn('⚠️ ' + this.formatLog(logData));
@@ -83,7 +83,7 @@ class DebugLogger {
       context,
       data: error,
       timestamp: new Date().toISOString(),
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
     };
 
     console.error('❌ ' + this.formatLog(logData));
@@ -99,15 +99,12 @@ class DebugLogger {
   csvDebug(phase: string, data: unknown, context?: LogContext) {
     if (!this.isDebugMode) return;
 
-
     if (phase === 'headers' && Array.isArray(data)) {
-      data.forEach((header, index) => {
-      });
+      data.forEach((header, index) => {});
     }
 
     if (phase === 'mapping' && typeof data === 'object' && data !== null) {
-      Object.entries(data).forEach(([field, value]) => {
-      });
+      Object.entries(data).forEach(([field, value]) => {});
     }
 
     if (phase === 'validation_errors' && Array.isArray(data)) {
@@ -117,17 +114,23 @@ class DebugLogger {
         return acc;
       }, {});
 
-      Object.entries(errorCounts).forEach(([errorType, count]) => {
-      });
+      Object.entries(errorCounts).forEach(([errorType, count]) => {});
     }
   }
 
   // API リクエスト/レスポンスのトレース
-  apiTrace(phase: 'REQUEST' | 'RESPONSE' | 'ERROR', data: unknown, context?: LogContext, extraData?: unknown) {
+  apiTrace(
+    phase: 'REQUEST' | 'RESPONSE' | 'ERROR',
+    data: unknown,
+    context?: LogContext,
+    extraData?: unknown
+  ) {
     if (!this.isDebugMode) return;
 
     const emoji = phase === 'REQUEST' ? '📤' : phase === 'RESPONSE' ? '📥' : '💥';
-    const logData = extraData ? { ...data as Record<string, unknown>, ...extraData as Record<string, unknown> } : data;
+    const logData = extraData
+      ? { ...(data as Record<string, unknown>), ...(extraData as Record<string, unknown>) }
+      : data;
     if (logData && typeof logData === 'object' && logData !== null) {
     }
   }
@@ -157,26 +160,14 @@ export const logCSVProcessing = (
   debugLogger.csvDebug(phase, data, context);
 };
 
-export const logAPICall = (
-  method: string,
-  url: string,
-  data?: unknown,
-  context?: LogContext
-) => {
+export const logAPICall = (method: string, url: string, data?: unknown, context?: LogContext) => {
   debugLogger.apiTrace('REQUEST', { method, url }, context, data);
 };
 
-export const logAPIResponse = (
-  status: number,
-  data?: unknown,
-  context?: LogContext
-) => {
+export const logAPIResponse = (status: number, data?: unknown, context?: LogContext) => {
   debugLogger.apiTrace('RESPONSE', { status }, context, data);
 };
 
-export const logAPIError = (
-  error: unknown,
-  context?: LogContext
-) => {
+export const logAPIError = (error: unknown, context?: LogContext) => {
   debugLogger.apiTrace('ERROR', error, context);
 };

@@ -10,6 +10,7 @@
 > 新しい**Product Master + Product Mapping + AI Suggestion**システムに置き換えられます。
 >
 > **削除されたもの:**
+>
 > - ✗ `categories`テーブル (データベース)
 > - ✗ `orders.category_id`カラム (データベース)
 > - ✗ `/api/categories` APIエンドポイント
@@ -41,6 +42,7 @@
 ## プロジェクト概要
 
 ### 基本情報
+
 - **プロジェクト名**: Agricultural AI Agent Frontend
 - **バージョン**: 0.1.0
 - **フレームワーク**: Next.js 14.2.0 (App Router)
@@ -50,7 +52,9 @@
 - **対象市場**: 日本国内農業ビジネス
 
 ### プロジェクトの目的
+
 農業ビジネス向けの包括的なEC注文管理システムで、以下の機能を提供:
+
 - 注文データの一元管理（手動入力、CSV一括アップロード）
 - AI搭載チャットボットによる経営相談
 - ダッシュボードによる売上・顧客分析
@@ -59,6 +63,7 @@
 - 管理者システムによる全体管理
 
 ### 主要な特徴
+
 1. **マルチテナントアーキテクチャ**: 全てのデータがuser_idで分離
 2. **3層認証システム**: Basic Auth → Enhanced Security → Admin Auth
 3. **AI判断型エラー検知**: 構造化エラー診断システムで自動問題解決
@@ -70,6 +75,7 @@
 ## 技術スタック
 
 ### フロントエンド
+
 ```json
 {
   "フレームワーク": "Next.js 14.2.0 (App Router)",
@@ -85,6 +91,7 @@
 ```
 
 ### バックエンド
+
 ```json
 {
   "API": "Next.js API Routes",
@@ -97,6 +104,7 @@
 ```
 
 ### インフラストラクチャ
+
 ```json
 {
   "ホスティング": "Vercel",
@@ -107,6 +115,7 @@
 ```
 
 ### 開発ツール
+
 ```json
 {
   "テストフレームワーク": "Jest 29.7.0",
@@ -122,6 +131,7 @@
 ## ディレクトリ構造
 
 ### 完全なディレクトリツリー
+
 ```
 agri-ai-agent-frontend-test/
 ├── src/
@@ -297,13 +307,12 @@ agri-ai-agent-frontend-test/
 ## データベースアーキテクチャ
 
 ### データベース接続
+
 ```typescript
 // src/lib/db.ts
 export async function getDbClient(): Promise<Client> {
   const connectionString =
-    process.env.DATABASE_URL ||
-    process.env.POSTGRES_URL ||
-    process.env.POSTGRES_URL_NON_POOLING;
+    process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING;
 
   const client = new Client({
     connectionString,
@@ -318,6 +327,7 @@ export async function getDbClient(): Promise<Client> {
 ### テーブル定義詳細
 
 #### 1. users テーブル（ユーザー）
+
 ```sql
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
@@ -346,10 +356,12 @@ CREATE TABLE users (
 ```
 
 **重要なユーザー**:
+
 - `admin` / `admin123` - 標準顧客ユーザー
 - `silentogasasoft@gmail.com` / `Ogasa1995` - スーパー管理者
 
 #### 2. sessions テーブル（セッション）
+
 ```sql
 CREATE TABLE sessions (
   id SERIAL PRIMARY KEY,
@@ -366,11 +378,13 @@ CREATE TABLE sessions (
 ```
 
 **セッション管理**:
+
 - デフォルト有効期限: 24時間
 - 自動延長: 有効期限2時間前にアクセスで自動延長
 - CSRF保護: 全リクエストでcsrf_token検証
 
 #### 3. remember_tokens テーブル（Remember Me）
+
 ```sql
 CREATE TABLE remember_tokens (
   id SERIAL PRIMARY KEY,
@@ -388,11 +402,13 @@ CREATE INDEX idx_remember_tokens_expires ON remember_tokens (expires_at);
 ```
 
 **セキュアパターン**:
+
 - Selector/Validator パターン採用
 - トークン盗難検知で全トークン削除
 - 使用後に新トークン発行（ローテーション）
 
 #### 4. rate_limits テーブル（レート制限）
+
 ```sql
 CREATE TABLE rate_limits (
   id SERIAL PRIMARY KEY,
@@ -411,12 +427,14 @@ CREATE INDEX idx_rate_limits_blocked ON rate_limits (blocked_until);
 ```
 
 **レート制限設定**:
+
 - ログイン: 10回/分
 - アップロード: 5回/分
 - チャット: 30回/分
 - その他API: 100回/分
 
 #### 5. security_events テーブル（セキュリティイベント）
+
 ```sql
 CREATE TABLE security_events (
   id SERIAL PRIMARY KEY,
@@ -435,6 +453,7 @@ CREATE INDEX idx_security_events_created ON security_events (created_at);
 ```
 
 **検知する攻撃パターン**:
+
 - ブルートフォース攻撃
 - パスワードスプレー攻撃（1時間に5つ以上の異なるユーザー名）
 - アカウント列挙攻撃
@@ -442,6 +461,7 @@ CREATE INDEX idx_security_events_created ON security_events (created_at);
 - Remember Token盗難
 
 #### 6. categories テーブル（カテゴリ）
+
 ```sql
 CREATE TABLE categories (
   id SERIAL PRIMARY KEY,
@@ -461,6 +481,7 @@ CREATE TABLE categories (
 **マルチテナント分離**: 全カテゴリがuser_idでスコープ化
 
 #### 7. orders テーブル（注文）
+
 ```sql
 CREATE TABLE orders (
   id SERIAL PRIMARY KEY,
@@ -489,12 +510,14 @@ CREATE TABLE orders (
 ```
 
 **重要な特徴**:
+
 - マルチテナント分離（user_id必須）
 - カテゴリとの関連（ON DELETE SET NULL）
 - 配送ステータス管理
 - JSONB extra_data で拡張データ対応
 
 #### 8. audit_logs テーブル（監査ログ）
+
 ```sql
 CREATE TABLE audit_logs (
   id SERIAL PRIMARY KEY,
@@ -511,6 +534,7 @@ CREATE TABLE audit_logs (
 ```
 
 #### 9. admin_audit_logs テーブル（管理者監査ログ）
+
 ```sql
 CREATE TABLE admin_audit_logs (
   id SERIAL PRIMARY KEY,
@@ -526,6 +550,7 @@ CREATE TABLE admin_audit_logs (
 ```
 
 #### 10. system_settings テーブル（システム設定）
+
 ```sql
 CREATE TABLE system_settings (
   id SERIAL PRIMARY KEY,
@@ -539,6 +564,7 @@ CREATE TABLE system_settings (
 ```
 
 #### 11. api_integrations テーブル（API連携設定）
+
 ```sql
 CREATE TABLE api_integrations (
   id SERIAL PRIMARY KEY,
@@ -558,6 +584,7 @@ CREATE TABLE api_integrations (
 ### データベース関数
 
 #### プログレッシブロックアウト計算
+
 ```sql
 CREATE OR REPLACE FUNCTION calculate_lockout_duration(lockout_level INTEGER)
 RETURNS INTERVAL AS $$
@@ -578,6 +605,7 @@ $$ LANGUAGE plpgsql;
 ```
 
 #### 期限切れデータ自動クリーンアップ
+
 ```sql
 CREATE OR REPLACE FUNCTION cleanup_expired_security_data()
 RETURNS void AS $$
@@ -599,6 +627,7 @@ $$ LANGUAGE plpgsql;
 ### 3層認証アーキテクチャ
 
 #### レイヤー1: 基本認証（src/lib/auth.ts）
+
 ```typescript
 // 主要機能
 - authenticateUser(): ユーザー名/パスワード認証
@@ -617,6 +646,7 @@ PASSWORD_MIN_LENGTH = 8文字
 ```
 
 #### レイヤー2: 拡張認証（src/lib/auth-enhanced.ts）
+
 ```typescript
 // 追加機能
 - authenticateUserEnhanced(): Remember Me対応ログイン
@@ -645,6 +675,7 @@ Selector/Validator パターン
 ```
 
 #### レイヤー3: 管理者認証（src/lib/admin-auth.ts）
+
 ```typescript
 // 管理者機能
 - validateAdminSession(): 管理者セッション検証
@@ -657,6 +688,7 @@ Selector/Validator パターン
 ```
 
 ### セキュリティヘッダー（src/lib/security.ts + next.config.js）
+
 ```typescript
 {
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
@@ -670,6 +702,7 @@ Selector/Validator パターン
 ```
 
 ### Middleware認証フロー（src/middleware.ts）
+
 ```typescript
 // ルート分類
 PUBLIC_ROUTES = ['/api/auth/login', '/api/auth/auto-login', '/login']
@@ -694,6 +727,7 @@ ADMIN_ROUTES = ['/admin', '/api/admin']
 ```
 
 ### API Route セキュリティパターン
+
 ```typescript
 // 全保護APIルートで必須の実装パターン
 export const dynamic = 'force-dynamic';  // 動的レンダリング強制
@@ -742,9 +776,10 @@ export async function GET/POST/PUT/DELETE(request: NextRequest) {
 
 ## API Routes 詳細
 
-### 認証API（/api/auth/*）
+### 認証API（/api/auth/\*）
 
 #### POST /api/auth/login
+
 ```typescript
 // 機能: ユーザーログイン（Remember Me対応）
 // リクエスト:
@@ -780,6 +815,7 @@ export async function GET/POST/PUT/DELETE(request: NextRequest) {
 ```
 
 #### POST /api/auth/auto-login
+
 ```typescript
 // 機能: Remember Token による自動ログイン
 // Cookie: remember_token (selector:validator 形式)
@@ -800,6 +836,7 @@ export async function GET/POST/PUT/DELETE(request: NextRequest) {
 ```
 
 #### POST /api/auth/logout
+
 ```typescript
 // 機能: ログアウト
 // 処理:
@@ -813,6 +850,7 @@ export async function GET/POST/PUT/DELETE(request: NextRequest) {
 ```
 
 #### GET /api/auth/me
+
 ```typescript
 // 機能: 現在のセッション情報取得
 // レスポンス:
@@ -834,6 +872,7 @@ export async function GET/POST/PUT/DELETE(request: NextRequest) {
 ```
 
 #### POST /api/auth/change-password
+
 ```typescript
 // 機能: パスワード変更
 // リクエスト:
@@ -852,9 +891,10 @@ export async function GET/POST/PUT/DELETE(request: NextRequest) {
 { success: true, message: 'パスワードを変更しました' }
 ```
 
-### 注文API（/api/orders/*）
+### 注文API（/api/orders/\*）
 
 #### GET /api/orders
+
 ```typescript
 // 機能: 注文一覧取得（マルチテナント分離）
 // クエリパラメータ:
@@ -882,6 +922,7 @@ ORDER BY o.created_at DESC
 ```
 
 #### POST /api/orders
+
 ```typescript
 // 機能: 新規注文作成
 // リクエスト:
@@ -913,6 +954,7 @@ ORDER BY o.created_at DESC
 ```
 
 #### PUT /api/orders/[id]
+
 ```typescript
 // 機能: 注文更新
 // パスパラメータ: id (注文ID)
@@ -930,6 +972,7 @@ WHERE id = $1 AND user_id = $2  // マルチテナント分離
 ```
 
 #### DELETE /api/orders/[id]
+
 ```typescript
 // 機能: 注文削除
 // セキュリティ:
@@ -942,6 +985,7 @@ WHERE id = $1 AND user_id = $2
 ### カテゴリAPI（/api/categories）
 
 #### GET /api/categories
+
 ```typescript
 // 機能: カテゴリ一覧取得（user_idスコープ）
 // レスポンス:
@@ -952,6 +996,7 @@ WHERE id = $1 AND user_id = $2
 ```
 
 #### POST /api/categories
+
 ```typescript
 // 機能: カテゴリ作成
 // リクエスト:
@@ -977,6 +1022,7 @@ UNIQUE(name, user_id)  // ユーザーごとに一意
 ### CSVアップロードAPI
 
 #### POST /api/upload
+
 ```typescript
 // 機能: 一般CSV一括アップロード
 // Content-Type: multipart/form-data
@@ -1013,6 +1059,7 @@ UNIQUE(name, user_id)  // ユーザーごとに一意
 ```
 
 #### POST /api/upload-with-category
+
 ```typescript
 // 機能: カテゴリ指定CSV一括アップロード
 // Content-Type: multipart/form-data
@@ -1023,9 +1070,10 @@ UNIQUE(name, user_id)  // ユーザーごとに一意
 // 処理: /api/upload と同様 + category_id自動設定
 ```
 
-### 配送API（/api/shipping/*）
+### 配送API（/api/shipping/\*）
 
 #### POST /api/shipping
+
 ```typescript
 // 機能: 配送ラベル生成・ステータス更新
 // リクエスト:
@@ -1051,6 +1099,7 @@ UNIQUE(name, user_id)  // ユーザーごとに一意
 ```
 
 #### POST /api/shipping/cancel
+
 ```typescript
 // 機能: 配送キャンセル
 // リクエスト:
@@ -1068,6 +1117,7 @@ status = 'pending', tracking_number = NULL, shipped_at = NULL
 ### AIチャットAPI（/api/chat）
 
 #### POST /api/chat
+
 ```typescript
 // 機能: OpenAI GPT-4o-miniによるAI相談
 // リクエスト:
@@ -1120,9 +1170,10 @@ const response = await fetch('https://api.openai.com/v1/chat/completions', {
 }
 ```
 
-### ダッシュボードAPI（/api/dashboard/*）
+### ダッシュボードAPI（/api/dashboard/\*）
 
 #### GET /api/dashboard/stats
+
 ```typescript
 // 機能: ダッシュボード統計データ取得
 // クエリパラメータ:
@@ -1170,6 +1221,7 @@ const response = await fetch('https://api.openai.com/v1/chat/completions', {
 ```
 
 #### GET /api/dashboard/latest-date
+
 ```typescript
 // 機能: 最新出荷日取得
 // SQL:
@@ -1184,9 +1236,10 @@ WHERE user_id = $1 AND status = 'shipped'
 }
 ```
 
-### ヤマト運輸API（/api/yamato/*）
+### ヤマト運輸API（/api/yamato/\*）
 
 #### POST /api/yamato
+
 ```typescript
 // 機能: ヤマト運輸API呼び出し（Mock実装）
 // 本番環境: 実際のYamato APIエンドポイント
@@ -1215,6 +1268,7 @@ WHERE user_id = $1 AND status = 'shipped'
 ```
 
 #### POST /api/yamato-csv
+
 ```typescript
 // 機能: ヤマト運輸B2形式CSV生成
 // リクエスト:
@@ -1233,9 +1287,10 @@ WHERE user_id = $1 AND status = 'shipped'
 }
 ```
 
-### 管理者API（/api/admin/*）
+### 管理者API（/api/admin/\*）
 
 #### GET /api/admin/me
+
 ```typescript
 // 機能: 管理者セッション検証
 // レスポンス:
@@ -1252,6 +1307,7 @@ WHERE user_id = $1 AND status = 'shipped'
 ```
 
 #### GET /api/admin/dashboard/stats
+
 ```typescript
 // 機能: システム全体統計
 // レスポンス:
@@ -1273,6 +1329,7 @@ WHERE user_id = $1 AND status = 'shipped'
 ```
 
 #### GET /api/admin/customers
+
 ```typescript
 // 機能: 全ユーザーの顧客データ取得（クロステナント）
 // 権限: super_admin のみ
@@ -1299,6 +1356,7 @@ WHERE user_id = $1 AND status = 'shipped'
 ### コンポーネント構成
 
 #### レイアウト構造
+
 ```typescript
 // src/app/layout.tsx - グローバルレイアウト
 <html>
@@ -1324,6 +1382,7 @@ WHERE user_id = $1 AND status = 'shipped'
 #### 主要コンポーネント詳細
 
 ##### OrderList.tsx
+
 ```typescript
 // 機能: 注文一覧表示（2ペイン構成）
 // Props:
@@ -1343,6 +1402,7 @@ interface OrderListProps {
 ```
 
 ##### ChatPanel.tsx
+
 ```typescript
 // 機能: AIチャットパネル
 // 状態管理: IndexedDB + BroadcastChannel
@@ -1363,6 +1423,7 @@ interface OrderListProps {
 ```
 
 ##### DashboardCharts.tsx
+
 ```typescript
 // 機能: ダッシュボードグラフ
 // 使用ライブラリ: Recharts
@@ -1379,6 +1440,7 @@ interface OrderListProps {
 ```
 
 ##### ErrorBoundary.tsx
+
 ```typescript
 // 機能: Reactエラー境界
 // エラーハンドリング:
@@ -1400,7 +1462,8 @@ class ErrorBoundary extends React.Component {
 
 ### ページ構成
 
-#### 注文登録フロー（/orders/register/*）
+#### 注文登録フロー（/orders/register/\*）
+
 ```
 1. /orders/register/choose
    └→ 登録方法選択（手動 or CSV）
@@ -1418,7 +1481,8 @@ class ErrorBoundary extends React.Component {
    └→ 登録完了・結果表示
 ```
 
-#### 配送フロー（/orders/shipping/*）
+#### 配送フロー（/orders/shipping/\*）
+
 ```
 1. /orders/shipping/pending
    └→ 配送待ち注文一覧（複数選択可）
@@ -1436,6 +1500,7 @@ class ErrorBoundary extends React.Component {
 ### 状態管理
 
 #### Zustand Store（必要に応じて実装）
+
 ```typescript
 // 現状: useState/useEffect中心
 // 必要に応じてZustandでグローバル状態管理
@@ -1453,6 +1518,7 @@ interface AppStore {
 ### フォーム管理
 
 #### React Hook Form + Zod
+
 ```typescript
 // 例: ログインフォーム
 import { useForm } from 'react-hook-form';
@@ -1462,11 +1528,15 @@ import { z } from 'zod';
 const loginSchema = z.object({
   username: z.string().min(1, 'ユーザー名を入力してください'),
   password: z.string().min(8, 'パスワードは8文字以上です'),
-  rememberMe: z.boolean().optional()
+  rememberMe: z.boolean().optional(),
 });
 
-const { register, handleSubmit, formState: { errors } } = useForm({
-  resolver: zodResolver(loginSchema)
+const {
+  register,
+  handleSubmit,
+  formState: { errors },
+} = useForm({
+  resolver: zodResolver(loginSchema),
 });
 ```
 
@@ -1477,6 +1547,7 @@ const { register, handleSubmit, formState: { errors } } = useForm({
 ### AI判断型エラー検知アーキテクチャ
 
 #### 基底クラス（src/lib/error-details.ts）
+
 ```typescript
 export interface DetailedErrorResponse {
   success: false;
@@ -1508,6 +1579,7 @@ export class ErrorDetailBuilder {
 ```
 
 #### 認証エラー（src/lib/auth-error-details.ts）
+
 ```typescript
 export class AuthErrorBuilder extends ErrorDetailBuilder {
   static loginFailure(
@@ -1544,10 +1616,15 @@ const authError = AuthErrorBuilder.loginFailure('admin', 'INVALID_CREDENTIALS', 
 ```
 
 #### データベースエラー（src/lib/api-error-details.ts）
+
 ```typescript
 export class DatabaseErrorBuilder extends ErrorDetailBuilder {
   static connectionError(errorDetails: any, context: DatabaseErrorContext): DetailedErrorResponse;
-  static queryError(query: string, errorDetails: any, context: DatabaseErrorContext): DetailedErrorResponse;
+  static queryError(
+    query: string,
+    errorDetails: any,
+    context: DatabaseErrorContext
+  ): DetailedErrorResponse;
   static transactionError(errorDetails: any, context: DatabaseErrorContext): DetailedErrorResponse;
 }
 
@@ -1560,13 +1637,14 @@ try {
   const dbError = DatabaseErrorBuilder.queryError(query, error, {
     table: 'orders',
     operation: 'SELECT',
-    userId
+    userId,
   });
   return NextResponse.json(dbError, { status: 500 });
 }
 ```
 
 #### 外部APIエラー（src/lib/api-error-details.ts）
+
 ```typescript
 export class ExternalAPIErrorBuilder extends ErrorDetailBuilder {
   static openAIError(errorDetails: any, context: ExternalAPIErrorContext): DetailedErrorResponse;
@@ -1581,6 +1659,7 @@ export class ExternalAPIErrorBuilder extends ErrorDetailBuilder {
 ```
 
 #### クライアントエラー（src/lib/client-error-details.ts）
+
 ```typescript
 export class FormErrorBuilder extends ErrorDetailBuilder {
   static validationError(
@@ -1605,24 +1684,28 @@ export class DataFetchErrorBuilder extends ErrorDetailBuilder {
 ```
 
 #### React フック（src/hooks/useErrorHandler.ts）
+
 ```typescript
 // フォーム専用
-const { handleValidationError, handleSubmissionError, errorDetails } =
-  useFormErrorHandler('login-form', { componentName: 'LoginPage' });
+const { handleValidationError, handleSubmissionError, errorDetails } = useFormErrorHandler(
+  'login-form',
+  { componentName: 'LoginPage' }
+);
 
 // API呼び出し専用
-const { handleFetchError, handleApiError } =
-  useApiErrorHandler({ componentName: 'OrderList' });
+const { handleFetchError, handleApiError } = useApiErrorHandler({ componentName: 'OrderList' });
 
 // 汎用
-const { handleError, clearError, retry } =
-  useErrorHandler({
-    componentName: 'Dashboard',
-    onError: (error) => { /* カスタム処理 */ }
-  });
+const { handleError, clearError, retry } = useErrorHandler({
+  componentName: 'Dashboard',
+  onError: (error) => {
+    /* カスタム処理 */
+  },
+});
 ```
 
 ### ログシステム（src/lib/debug-logger.ts）
+
 ```typescript
 export const debugLogger = {
   info: (message: string, data?: any) => {
@@ -1635,15 +1718,15 @@ export const debugLogger = {
   },
   error: (message: string, data?: any) => {
     console.error(`[ERROR] ${message}`, sanitizeForLogging(data));
-  }
+  },
 };
 
 // ログ関数
-- logAuthAttempt(result, username, context)
-- logSecurityEvent(eventType, details, context)
-- logDatabaseOperation(operation, table, success, details, userId)
-- logExternalAPICall(apiName, endpoint, method, success, responseTime, statusCode)
-- logClientError(errorType, error, context)
+-logAuthAttempt(result, username, context) -
+  logSecurityEvent(eventType, details, context) -
+  logDatabaseOperation(operation, table, success, details, userId) -
+  logExternalAPICall(apiName, endpoint, method, success, responseTime, statusCode) -
+  logClientError(errorType, error, context);
 ```
 
 ---
@@ -1653,6 +1736,7 @@ export const debugLogger = {
 ### データフェッチパターン
 
 #### Server Components（デフォルト）
+
 ```typescript
 // src/app/orders/shipping/pending/page.tsx
 export default async function PendingOrdersPage() {
@@ -1664,6 +1748,7 @@ export default async function PendingOrdersPage() {
 ```
 
 #### Client Components（対話的UI）
+
 ```typescript
 'use client';
 
@@ -1685,6 +1770,7 @@ export function OrderList({ orders: initialOrders }) {
 ```
 
 ### IndexedDB統合（チャット履歴）
+
 ```typescript
 // チャット履歴の永続化
 class ChatStorageManager {
@@ -1707,6 +1793,7 @@ class ChatStorageManager {
 ```
 
 ### BroadcastChannel（タブ間同期）
+
 ```typescript
 // src/components/ChatPanel.tsx
 const channel = new BroadcastChannel('chat-sync');
@@ -1717,7 +1804,7 @@ channel.postMessage({ type: 'NEW_MESSAGE', message });
 // 他タブからの受信
 channel.onmessage = (event) => {
   if (event.data.type === 'NEW_MESSAGE') {
-    setMessages(prev => [...prev, event.data.message]);
+    setMessages((prev) => [...prev, event.data.message]);
   }
 };
 ```
@@ -1727,6 +1814,7 @@ channel.onmessage = (event) => {
 ## 開発ワークフロー
 
 ### 開発環境セットアップ
+
 ```bash
 # 1. リポジトリクローン
 git clone <repository-url>
@@ -1754,6 +1842,7 @@ open http://localhost:3000/orders
 ```
 
 ### 品質保証コマンド
+
 ```bash
 # TypeScript型チェック
 npm run typecheck
@@ -1775,6 +1864,7 @@ npm test -- --testNamePattern="should validate required fields"
 ```
 
 ### コード品質チェックリスト
+
 ```bash
 # QUALITY_CHECKLIST.md の10項目チェック
 1. ビルドエラー/警告 (CRITICAL)
@@ -1796,6 +1886,7 @@ npm test -- --testNamePattern="should validate required fields"
 ```
 
 ### Git ワークフロー
+
 ```bash
 # 機能ブランチ作成
 git checkout -b feature/new-feature
@@ -1816,6 +1907,7 @@ git push origin feature/new-feature
 ```
 
 ### テスト戦略
+
 ```typescript
 // __tests__/api/orders/route.test.ts
 describe('GET /api/orders', () => {
@@ -1829,7 +1921,7 @@ describe('GET /api/orders', () => {
       .mockResolvedValueOnce({ rows: mockOrders });
 
     const request = new NextRequest('http://localhost:3000/api/orders', {
-      headers: { 'x-session-token': 'valid-token' }
+      headers: { 'x-session-token': 'valid-token' },
     });
 
     const response = await GET(request);
@@ -1855,6 +1947,7 @@ describe('GET /api/orders', () => {
 ## デプロイメント
 
 ### Vercel デプロイ
+
 ```bash
 # 1. Vercel CLI インストール
 npm install -g vercel
@@ -1882,6 +1975,7 @@ curl -X POST https://your-domain.vercel.app/api/migrate-admin-system
 ```
 
 ### 環境変数
+
 ```bash
 # 開発環境 (.env.local)
 DATABASE_URL=postgresql://user:pass@localhost:5432/agri_dev
@@ -1898,6 +1992,7 @@ NODE_ENV=production
 ```
 
 ### ビルド設定
+
 ```json
 // package.json
 {
@@ -1916,6 +2011,7 @@ NODE_ENV=production
 ```
 
 ### SSL/HTTPS
+
 - Vercelで自動SSL証明書発行
 - next.config.jsでセキュリティヘッダー設定済み
 - 全Cookie設定でSecure, HttpOnly, SameSite=Strict
@@ -1925,6 +2021,7 @@ NODE_ENV=production
 ## 追加情報
 
 ### テストカバレッジ
+
 ```
 Total Test Cases: 140+
 
@@ -1940,6 +2037,7 @@ Coverage by Module:
 ```
 
 ### パフォーマンス最適化
+
 1. **データベース接続プーリング**: Neon Serverless PostgreSQL
 2. **画像最適化**: Next.js Image Component
 3. **コード分割**: 動的import
@@ -1947,6 +2045,7 @@ Coverage by Module:
 5. **レート制限**: Middleware レベルで実装
 
 ### セキュリティ監査チェックリスト
+
 - [x] 全APIルートで認証検証
 - [x] 全POST/PUT/DELETEでCSRF検証
 - [x] パラメータ化クエリでSQLインジェクション防止
@@ -1959,6 +2058,7 @@ Coverage by Module:
 - [x] 監査ログ記録
 
 ### 今後の拡張予定
+
 1. **外部API統合**
    - ColorMi Shop API
    - Tabechoku API
@@ -1990,6 +2090,7 @@ Coverage by Module:
 - テスト戦略とデプロイメント手順
 
 **重要な開発原則**:
+
 1. 全データ操作でマルチテナント分離（user_id必須）
 2. 全保護ルートで認証・CSRF検証
 3. エラーは構造化エラーシステムで詳細分析
@@ -2003,25 +2104,30 @@ Coverage by Module:
 ## 🗑️ Category Feature Removal Summary
 
 ### Overview
+
 The manual category selection feature has been **completely removed** from the codebase to make way for a more powerful **Product Master + Product Mapping + AI Suggestion** system.
 
 ### Database Changes
 
 #### Migration Script Created
+
 **File:** `src/app/api/migrate-drop-categories/route.ts`
 
 **Execution:**
+
 ```bash
 curl -X POST http://localhost:3000/api/migrate-drop-categories
 ```
 
 **Actions Performed:**
+
 1. ✓ DROP foreign key constraint `orders_category_id_fkey`
 2. ✓ DROP column `orders.category_id`
 3. ✓ DROP column `orders.product_category`
 4. ✓ DROP TABLE `categories CASCADE`
 
 #### Removed Database Objects
+
 - ❌ **categories table** (11 columns: id, name, description, color, icon, display_order, is_active, user_id, created_at, updated_at, UNIQUE constraint)
 - ❌ **orders.category_id** (INTEGER FK → categories.id)
 - ❌ **orders.product_category** (VARCHAR column)
@@ -2029,6 +2135,7 @@ curl -X POST http://localhost:3000/api/migrate-drop-categories
 ### Backend API Changes
 
 #### Deleted API Routes
+
 1. ❌ `src/app/api/categories/route.ts` (351 lines)
    - GET /api/categories (list all categories for user)
    - POST /api/categories (create new category)
@@ -2039,6 +2146,7 @@ curl -X POST http://localhost:3000/api/migrate-drop-categories
    - POST /api/upload-with-category (CSV upload with category assignment)
 
 #### Modified API Routes
+
 1. ✓ **`src/app/api/orders/route.ts`**
    - Removed category JOIN from SELECT query
    - Removed category fields: `category_id`, `category_name`, `category_color`, `category_icon`
@@ -2052,12 +2160,14 @@ curl -X POST http://localhost:3000/api/migrate-drop-categories
 ### Frontend Changes
 
 #### Deleted Pages
+
 - ❌ `src/app/categories/page.tsx` (426 lines)
   - Full category management UI with CRUD operations
   - Icon picker (9 icons) and color picker (8 colors)
   - Category creation/edit forms with preview
 
 #### Modified Pages
+
 1. ✓ **`src/app/orders/shipping/pending/page.tsx`**
    - Removed `Category` interface
    - Removed `iconComponents` and `colorClasses` mappings
@@ -2068,6 +2178,7 @@ curl -X POST http://localhost:3000/api/migrate-drop-categories
    - Removed unused imports: `Carrot`, `Apple`, `Coffee`, `ShoppingBag`, `Heart`, `Star`, `Leaf`, `Zap`
 
 #### Modified Components
+
 1. ✓ **`src/components/Sidebar.tsx`**
    - Removed `{ name: 'カテゴリ管理', href: '/categories', icon: Tags }` navigation item
    - Removed `Tags` import from lucide-react
@@ -2075,7 +2186,9 @@ curl -X POST http://localhost:3000/api/migrate-drop-categories
 ### TypeScript Type Changes
 
 #### Modified Types
+
 **`src/types/order.ts`**
+
 ```diff
 export interface Order {
   id: number;
@@ -2095,6 +2208,7 @@ export interface Order {
 ### Middleware Changes
 
 **`src/middleware.ts`**
+
 - ✓ Removed `/api/categories` from `CUSTOMER_ONLY_API_ROUTES`
 - ✓ Removed `/api/upload-with-category` from `CUSTOMER_ONLY_API_ROUTES`
 - ✓ Removed `/categories` from `CUSTOMER_ONLY_PAGE_ROUTES`
@@ -2102,15 +2216,17 @@ export interface Order {
 ### Test Changes
 
 #### Deleted Test Files
+
 - ❌ `__tests__/api/categories/categories.test.ts` (full category API test suite)
 - ❌ `__tests__/api/upload-colormi-final.test.ts` (upload-with-category tests)
 - ❌ `__tests__/api/upload/csv-upload.test.ts` (category CSV upload tests)
 
 #### Modified Test Files
+
 1. ✓ **`__tests__/setup/test-utils.ts`**
    - Removed all category query handling from MockDbClient
    - Removed `createMockCategory()` factory function
-   - Removed `category_id` from `createMockOrder()` 
+   - Removed `category_id` from `createMockOrder()`
    - Removed `category` parameter from `createFormDataRequest()`
    - Removed category seeding from `seedTestData()`
    - Updated INSERT INTO orders mock to match new column order
@@ -2122,6 +2238,7 @@ export interface Order {
 ### Files Summary
 
 **Total Files Deleted:** 5
+
 ```
 - src/app/api/categories/route.ts
 - src/app/api/upload-with-category/route.ts
@@ -2132,6 +2249,7 @@ export interface Order {
 ```
 
 **Total Files Modified:** 9
+
 ```
 - src/app/api/orders/route.ts
 - src/app/api/orders/[id]/route.ts
@@ -2145,6 +2263,7 @@ export interface Order {
 ```
 
 **New Files Created:** 1
+
 ```
 + src/app/api/migrate-drop-categories/route.ts (migration script)
 ```
@@ -2152,16 +2271,20 @@ export interface Order {
 ### Verification Steps
 
 1. ✅ **TypeScript Compilation**
+
    ```bash
    npm run typecheck
    ```
+
    - No category-related errors
    - All type references resolved
 
 2. ✅ **Database Migration**
+
    ```bash
    curl -X POST http://localhost:3000/api/migrate-drop-categories
    ```
+
    - Categories table dropped
    - Foreign keys removed
    - No data loss warnings (feature intentionally removed)

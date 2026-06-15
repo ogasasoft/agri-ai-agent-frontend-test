@@ -9,12 +9,14 @@ This is a comprehensive agricultural AI agent frontend application built with Ne
 ## Key Architecture
 
 ### Multi-Tier Authentication System
+
 - **Basic Authentication**: Session-based auth with CSRF protection (`src/lib/auth.ts`)
 - **Enhanced Security**: Progressive lockout, rate limiting, Remember Me tokens (`src/lib/auth-enhanced.ts`)
 - **Admin Authentication**: Role-based access control with super admin privileges (`src/lib/admin-auth.ts`)
 - **Middleware Protection**: Route-based authentication filtering (`src/middleware.ts`)
 
 ### Database Architecture
+
 - **Production**: PostgreSQL with Neon database connection pooling
 - **Multi-tenancy**: Row Level Security (RLS) with user_id isolation
 - **Security Tables**: Sessions, remember_tokens, rate_limits, security_events, admin_audit_logs
@@ -22,6 +24,7 @@ This is a comprehensive agricultural AI agent frontend application built with Ne
 - **Security Framework**: Comprehensive security utility functions (`src/lib/security.ts`)
 
 ### AI Integration
+
 - **Primary**: OpenAI ChatGPT API (gpt-4o-mini)
 - **Simple Chat Interface**: Direct OpenAI API integration for user questions
 - **Fallback System**: System-based responses when OpenAI API is unavailable
@@ -49,7 +52,7 @@ npm test -- --verbose                                           # Run tests with
 
 # Database Setup (run after npm run dev starts)
 curl -X POST http://localhost:3000/api/migrate-auth
-curl -X POST http://localhost:3000/api/migrate-security-enhancements  
+curl -X POST http://localhost:3000/api/migrate-security-enhancements
 curl -X POST http://localhost:3000/api/migrate-admin-system
 
 # Vercel Deployment
@@ -68,11 +71,13 @@ vercel --prod        # Deploy to production
 ## Authentication & Security Architecture
 
 ### Three-Layer Authentication
+
 1. **Basic Auth** (`/api/auth/*`): Login, logout, password change
 2. **Enhanced Security** (`auth-enhanced.ts`): Progressive lockout, rate limiting, Remember Me
 3. **Admin System** (`/api/admin/*`): Role-based access with audit logging
 
 ### Security Features
+
 - **Progressive Lockout**: 5min → 15min → 30min → 1hr → 2hr → 4hr → 8hr → 24hr
 - **Rate Limiting**: API endpoint specific limits (Login: 10/min, Upload: 5/min, Chat: 30/min)
 - **Remember Me**: 30-day persistent login with selector/validator pattern
@@ -83,6 +88,7 @@ vercel --prod        # Deploy to production
 - **CSRF Protection**: All authenticated API routes require CSRF token validation
 
 ### Middleware Route Protection
+
 - **Public Routes**: `/login`, `/api/auth/login`, `/api/auth/auto-login`
 - **Protected Routes**: All `/orders/*`, `/dashboard/*`
 - **Admin Routes**: `/admin/*`, `/api/admin/*` (super admin only)
@@ -91,6 +97,7 @@ vercel --prod        # Deploy to production
 ## API Routes Structure
 
 ### Core API Routes (`src/app/api/`)
+
 - `/api/orders` - Multi-tenant order CRUD with user_id isolation
 - `/api/chat` - AI chat with live database context and page awareness
 - `/api/upload` - CSV processing with Japanese header mapping
@@ -98,6 +105,7 @@ vercel --prod        # Deploy to production
 - `/api/shipping` - Yamato Transport API integration (mock)
 
 ### Authentication API (`src/app/api/auth/`)
+
 - `/api/auth/login` - Enhanced login with Remember Me support
 - `/api/auth/auto-login` - Remember token validation and session creation
 - `/api/auth/logout` - Session invalidation with Remember token cleanup
@@ -105,12 +113,14 @@ vercel --prod        # Deploy to production
 - `/api/auth/change-password` - Password change with security validation
 
 ### Admin API (`src/app/api/admin/`)
+
 - `/api/admin/me` - Admin role validation
 - `/api/admin/customers` - Cross-user customer data management
 - `/api/admin/integrations` - External API integration settings
 - `/api/admin/dashboard/*` - System statistics and activity monitoring
 
 ### Dashboard API (`src/app/api/dashboard/`)
+
 - `/api/dashboard/stats` - Analytics data with date range filtering (shipped orders only)
 - `/api/dashboard/latest-date` - Get latest shipped order date for default date range
 - **Date range logic**: Defaults to latest shipped date minus 1 month (not today)
@@ -118,30 +128,34 @@ vercel --prod        # Deploy to production
 ## Core Architecture Patterns
 
 ### Multi-Tenant Data Isolation
+
 - All user data queries include `WHERE user_id = $1` clauses
 - Admin queries can access cross-user data with proper authorization
 - Categories and orders are user-scoped with ownership validation
 - Database RLS policies enforce tenant separation at PostgreSQL level
 
-
 ### Security Utility Framework
+
 - Comprehensive security functions in `src/lib/security.ts`
 - Standardized error responses with security headers
 - Input sanitization and SQL injection prevention
 - Logging sanitization to prevent sensitive data exposure
 
 ### Two-Pane Order Management
+
 - Orders separated by delivery date presence (with/without dates)
 - Different visual styling (white vs light blue backgrounds)
 - Maintains selection state across both panes for bulk operations
 - Shipping workflow with multi-select and label generation
 
 ### Chat Persistence Strategy
+
 - IndexedDB for local storage with cross-tab synchronization
 - BroadcastChannel API for real-time updates across browser tabs
 - Graceful fallback when browser APIs are unavailable
 
 ### Dashboard Analytics
+
 - **Data source**: Only shipped orders (status = 'shipped')
 - **Default range**: Latest shipped order date minus 1 month (not current date)
 - **Manual refresh**: Date picker changes don't auto-reload; requires "更新" button
@@ -151,18 +165,21 @@ vercel --prod        # Deploy to production
 ## Admin System Architecture
 
 ### Role-Based Access Control
+
 - **Super Admin**: Full system access (silentogasasoft@gmail.com/Ogasa1995)
 - **Admin**: Limited administrative functions
 - **User**: Standard application access (admin/admin123)
 - Database-driven role checking with `is_super_admin` flag
 
 ### Admin Dashboard Features
+
 - **System Statistics**: Users, orders, customers, integrations
 - **Activity Monitoring**: Real-time admin action logging
 - **Customer Management**: Cross-user customer data with search/filter
 - **API Integration Setup**: External service configuration (ColorMi, Tabechoku)
 
 ### Audit Logging
+
 - All admin actions logged to `admin_audit_logs` table
 - IP address and user agent tracking
 - Detailed operation context in JSONB format
@@ -171,6 +188,7 @@ vercel --prod        # Deploy to production
 ## Japanese Business Context
 
 ### Localization Features
+
 - Complete Japanese UI with agricultural terminology
 - Date formatting with Japanese locale (`date-fns/locale/ja`)
 - Currency formatting for Japanese Yen
@@ -178,6 +196,7 @@ vercel --prod        # Deploy to production
 - Agricultural product-specific workflows and terminology
 
 ### External API Integration Framework
+
 - **ColorMi Shop**: E-commerce platform integration (planned)
 - **Tabechoku**: Direct-from-farm marketplace (planned)
 - **Yamato Transport**: Shipping label generation with CSV export
@@ -185,6 +204,7 @@ vercel --prod        # Deploy to production
 - Automatic sync scheduling with error handling
 
 ### Shipping Workflow
+
 - **Three-step process**: Settings → Confirmation → Completion
 - **Auto-download**: CSV files automatically download on completion page
 - **Status tracking**: Orders progress from pending → shipped with tracking numbers
@@ -193,6 +213,7 @@ vercel --prod        # Deploy to production
 ## Important Notes
 
 ### Entry Points and Navigation
+
 - **Quick Start**: `npm run dev` → `http://localhost:3000/orders`
 - **Main Entry**: `/orders` redirects to `/orders/shipping/pending`
 - **Admin Panel**: `/admin` requires super admin authentication
@@ -200,6 +221,7 @@ vercel --prod        # Deploy to production
 - **Shipping Flow**: pending → settings modal → confirmation screen → completion (with auto-download)
 
 ### Critical Security Considerations
+
 - All API routes must have authentication, CSRF protection, and input validation
 - All database operations must include proper user_id filtering for multi-tenancy
 - Admin operations require audit logging
@@ -208,6 +230,7 @@ vercel --prod        # Deploy to production
 - File uploads must have size limits, type validation, and security scanning
 
 ### Database Migration Sequence
+
 1. `/api/migrate-auth` - Basic authentication tables
 2. `/api/migrate-security-enhancements` - Advanced security features
 3. `/api/migrate-admin-system` - Admin system and settings
@@ -215,16 +238,19 @@ vercel --prod        # Deploy to production
 ## Environment Variables
 
 ### Required for Development
+
 - `DATABASE_URL`: PostgreSQL connection string (Neon recommended)
 - `OPENAI_API_KEY`: OpenAI API key for chat functionality
 
 ### Required for Production
+
 - All development variables plus:
 - `YAMATO_API_KEY`: Yamato Transport API key
 - `YAMATO_API_SECRET`: Yamato Transport API secret
 - `YAMATO_API_BASE_URL`: Yamato API base URL
 
 ### Vercel Deployment
+
 - Environment variables are set in Vercel dashboard
 - API routes work consistently between development and production
 - SSL is automatically handled for database connections
@@ -232,13 +258,17 @@ vercel --prod        # Deploy to production
 ## Security Framework Details
 
 ### Comprehensive Security Implementation
+
 The application has undergone extensive security hardening with the following measures:
 
 #### API Route Security Pattern
+
 All protected API routes follow this security pattern:
+
 ```typescript
 // 1. Session validation
-const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+const sessionToken =
+  request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
 if (!sessionToken) return unauthorized();
 
 // 2. CSRF token validation
@@ -250,6 +280,7 @@ if (csrfToken !== sessionData.session.csrf_token) return forbidden();
 ```
 
 #### Security Utilities (`src/lib/security.ts`)
+
 - `addSecurityHeaders()` - Adds comprehensive security headers
 - `createErrorResponse()` - Standardized error responses with security headers
 - `sanitizeInput()` - Input sanitization and XSS prevention
@@ -257,11 +288,13 @@ if (csrfToken !== sessionData.session.csrf_token) return forbidden();
 - `sanitizeForLogging()` - Removes sensitive data from logs
 
 #### Rate Limiting Implementation
+
 - Memory-based rate limiting in middleware
 - Endpoint-specific limits (login: 10/min, upload: 5/min, chat: 30/min)
 - IP-based tracking with automatic window reset
 
 #### File Upload Security
+
 - File size limits (10MB maximum)
 - File type validation (CSV only for uploads)
 - Content validation and sanitization
@@ -270,26 +303,31 @@ if (csrfToken !== sessionData.session.csrf_token) return forbidden();
 ## TDD Testing Architecture
 
 ### Comprehensive Test Suite
+
 The codebase includes a complete TDD test suite following t_wada's methodology with 140+ test cases covering all functionality:
 
 ### Test Structure
+
 - **Framework**: Jest with Next.js integration, Node.js environment for API tests
 - **Mock Infrastructure**: Complete database mocking via `MockDbClient` in `__tests__/setup/test-utils.ts`
 - **Factory Functions**: `createMockUser`, `createMockOrder`, `createMockCategory`, `createMockSession`
 - **Authentication Testing**: Full session management, CSRF validation, role-based access
 
 ### Test Categories by Functionality
+
 ```
 /api/auth/*         → Authentication system (login, logout, session management)
 /api/orders/*       → Order CRUD operations with multi-tenant isolation
-/api/upload/*       → CSV file processing and validation  
+/api/upload/*       → CSV file processing and validation
 /api/shipping/*     → Yamato Transport integration and shipping management
 /api/admin/*        → Admin system with role-based access and audit logging
 /api/chat           → AI chat functionality with OpenAI integration
 ```
 
 ### Testing Patterns
+
 All API route tests follow this structure:
+
 1. **Authentication Tests**: Session validation, CSRF token checking, role verification
 2. **Business Logic Tests**: CRUD operations, data validation, constraint checking
 3. **Security Tests**: Multi-tenant isolation, input sanitization, SQL injection prevention
@@ -297,12 +335,14 @@ All API route tests follow this structure:
 5. **Edge Case Tests**: Boundary conditions, concurrent operations, large data sets
 
 ### Mock Strategy
+
 - **Database**: Complete PostgreSQL mocking with query simulation and transaction support
 - **External APIs**: OpenAI API mocking for chat functionality, Yamato API mocking for shipping
 - **Authentication**: Session and CSRF token mocking with role-based access simulation
 - **File Operations**: FormData and file upload mocking for CSV processing
 
 ### Test Quality Standards
+
 - **Coverage**: 100% of API routes and core business logic
 - **Security Focus**: Every endpoint tested for authentication, authorization, and input validation
 - **Multi-tenant Testing**: User isolation verified across all data operations
@@ -312,32 +352,39 @@ All API route tests follow this structure:
 ## Code Quality Assurance
 
 ### Quality Checklist Integration
+
 This project includes a comprehensive quality checklist (`QUALITY_CHECKLIST.md`) with 10 standardized inspection items:
 
 **CRITICAL Level (4 items)**:
+
 - Build errors/warnings verification
-- TypeScript compilation errors 
+- TypeScript compilation errors
 - Security vulnerability scanning
 - Dynamic route configuration validation
 
 **HIGH Level (3 items)**:
+
 - Debug log cleanup verification
 - Problem comments (TODO/FIXME) detection
 - Function duplication analysis
 
 **MEDIUM/LOW Levels (3 items)**:
+
 - Environment variable type definitions
 - Test mock contamination
 - TypeScript `any` usage analysis
 
 ### Quality Score System
+
 - **Perfect (30/30)**: Enterprise-grade quality
 - **Excellent (27-29)**: Production deployment ready
 - **Good (24-26)**: Minor improvements recommended
 - **Below 24**: Significant fixes required
 
 ### Code Standards Enforcement
+
 All production code must meet these requirements:
+
 - Zero TypeScript compilation errors
 - No console.log statements (console.error acceptable for error handling)
 - All API routes using dynamic headers must have `export const dynamic = 'force-dynamic'`
@@ -347,7 +394,9 @@ All production code must meet these requirements:
 ## Architecture Patterns
 
 ### Database Connection Pattern
+
 All database operations use the centralized connection utility:
+
 ```typescript
 import { getDbClient } from '@/lib/db';
 
@@ -362,7 +411,9 @@ try {
 ```
 
 ### API Route Dynamic Rendering Pattern
+
 All API routes accessing request.headers require dynamic configuration:
+
 ```typescript
 export const dynamic = 'force-dynamic';
 
@@ -373,13 +424,15 @@ export async function GET(request: NextRequest) {
 ```
 
 ### Multi-Tenant Query Pattern
+
 All user-scoped database queries must include user isolation:
+
 ```typescript
 // Correct: User isolation enforced
-const orders = await client.query(
-  'SELECT * FROM orders WHERE user_id = $1 AND order_date > $2',
-  [userId, dateFilter]
-);
+const orders = await client.query('SELECT * FROM orders WHERE user_id = $1 AND order_date > $2', [
+  userId,
+  dateFilter,
+]);
 
 // Admin access pattern (cross-user data access)
 if (adminUser && isSuperAdmin(adminUser)) {
@@ -390,14 +443,17 @@ if (adminUser && isSuperAdmin(adminUser)) {
 ## Critical Development Practices
 
 ### File Creation Policy
+
 - NEVER create files unless absolutely necessary for achieving the goal
 - ALWAYS prefer editing existing files over creating new ones
-- NEVER proactively create documentation files (*.md) or README files unless explicitly requested
+- NEVER proactively create documentation files (\*.md) or README files unless explicitly requested
 
 ### AI判断型エラー検知システム（必須ルール）
+
 すべての新規実装で「構造化エラー診断システム」の適用が必須です。これはログを見なくてもAIが自動的に問題を判断し、具体的な解決策を提示するシステムです。
 
 #### API Route必須実装
+
 ```typescript
 // ✅ 必須インポート
 import { AuthErrorBuilder } from '@/lib/auth-error-details';
@@ -423,6 +479,7 @@ if (!sessionToken) {
 ```
 
 #### React Component必須実装
+
 ```typescript
 // ✅ エラーハンドリングフック
 import { useFormErrorHandler } from '@/hooks/useErrorHandler';
@@ -438,6 +495,7 @@ const { handleSubmissionError, errorDetails, isError } =
 ```
 
 #### 禁止パターン
+
 ```typescript
 // ❌ シンプルエラーレスポンス（禁止）
 return NextResponse.json({ success: false, message: 'エラー' }, { status: 500 });
@@ -450,6 +508,7 @@ return NextResponse.json({ success: false, message: 'エラー' }, { status: 500
 ```
 
 #### エラー検知システムの主要機能
+
 - **段階的処理追跡**: 各ステップでの成功/失敗を記録
 - **インテリジェント提案**: エラー原因に基づく具体的解決策
 - **攻撃パターン検出**: ブルートフォース、CSRF攻撃等の自動識別
@@ -457,7 +516,9 @@ return NextResponse.json({ success: false, message: 'エラー' }, { status: 500
 - **VSCodeスニペット**: `api-error-handler`, `react-error-handler`等で自動生成可能
 
 ### Quality Gate Requirements
+
 Before committing or deploying, run the quality verification commands:
+
 ```bash
 # Essential quality checks
 npm run build        # Must complete without errors
@@ -472,12 +533,14 @@ npm run lint         # Must pass ESLint validation
 ```
 
 ### Security-First Development
+
 - All API routes must implement the security pattern: session validation → CSRF validation → input sanitization → user isolation
 - Never expose sensitive data in logs or error messages
 - All admin operations require audit logging via `logAdminAction()`
 - File uploads must have size limits, type validation, and security scanning
 
 ### Database Operation Standards
+
 - Use `getDbClient` from `@/lib/db.ts` for all database connections
 - All user-scoped queries must include `WHERE user_id = $1` for multi-tenant isolation
 - Use parameterized queries exclusively to prevent SQL injection

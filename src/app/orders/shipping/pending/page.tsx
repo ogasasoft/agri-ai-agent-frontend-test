@@ -18,7 +18,7 @@ export default function ShippingPendingPage() {
     dateTo: '',
     status: 'all',
     hasDeliveryDate: 'all',
-    hasMemo: 'all'
+    hasMemo: 'all',
   });
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
 
@@ -30,8 +30,8 @@ export default function ShippingPendingPage() {
       const response = await fetch('/api/orders', {
         credentials: 'include', // クッキーを含める
         headers: {
-          'x-session-token': sessionToken || ''
-        }
+          'x-session-token': sessionToken || '',
+        },
       });
       const data = await response.json();
 
@@ -52,35 +52,38 @@ export default function ShippingPendingPage() {
     }
   };
 
-  const filteredOrders = Array.isArray(orders) ? orders.filter(order => {
-    // 発送済みは除外
-    if (order.status === 'shipped' || order.status === 'delivered') return false;
+  const filteredOrders = Array.isArray(orders)
+    ? orders.filter((order) => {
+        // 発送済みは除外
+        if (order.status === 'shipped' || order.status === 'delivered') return false;
 
-    if (filters.dateFrom && order.order_date < filters.dateFrom) return false;
-    if (filters.dateTo && order.order_date > filters.dateTo) return false;
-    if (filters.status !== 'all' && order.status !== filters.status) return false;
-    if (filters.hasDeliveryDate === 'yes' && !order.delivery_date) return false;
-    if (filters.hasDeliveryDate === 'no' && order.delivery_date) return false;
-    if (filters.hasMemo === 'yes' && !order.has_memo) return false;
-    if (filters.hasMemo === 'no' && order.has_memo) return false;
-    return true;
-  }) : [];
+        if (filters.dateFrom && order.order_date < filters.dateFrom) return false;
+        if (filters.dateTo && order.order_date > filters.dateTo) return false;
+        if (filters.status !== 'all' && order.status !== filters.status) return false;
+        if (filters.hasDeliveryDate === 'yes' && !order.delivery_date) return false;
+        if (filters.hasDeliveryDate === 'no' && order.delivery_date) return false;
+        if (filters.hasMemo === 'yes' && !order.has_memo) return false;
+        if (filters.hasMemo === 'no' && order.has_memo) return false;
+        return true;
+      })
+    : [];
 
-  const ordersWithDeliveryDate = filteredOrders.filter(order => order.delivery_date);
-  const ordersWithoutDeliveryDate = filteredOrders.filter(order => !order.delivery_date);
+  const ordersWithDeliveryDate = filteredOrders.filter((order) => order.delivery_date);
+  const ordersWithoutDeliveryDate = filteredOrders.filter((order) => !order.delivery_date);
 
   const handleShippingComplete = (response: YamatoApiResponse) => {
     // 発送完了画面に遷移
     const successOrderIds = response.results
-      .filter(result => result.success)
-      .map(result => result.order_id)
+      .filter((result) => result.success)
+      .map((result) => result.order_id)
       .join(',');
 
     if (successOrderIds) {
-      router.push(`/orders/shipping/complete?orderIds=${successOrderIds}&batchId=${response.batch_id}`);
+      router.push(
+        `/orders/shipping/complete?orderIds=${successOrderIds}&batchId=${response.batch_id}`
+      );
     }
   };
-
 
   if (loading) {
     return (
@@ -97,13 +100,11 @@ export default function ShippingPendingPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">発送対象注文</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              未発送注文: {filteredOrders.length}件
-            </p>
+            <p className="text-sm text-gray-600 mt-1">未発送注文: {filteredOrders.length}件</p>
           </div>
           <div className="flex gap-3">
             <ShippingLabelButton
-              selectedOrders={filteredOrders.filter(order =>
+              selectedOrders={filteredOrders.filter((order) =>
                 selectedOrders.includes(order.id.toString())
               )}
               onShippingComplete={handleShippingComplete}
@@ -127,8 +128,7 @@ export default function ShippingPendingPage() {
             <p className="text-gray-600">
               {!Array.isArray(orders) || orders.length === 0
                 ? '注文データが登録されていません。'
-                : 'すべての注文が発送済みです。'
-              }
+                : 'すべての注文が発送済みです。'}
             </p>
           </div>
         </div>
@@ -142,7 +142,9 @@ export default function ShippingPendingPage() {
             <div className="bg-green-50 px-4 py-3 border-b border-green-200">
               <div className="flex items-center gap-2 text-green-800">
                 <Calendar className="w-4 h-4" />
-                <span className="font-medium">到着希望日あり ({ordersWithDeliveryDate.length}件)</span>
+                <span className="font-medium">
+                  到着希望日あり ({ordersWithDeliveryDate.length}件)
+                </span>
               </div>
             </div>
             <div className="flex-1 overflow-auto">
@@ -159,7 +161,9 @@ export default function ShippingPendingPage() {
             <div className="bg-orange-50 px-4 py-3 border-b border-orange-200">
               <div className="flex items-center gap-2 text-orange-800">
                 <AlertCircle className="w-4 h-4" />
-                <span className="font-medium">到着希望日なし ({ordersWithoutDeliveryDate.length}件)</span>
+                <span className="font-medium">
+                  到着希望日なし ({ordersWithoutDeliveryDate.length}件)
+                </span>
               </div>
             </div>
             <div className="flex-1 overflow-auto">

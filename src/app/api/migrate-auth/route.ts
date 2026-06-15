@@ -3,10 +3,10 @@ import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   // Starting database migration
-  
+
   try {
     const client = await getDbClient();
-    
+
     try {
       // Create users table
       await client.query(`
@@ -114,19 +114,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'Database migration completed successfully',
-        tables: ['users', 'sessions', 'categories', 'orders', 'audit_logs']
+        tables: ['users', 'sessions', 'categories', 'orders', 'audit_logs'],
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: unknown) {
     console.error('❌ Migration error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'Database migration failed',
-      error: error instanceof Error ? error.message : "Internal server error"
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Database migration failed',
+        error: error instanceof Error ? error.message : 'Internal server error',
+      },
+      { status: 500 }
+    );
   }
 }

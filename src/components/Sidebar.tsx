@@ -12,7 +12,7 @@ import {
   User,
   Shield,
   MessageSquare,
-  X
+  X,
 } from 'lucide-react';
 
 const navigation = [
@@ -39,7 +39,7 @@ export function Sidebar({ isChatOpen = true, setIsChatOpen }: SidebarProps = {})
       const response = await fetch('/api/auth/me', {
         method: 'GET',
         credentials: 'include',
-        cache: 'no-cache'
+        cache: 'no-cache',
       });
 
       if (response.ok) {
@@ -69,16 +69,16 @@ export function Sidebar({ isChatOpen = true, setIsChatOpen }: SidebarProps = {})
         // Get CSRF token from cookie for logout request
         const csrfToken = document.cookie
           .split('; ')
-          .find(row => row.startsWith('csrf_token='))
+          .find((row) => row.startsWith('csrf_token='))
           ?.split('=')[1];
 
-        await fetch('/api/auth/logout', { 
+        await fetch('/api/auth/logout', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...(csrfToken && { 'x-csrf-token': csrfToken })
+            ...(csrfToken && { 'x-csrf-token': csrfToken }),
           },
-          credentials: 'include'
+          credentials: 'include',
         });
         router.push('/login');
       } catch (error) {
@@ -136,9 +136,10 @@ export function Sidebar({ isChatOpen = true, setIsChatOpen }: SidebarProps = {})
               href={item.href}
               className={`
                 flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                ${isActive
-                  ? 'bg-primary-50 text-primary-700 border border-primary-200'
-                  : 'text-gray-700 hover:bg-gray-100'
+                ${
+                  isActive
+                    ? 'bg-primary-50 text-primary-700 border border-primary-200'
+                    : 'text-gray-700 hover:bg-gray-100'
                 }
               `}
             >
@@ -179,7 +180,7 @@ export function Sidebar({ isChatOpen = true, setIsChatOpen }: SidebarProps = {})
           <Shield className="w-4 h-4" />
           パスワード変更
         </Link>
-        
+
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-700 hover:bg-red-50 transition-colors"
@@ -187,10 +188,8 @@ export function Sidebar({ isChatOpen = true, setIsChatOpen }: SidebarProps = {})
           <LogOut className="w-4 h-4" />
           ログアウト
         </button>
-        
-        <div className="text-xs text-gray-500 text-center pt-2">
-          🔐 セキュア認証システム
-        </div>
+
+        <div className="text-xs text-gray-500 text-center pt-2">🔐 セキュア認証システム</div>
       </div>
     </div>
   );

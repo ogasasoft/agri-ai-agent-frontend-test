@@ -23,58 +23,63 @@ export default function UploadPage() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
       'text/csv': ['.csv'],
-      'application/vnd.ms-excel': ['.xls', '.xlsx']
+      'application/vnd.ms-excel': ['.xls', '.xlsx'],
     },
     multiple: false,
     preventDropOnDocument: true, // ドキュメント全体でのドロップを防止
     noClick: false,
-    noKeyboard: false
+    noKeyboard: false,
   });
 
-  const parseFileForPreview = useCallback(async (file: File) => {
-    setIsProcessing(true);
+  const parseFileForPreview = useCallback(
+    async (file: File) => {
+      setIsProcessing(true);
 
-    try {
-      // エンコーディング自動検出・変換
-      const buffer = await file.arrayBuffer();
-      const encodingResult = detectAndConvertEncoding(buffer);
+      try {
+        // エンコーディング自動検出・変換
+        const buffer = await file.arrayBuffer();
+        const encodingResult = detectAndConvertEncoding(buffer);
 
-      if (encodingResult.hasGarbledText || encodingResult.confidence < 0.3) {
-        alert(`文字エンコーディングの問題が検出されました。\n検出されたエンコーディング: ${encodingResult.detectedEncoding}\n信頼度: ${Math.round(encodingResult.confidence * 100)}%\n\nCSVファイルをUTF-8で保存し直すか、正しいエンコーディングで保存してください。`);
+        if (encodingResult.hasGarbledText || encodingResult.confidence < 0.3) {
+          alert(
+            `文字エンコーディングの問題が検出されました。\n検出されたエンコーディング: ${encodingResult.detectedEncoding}\n信頼度: ${Math.round(encodingResult.confidence * 100)}%\n\nCSVファイルをUTF-8で保存し直すか、正しいエンコーディングで保存してください。`
+          );
+          setIsProcessing(false);
+          return;
+        }
+
+        const text = encodingResult.text;
+
+        const parseResult = Papa.parse<Record<string, string>>(text, {
+          header: true,
+          skipEmptyLines: true,
+        });
+
+        if (parseResult.errors && parseResult.errors.length > 0) {
+          alert(`CSV解析エラー: ${parseResult.errors[0].message}`);
+          setIsProcessing(false);
+          return;
+        }
+
+        const headers = parseResult.meta?.fields || [];
+        const allData = parseResult.data;
+        const rows = allData.slice(0, 10); // 最初の10行のみプレビュー
+
+        setParsedData({
+          file,
+          headers,
+          rows,
+          allData,
+        });
+        setShowPreview(true);
+      } catch (error) {
+        alert(`ファイル読み込みエラー: ${error instanceof Error ? error.message : '不明なエラー'}`);
+      } finally {
         setIsProcessing(false);
-        return;
       }
-
-      const text = encodingResult.text;
-
-      const parseResult = Papa.parse<Record<string, string>>(text, {
-        header: true,
-        skipEmptyLines: true,
-      });
-
-      if (parseResult.errors && parseResult.errors.length > 0) {
-        alert(`CSV解析エラー: ${parseResult.errors[0].message}`);
-        setIsProcessing(false);
-        return;
-      }
-
-      const headers = parseResult.meta?.fields || [];
-      const allData = parseResult.data;
-      const rows = allData.slice(0, 10); // 最初の10行のみプレビュー
-
-      setParsedData({
-        file,
-        headers,
-        rows,
-        allData
-      });
-      setShowPreview(true);
-    } catch (error) {
-      alert(`ファイル読み込みエラー: ${error instanceof Error ? error.message : '不明なエラー'}`);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [setIsProcessing, setParsedData, setShowPreview]);
+    },
+    [setIsProcessing, setParsedData, setShowPreview]
+  );
 
   const cancelPreview = useCallback(() => {
     setParsedData(null);
@@ -93,7 +98,11 @@ export default function UploadPage() {
       total_amount: parseInt(row['金額'] || row['amount'] || '0'),
       order_date: row['注文日'] || row['order_date'] || new Date().toISOString().split('T')[0],
       delivery_date: row['配達希望日'] || row['delivery_date'] || '',
-      status: (row['ステータス'] || row['status'] || 'pending') as 'pending' | 'processing' | 'shipped' | 'delivered',
+      status: (row['ステータス'] || row['status'] || 'pending') as
+        | 'pending'
+        | 'processing'
+        | 'shipped'
+        | 'delivered',
       memo: row['備考'] || row['memo'] || '',
     }));
 
@@ -104,12 +113,15 @@ export default function UploadPage() {
     router.push('/orders/register/confirm?type=csv');
   }, [parsedData, router]);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      parseFileForPreview(file);
-    }
-  }, [parseFileForPreview]);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        const file = acceptedFiles[0];
+        parseFileForPreview(file);
+      }
+    },
+    [parseFileForPreview]
+  );
 
   // ブラウザのデフォルトのドラッグ&ドロップ動作を防止
   useEffect(() => {
@@ -199,16 +211,10 @@ export default function UploadPage() {
 
           {/* Actions */}
           <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
-            <button
-              onClick={cancelPreview}
-              className="btn-secondary"
-            >
+            <button onClick={cancelPreview} className="btn-secondary">
               キャンセル
             </button>
-            <button
-              onClick={handleConfirm}
-              className="btn-primary flex items-center gap-2"
-            >
+            <button onClick={handleConfirm} className="btn-primary flex items-center gap-2">
               確認画面へ進む
               <ArrowRight className="w-4 h-4" />
             </button>
@@ -243,34 +249,37 @@ export default function UploadPage() {
             {...getRootProps()}
             className={`
               border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-              ${isDragActive 
-                ? 'border-primary-500 bg-primary-50' 
-                : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+              ${
+                isDragActive
+                  ? 'border-primary-500 bg-primary-50'
+                  : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
               }
               ${isProcessing ? 'pointer-events-none opacity-50' : ''}
             `}
           >
             <input {...getInputProps()} />
-            
+
             <div className="flex flex-col items-center">
-              <Upload className={`w-12 h-12 mb-4 ${isDragActive ? 'text-primary-500' : 'text-gray-400'}`} />
-              
+              <Upload
+                className={`w-12 h-12 mb-4 ${isDragActive ? 'text-primary-500' : 'text-gray-400'}`}
+              />
+
               {isProcessing ? (
                 <>
                   <div className="w-6 h-6 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mb-2"></div>
                   <p className="text-lg font-medium text-gray-700">ファイルを処理中...</p>
                 </>
               ) : isDragActive ? (
-                <p className="text-lg font-medium text-primary-600">ファイルをここにドロップしてください</p>
+                <p className="text-lg font-medium text-primary-600">
+                  ファイルをここにドロップしてください
+                </p>
               ) : (
                 <>
                   <p className="text-lg font-medium text-gray-700 mb-2">
                     CSVファイルをドラッグ&ドロップ
                   </p>
                   <p className="text-sm text-gray-500 mb-4">または</p>
-                  <button className="btn-primary">
-                    ファイルを選択
-                  </button>
+                  <button className="btn-primary">ファイルを選択</button>
                 </>
               )}
             </div>

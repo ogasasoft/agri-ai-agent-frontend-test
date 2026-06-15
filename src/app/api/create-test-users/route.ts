@@ -6,14 +6,17 @@ import { getDbClient } from '@/lib/db';
 export async function POST(request: NextRequest) {
   // Only allow in development environment
   if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json({
-      success: false,
-      message: 'This API is not available in production'
-    }, { status: 404 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'This API is not available in production',
+      },
+      { status: 404 }
+    );
   }
 
   let client: Client | null = null;
-  
+
   try {
     client = await getDbClient();
 
@@ -24,57 +27,57 @@ export async function POST(request: NextRequest) {
         email: 'tanaka@farm.com',
         password: 'tanaka123',
         role: 'user',
-        is_super_admin: false
+        is_super_admin: false,
       },
       {
         username: 'suzuki@agri.jp',
-        email: 'suzuki@agri.jp', 
+        email: 'suzuki@agri.jp',
         password: 'suzuki456',
         role: 'user',
-        is_super_admin: false
+        is_super_admin: false,
       },
       {
         username: 'yamamoto@organic.co.jp',
         email: 'yamamoto@organic.co.jp',
         password: 'yamamoto789',
         role: 'user',
-        is_super_admin: false
+        is_super_admin: false,
       },
       {
         username: 'watanabe@veggie.net',
         email: 'watanabe@veggie.net',
         password: 'watanabe321',
         role: 'user',
-        is_super_admin: false
+        is_super_admin: false,
       },
       {
         username: 'sato@greenfield.org',
         email: 'sato@greenfield.org',
         password: 'sato654',
         role: 'user',
-        is_super_admin: false
+        is_super_admin: false,
       },
       {
         username: 'test@demo.com',
         email: 'test@demo.com',
         password: 'demo123',
         role: 'admin',
-        is_super_admin: false
+        is_super_admin: false,
       },
       {
         username: 'customer01@example.jp',
         email: 'customer01@example.jp',
         password: 'pass123',
         role: 'user',
-        is_super_admin: false
+        is_super_admin: false,
       },
       {
         username: 'farmer@local.jp',
         email: 'farmer@local.jp',
         password: 'farmer456',
         role: 'user',
-        is_super_admin: false
-      }
+        is_super_admin: false,
+      },
     ];
 
     const createdUsers = [];
@@ -94,13 +97,14 @@ export async function POST(request: NextRequest) {
       // Generate salt
       const crypto = require('crypto');
       const salt = crypto.randomBytes(16).toString('hex');
-      
+
       // パスワードをハッシュ化 (password + salt)
       const saltRounds = 12;
       const hashedPassword = await bcrypt.hash(userData.password + salt, saltRounds);
 
       // ユーザーを作成
-      const result = await client.query(`
+      const result = await client.query(
+        `
         INSERT INTO users (
           username, 
           email, 
@@ -116,15 +120,31 @@ export async function POST(request: NextRequest) {
           password_changed_at
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
         RETURNING id, username, email, created_at, role, is_super_admin
-      `, [userData.username, userData.email, hashedPassword, salt, userData.role, userData.is_super_admin, true, 0, 0, 0]);
+      `,
+        [
+          userData.username,
+          userData.email,
+          hashedPassword,
+          salt,
+          userData.role,
+          userData.is_super_admin,
+          true,
+          0,
+          0,
+          0,
+        ]
+      );
 
       const newUser = result.rows[0];
 
       // プレーンテキストパスワードを保存（管理者表示用）
-      await client.query(`
+      await client.query(
+        `
         INSERT INTO user_passwords (user_id, plain_password)
         VALUES ($1, $2)
-      `, [newUser.id, userData.password]);
+      `,
+        [newUser.id, userData.password]
+      );
 
       createdUsers.push({
         id: newUser.id,
@@ -133,7 +153,7 @@ export async function POST(request: NextRequest) {
         password: userData.password,
         role: newUser.role,
         is_super_admin: newUser.is_super_admin,
-        created_at: newUser.created_at
+        created_at: newUser.created_at,
       });
 
       // User created successfully
@@ -142,16 +162,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `${createdUsers.length}人のテストユーザーを作成しました`,
-      users: createdUsers
+      users: createdUsers,
     });
-
   } catch (error) {
     console.error('Create test users error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'テストユーザー作成に失敗しました',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'テストユーザー作成に失敗しました',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   } finally {
     if (client) {
       await client.end();

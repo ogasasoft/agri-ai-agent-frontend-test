@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
 
   try {
     // Session validation
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       const authError = AuthErrorBuilder.sessionError('INVALID_SESSION');
       return NextResponse.json(authError, { status: 401 });
@@ -33,16 +34,25 @@ export async function GET(request: NextRequest) {
 
     try {
       // 発送済注文の最新日付を取得
-      const result = await client.query(`
+      const result = await client.query(
+        `
         SELECT MAX(order_date) as latest_date
         FROM orders
         WHERE user_id = $1
           AND status = 'shipped'
-      `, [userId]);
+      `,
+        [userId]
+      );
 
-      logDatabaseOperation('SELECT', 'orders', true, {
-        operation: 'get_latest_shipped_date'
-      }, userId);
+      logDatabaseOperation(
+        'SELECT',
+        'orders',
+        true,
+        {
+          operation: 'get_latest_shipped_date',
+        },
+        userId
+      );
 
       const latestDate = result.rows[0]?.latest_date;
 
@@ -53,25 +63,25 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        latestDate: dateStr
+        latestDate: dateStr,
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: unknown) {
-    logDatabaseOperation('SELECT', 'orders', false, { error: error instanceof Error ? error.message : "Internal server error" }, userId);
-
-    const dbError = DatabaseErrorBuilder.queryError(
-      'SELECT latest shipped date',
-      error,
-      {
-        table: 'orders',
-        operation: 'SELECT',
-        userId: userId
-      }
+    logDatabaseOperation(
+      'SELECT',
+      'orders',
+      false,
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      userId
     );
+
+    const dbError = DatabaseErrorBuilder.queryError('SELECT latest shipped date', error, {
+      table: 'orders',
+      operation: 'SELECT',
+      userId: userId,
+    });
 
     return NextResponse.json(dbError, { status: 500 });
   }

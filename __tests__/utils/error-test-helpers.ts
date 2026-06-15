@@ -44,7 +44,10 @@ export const validateDebugInfo = (response: StructuredErrorResponse): boolean =>
 
   if (!response.debug_info.timestamp) return false;
 
-  if (response.debug_info.processing_steps !== undefined && !Array.isArray(response.debug_info.processing_steps)) {
+  if (
+    response.debug_info.processing_steps !== undefined &&
+    !Array.isArray(response.debug_info.processing_steps)
+  ) {
     return false;
   }
 
@@ -57,7 +60,9 @@ export const validateSuggestions = (response: StructuredErrorResponse): boolean 
 
   return (
     Array.isArray(response.suggestions) &&
-    response.suggestions.every(suggestion => typeof suggestion === 'string' && suggestion.length > 0)
+    response.suggestions.every(
+      (suggestion) => typeof suggestion === 'string' && suggestion.length > 0
+    )
   );
 };
 
@@ -67,15 +72,18 @@ export const validateUserActions = (response: StructuredErrorResponse): boolean 
 
   return (
     Array.isArray(response.user_actions) &&
-    response.user_actions.every(action =>
-      typeof action.label === 'string' &&
-      ['retry', 'refresh', 'navigate', 'contact_support'].includes(action.action)
+    response.user_actions.every(
+      (action) =>
+        typeof action.label === 'string' &&
+        ['retry', 'refresh', 'navigate', 'contact_support'].includes(action.action)
     )
   );
 };
 
 // 完全なエラーレスポンス検証
-export const validateCompleteErrorResponse = (response: any): {
+export const validateCompleteErrorResponse = (
+  response: any
+): {
   isValid: boolean;
   errors: string[];
 } => {
@@ -113,14 +121,14 @@ export const createMockSession = (overrides: Partial<any> = {}) => ({
     username: 'test_user',
     email: 'test@example.com',
     is_super_admin: false,
-    ...overrides.user
+    ...overrides.user,
   },
   session: {
     session_token: 'mock_session_token',
     csrf_token: 'mock_csrf_token',
     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    ...overrides.session
-  }
+    ...overrides.session,
+  },
 });
 
 // モックリクエスト生成
@@ -153,7 +161,7 @@ export const createMockRequest = (
   const requestInit: any = {
     method,
     headers,
-    body: options.body ? JSON.stringify(options.body) : undefined
+    body: options.body ? JSON.stringify(options.body) : undefined,
   };
 
   return new NextRequest(url, requestInit);
@@ -199,8 +207,8 @@ export class ExternalAPIErrorSimulator {
       error: {
         message: 'Rate limit exceeded',
         code: 'rate_limit_exceeded',
-        type: 'requests'
-      }
+        type: 'requests',
+      },
     };
   }
 
@@ -209,8 +217,8 @@ export class ExternalAPIErrorSimulator {
       error: {
         message: 'Invalid API key provided',
         code: 'invalid_api_key',
-        type: 'authentication'
-      }
+        type: 'authentication',
+      },
     };
   }
 
@@ -219,8 +227,8 @@ export class ExternalAPIErrorSimulator {
       error: {
         message: 'You exceeded your current quota',
         code: 'insufficient_quota',
-        type: 'billing'
-      }
+        type: 'billing',
+      },
     };
   }
 
@@ -242,7 +250,7 @@ export const expectStructuredError = (response: any, expectedErrorCode: string) 
   expect(response).toMatchObject({
     success: false,
     message: expect.any(String),
-    error_code: expectedErrorCode
+    error_code: expectedErrorCode,
   });
 
   const validation = validateCompleteErrorResponse(response);
@@ -252,12 +260,15 @@ export const expectStructuredError = (response: any, expectedErrorCode: string) 
 };
 
 // ログ記録のモック検証
-export const expectLogCalls = (logSpy: jest.SpyInstance, expectedCalls: Array<{
-  operation: string;
-  success: boolean;
-  details?: any;
-}>) => {
-  expectedCalls.forEach(call => {
+export const expectLogCalls = (
+  logSpy: jest.SpyInstance,
+  expectedCalls: Array<{
+    operation: string;
+    success: boolean;
+    details?: any;
+  }>
+) => {
+  expectedCalls.forEach((call) => {
     (logSpy as jest.Mock)(call.operation, call.success, call.details);
   });
 
@@ -283,13 +294,17 @@ export const measureErrorHandlingPerformance = async (
 
   return {
     duration: end - start,
-    response
+    response,
   };
 };
 
 // エラーハンドリングのe2eテスト用ヘルパー
 export const simulateUserErrorScenario = async (
-  scenario: 'network_failure' | 'authentication_expired' | 'form_validation_error' | 'database_error',
+  scenario:
+    | 'network_failure'
+    | 'authentication_expired'
+    | 'form_validation_error'
+    | 'database_error',
   testFunction: () => Promise<any>
 ): Promise<StructuredErrorResponse> => {
   // ネットワーク環境やモック設定を操作

@@ -5,6 +5,7 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 ## Implementation Overview
 
 ### Test Architecture
+
 - **Framework**: Jest with Next.js testing environment
 - **Methodology**: TDD Red-Green-Refactor cycle following t_wada's best practices
 - **Mock Strategy**: Comprehensive mocking infrastructure with factory functions
@@ -13,6 +14,7 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 ## Test Structure
 
 ### Core Setup (`/setup/test-utils.ts`)
+
 - **MockDbClient**: Complete database mocking with query simulation
 - **Factory Functions**: createMockUser, createMockOrder, createMockCategory, createMockSession
 - **Authentication Helpers**: createMockAuthHeaders, session management
@@ -21,7 +23,9 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 ### Authentication System Tests
 
 #### `/api/auth/login.test.ts`
+
 ✅ **Complete Coverage**
+
 - Valid credential authentication (username/email support)
 - Invalid credentials handling
 - Account locking progression (5min → 15min → 30min → 1hr → 2hr → 4hr → 8hr → 24hr)
@@ -29,15 +33,19 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 - Remember Me token functionality
 - Input validation and security checks
 
-#### `/api/auth/logout.test.ts`  
+#### `/api/auth/logout.test.ts`
+
 ✅ **Complete Coverage**
+
 - Session invalidation
 - Remember token cleanup
 - Database cleanup verification
 - Authentication requirement validation
 
 #### `/api/auth/me.test.ts`
+
 ✅ **Complete Coverage**
+
 - Current session validation
 - User data retrieval
 - CSRF token provision
@@ -46,7 +54,9 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 ### Core Business Logic Tests
 
 #### `/api/orders/orders.test.ts`
+
 ✅ **Complete CRUD Coverage**
+
 - Order creation with full validation
 - Multi-tenant data isolation (user_id filtering)
 - Order retrieval with user-specific filtering
@@ -56,7 +66,9 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 - Database error handling
 
 #### `/api/categories/categories.test.ts`
+
 ✅ **Complete Category Management**
+
 - Category CRUD operations
 - User-scoped category isolation
 - Duplicate name prevention
@@ -67,7 +79,9 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 ### File Processing Tests
 
 #### `/api/upload/csv-upload.test.ts`
+
 ✅ **Complete CSV Processing**
+
 - File upload validation (size, type, content)
 - CSV parsing with PapaParse integration
 - Japanese header mapping (注文番号, 顧客名, etc.)
@@ -79,7 +93,9 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 ### Shipping Management Tests
 
 #### `/api/shipping/yamato-csv.test.ts`
+
 ✅ **Yamato Transport Integration**
+
 - CSV generation for shipping labels
 - Order selection and filtering
 - Data formatting for Yamato specifications
@@ -88,7 +104,9 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 - Date formatting and field validation
 
 #### `/api/shipping/yamato-settings.test.ts`
+
 ✅ **Shipping Configuration**
+
 - Settings CRUD operations
 - Default value management
 - Input validation and sanitization
@@ -96,7 +114,9 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 - Authentication requirements
 
 #### `/api/shipping/shipping.test.ts`
+
 ✅ **Shipping Process Management**
+
 - Mock Yamato API integration
 - Order status updates
 - Tracking number generation
@@ -107,7 +127,9 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 ### Admin System Tests
 
 #### `/api/admin/admin-me.test.ts`
+
 ✅ **Admin Authentication**
+
 - Super admin validation
 - Regular admin validation
 - Session token validation
@@ -115,7 +137,9 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 - Permission checking and role validation
 
 #### `/api/admin/dashboard-stats.test.ts`
+
 ✅ **System Statistics**
+
 - Multi-query parallel execution
 - User, order, customer, integration counts
 - Performance optimization validation
@@ -123,7 +147,9 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 - Database error recovery
 
 #### `/api/admin/admin-customers.test.ts`
+
 ✅ **Customer Management**
+
 - Cross-user customer data access
 - Customer creation with audit logging
 - Statistics aggregation
@@ -133,7 +159,9 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 ### AI Functionality Tests
 
 #### `/api/ai/chat.test.ts`
+
 ✅ **OpenAI Integration**
+
 - Message processing with OpenAI API
 - Authentication and CSRF validation
 - Message length limits (4000 character DoS prevention)
@@ -145,14 +173,16 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 ## Test Quality Indicators
 
 ### Security Testing
+
 - **Authentication**: Every endpoint requires proper session validation
 - **Authorization**: Multi-tenant data isolation verified
-- **CSRF Protection**: Token validation on all authenticated endpoints  
+- **CSRF Protection**: Token validation on all authenticated endpoints
 - **Input Validation**: SQL injection, XSS, and data sanitization tests
 - **Rate Limiting**: DoS protection validation
 - **Audit Logging**: Admin action tracking with IP/User-Agent
 
 ### Error Handling
+
 - **Database Errors**: Connection failures, transaction rollbacks
 - **External API Errors**: OpenAI API failures, network timeouts
 - **Validation Errors**: Input validation, missing required fields
@@ -160,6 +190,7 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 - **Business Logic Errors**: Constraint violations, duplicate data
 
 ### Performance Testing
+
 - **Concurrent Operations**: Multiple simultaneous requests
 - **Large Data Sets**: Handling of large counts and file uploads
 - **Parallel Queries**: Database query optimization validation
@@ -168,17 +199,20 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 ## TDD Implementation Benefits
 
 ### Following t_wada's Methodology
+
 1. **Red Phase**: Tests written first, failing initially
 2. **Green Phase**: Minimal implementation to pass tests
 3. **Refactor Phase**: Code improvement while maintaining passing tests
 
 ### Test-First Benefits Achieved
+
 - **Design by Contract**: API interfaces defined through tests
 - **Documentation**: Tests serve as executable documentation
 - **Regression Protection**: Changes validated against comprehensive test suite
 - **Confidence**: High confidence in functionality through complete coverage
 
 ### Quality Assurance
+
 - **Edge Cases**: Boundary conditions and error scenarios covered
 - **Real-World Scenarios**: Practical usage patterns tested
 - **Integration**: End-to-end workflows validated
@@ -192,9 +226,10 @@ This comprehensive test suite follows **t_wada's Test-Driven Development methodo
 ✅ **File Upload/Processing**: Complete CSV handling  
 ✅ **Shipping Management**: Complete Yamato integration  
 ✅ **Admin System**: Complete with audit logging  
-✅ **AI Functionality**: Complete OpenAI integration  
+✅ **AI Functionality**: Complete OpenAI integration
 
 ### Next Steps
+
 - Fix Jest configuration for proper module resolution
 - Run full test suite validation
 - Add frontend component tests using React Testing Library

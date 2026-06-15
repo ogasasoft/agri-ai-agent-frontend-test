@@ -9,6 +9,7 @@
 ### 1. **APIルート開発ルール**
 
 #### ✅ 必須実装項目
+
 ```typescript
 // ✅ GOOD: 必須のインポート
 import { AuthErrorBuilder } from '@/lib/auth-error-details';
@@ -34,6 +35,7 @@ if (!sessionToken) {
 ```
 
 #### ❌ 禁止パターン
+
 ```typescript
 // ❌ BAD: シンプルなエラーレスポンス（禁止）
 return NextResponse.json({
@@ -51,13 +53,16 @@ return NextResponse.json({
 ### 2. **React Component開発ルール**
 
 #### ✅ 必須実装項目
+
 ```typescript
 // ✅ GOOD: エラーハンドリングフックの使用
 import { useFormErrorHandler } from '@/hooks/useErrorHandler';
 
 export default function MyComponent() {
-  const { handleSubmissionError, handleValidationError, errorDetails } =
-    useFormErrorHandler('my-form', { componentName: 'MyComponent' });
+  const { handleSubmissionError, handleValidationError, errorDetails } = useFormErrorHandler(
+    'my-form',
+    { componentName: 'MyComponent' }
+  );
 
   const handleSubmit = async (formData: any) => {
     try {
@@ -71,6 +76,7 @@ export default function MyComponent() {
 ```
 
 #### ✅ Error Boundaryの必須適用
+
 ```typescript
 // ✅ GOOD: コンポーネントをError Boundaryで包む
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -87,6 +93,7 @@ export default function Page() {
 ### 3. **ライブラリ関数開発ルール**
 
 #### ✅ 必須実装項目
+
 ```typescript
 // ✅ GOOD: ライブラリ関数でのエラー詳細化
 import { DatabaseErrorBuilder } from '@/lib/api-error-details';
@@ -97,7 +104,7 @@ export async function dbOperation() {
   } catch (error) {
     const errorDetails = DatabaseErrorBuilder.connectionError(error, {
       operation: 'CONNECT',
-      table: 'users'
+      table: 'users',
     });
     throw new Error(JSON.stringify(errorDetails));
   }
@@ -107,6 +114,7 @@ export async function dbOperation() {
 ## 📝 実装チェックリスト
 
 ### API Route チェックリスト
+
 - [ ] 適切なErrorBuilderクラスをインポート
 - [ ] 認証エラーは`AuthErrorBuilder`を使用
 - [ ] データベースエラーは`DatabaseErrorBuilder`を使用
@@ -116,6 +124,7 @@ export async function dbOperation() {
 - [ ] ユーザーへの解決提案を含む
 
 ### React Component チェックリスト
+
 - [ ] `useErrorHandler`または専用フックを使用
 - [ ] フォームエラーは`useFormErrorHandler`を使用
 - [ ] APIエラーは`useApiErrorHandler`を使用
@@ -124,6 +133,7 @@ export async function dbOperation() {
 - [ ] ユーザーアクション（再試行など）を提供
 
 ### Library Function チェックリスト
+
 - [ ] エラーを適切なErrorBuilderで構造化
 - [ ] 呼び出し元に詳細情報を伝達
 - [ ] ログ記録を適切に実行
@@ -131,6 +141,7 @@ export async function dbOperation() {
 ## 🛠️ 開発ツールとの統合
 
 ### ESLint ルール
+
 ```json
 {
   "rules": {
@@ -142,6 +153,7 @@ export async function dbOperation() {
 ```
 
 ### Pre-commit Hook
+
 ```bash
 #!/bin/sh
 # エラーハンドリング必須チェック
@@ -149,6 +161,7 @@ export async function dbOperation() {
 ```
 
 ### テストルール
+
 ```typescript
 // ✅ GOOD: エラーシナリオのテスト必須
 describe('API Error Handling', () => {
@@ -165,12 +178,14 @@ describe('API Error Handling', () => {
 ## 📊 コードレビュー基準
 
 ### 承認必須条件
+
 1. **エラーハンドリングの完全性**: すべてのエラーケースが構造化されている
 2. **ログ記録の適切性**: 成功・失敗ログが適切に記録されている
 3. **ユーザー体験**: 分かりやすいエラーメッセージと解決策が提供されている
 4. **テストカバレッジ**: エラーシナリオのテストが含まれている
 
 ### レビュー時確認項目
+
 - [ ] `console.error`のみの単純なエラー処理になっていないか
 - [ ] エラーレスポンスに`suggestions`と`debug_info`が含まれているか
 - [ ] 適切なErrorBuilderクラスが使用されているか
@@ -179,20 +194,24 @@ describe('API Error Handling', () => {
 ## 🎯 違反時の対応
 
 ### Severity Level 1 (Critical)
+
 - **条件**: API RouteでErrorBuilderを使用していない
 - **対応**: 即座の修正が必要、マージブロック
 
 ### Severity Level 2 (High)
+
 - **条件**: Error Boundaryが適用されていない
 - **対応**: 次のスプリントで修正
 
 ### Severity Level 3 (Medium)
+
 - **条件**: エラーテストが不足している
 - **対応**: レビュー指摘、改善推奨
 
 ## 📚 学習リソース
 
 ### 必読ドキュメント
+
 1. `src/lib/error-details.ts` - 基本ErrorBuilderクラス
 2. `src/lib/auth-error-details.ts` - 認証系エラー処理
 3. `src/lib/api-error-details.ts` - API・DB系エラー処理
@@ -200,6 +219,7 @@ describe('API Error Handling', () => {
 5. `src/hooks/useErrorHandler.ts` - Reactエラーハンドリング
 
 ### 実装例参考
+
 - `src/app/api/auth/login/route.ts` - 認証エラー処理の参考例
 - `src/app/api/orders/route.ts` - データベースエラー処理の参考例
 - `src/app/api/chat/route.ts` - 外部APIエラー処理の参考例
@@ -207,12 +227,14 @@ describe('API Error Handling', () => {
 ## 🚀 継続改善
 
 ### 月次レビュー項目
+
 - [ ] エラーパターンの分析と新しい検知ルールの追加
 - [ ] ユーザーからのフィードバックに基づく改善
 - [ ] 新しいErrorBuilderクラスの必要性検討
 - [ ] パフォーマンス影響の測定
 
 ### KPI追跡
+
 - **デバッグ時間短縮率**: 目標70%削減
 - **ユーザー問い合わせ減少率**: 目標50%削減
 - **エラー解決率**: 目標90%自動解決

@@ -1,108 +1,153 @@
-import { Client } from 'pg'
-import { NextRequest } from 'next/server'
+import { Client } from 'pg';
+import { NextRequest } from 'next/server';
 
 // Factory function to create mock DB client
 export function createMockDbClient(): MockDbClient {
-  return MockDbClient.getInstance()
+  return MockDbClient.getInstance();
 }
 
 // Mock database client
 export class MockDbClient {
-  private static instance: MockDbClient
-  public mockData: Record<string, any[]> = {}
-  private mockError: Error | null = null
+  private static instance: MockDbClient;
+  public mockData: Record<string, any[]> = {};
+  private mockError: Error | null = null;
 
   static getInstance(): MockDbClient {
     if (!MockDbClient.instance) {
-      MockDbClient.instance = new MockDbClient()
+      MockDbClient.instance = new MockDbClient();
     }
-    return MockDbClient.instance
+    return MockDbClient.instance;
   }
 
   async connect() {
-    return Promise.resolve()
+    return Promise.resolve();
   }
 
   async end() {
-    return Promise.resolve()
+    return Promise.resolve();
   }
 
   // Add Jest mock properties
   query = jest.fn().mockImplementation(async (text: string, params?: any[]) => {
     // Throw error if mock error is set
     if (this.mockError) {
-      throw this.mockError
+      throw this.mockError;
     }
 
     // Mock query responses based on SQL patterns
     if (text.includes('user_settings')) {
-      return { rows: this.mockData.user_settings || [] }
+      return { rows: this.mockData.user_settings || [] };
     }
     if (text.includes('SELECT') && text.includes('users')) {
-      return { rows: this.mockData.users || [] }
+      return { rows: this.mockData.users || [] };
     }
 
     // Categories queries - must be before orders since GET categories has a subquery mentioning orders
     if (text.includes('categories')) {
       // Get max display_order for new category
       if (text.includes('COALESCE') && text.includes('display_order')) {
-        return { rows: [{ next_order: (this.mockData.categories?.length || 0) + 1 }] }
+        return { rows: [{ next_order: (this.mockData.categories?.length || 0) + 1 }] };
       }
       // Order count check for DELETE (FROM orders without FROM categories as outer)
-      if (text.includes('COUNT(*)') && text.includes('category_id') && !text.includes('FROM categories')) {
-        const orders = this.mockData.orders || []
-        const categoryId = params?.[0]
-        const count = orders.filter((o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)).length
-        return { rows: [{ count: count.toString() }] }
+      if (
+        text.includes('COUNT(*)') &&
+        text.includes('category_id') &&
+        !text.includes('FROM categories')
+      ) {
+        const orders = this.mockData.orders || [];
+        const categoryId = params?.[0];
+        const count = orders.filter(
+          (o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)
+        ).length;
+        return { rows: [{ count: count.toString() }] };
       }
       if (text.includes('SELECT') && text.includes('FROM categories')) {
-        const cats = this.mockData.categories || []
+        const cats = this.mockData.categories || [];
         // Duplicate name check: WHERE name = $1 AND ... user_id = $2
         if (params && text.includes('name = $1') && text.includes('user_id = $2')) {
-          return { rows: cats.filter((c: any) => c.name === params[0] && c.user_id === params[1]) }
+          return { rows: cats.filter((c: any) => c.name === params[0] && c.user_id === params[1]) };
         }
         // Name conflict check: WHERE name = $1 AND id != $2
         if (params && text.includes('name = $1') && text.includes('id !=')) {
-          return { rows: cats.filter((c: any) => c.name === params[0] && c.id !== params[1] && c.id !== Number(params[1])) }
+          return {
+            rows: cats.filter(
+              (c: any) => c.name === params[0] && c.id !== params[1] && c.id !== Number(params[1])
+            ),
+          };
         }
         // Exists by ID: WHERE id = $1 (exclude user_id = $1 matches)
         if (params && text.includes('id = $1') && !text.includes('user_id = $1')) {
-          return { rows: cats.filter((c: any) => c.id === params[0] || c.id === Number(params[0])) }
+          return {
+            rows: cats.filter((c: any) => c.id === params[0] || c.id === Number(params[0])),
+          };
         }
-        return { rows: cats }
+        return { rows: cats };
       }
       if (text.includes('INSERT INTO categories')) {
-        const [name, description, color, icon, display_order, user_id] = params || []
-        return { rows: [{ id: 1, name, description: description || '', color: color || 'gray', icon: icon || 'Package', display_order: display_order || 1, is_active: true, user_id: user_id || 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }] }
+        const [name, description, color, icon, display_order, user_id] = params || [];
+        return {
+          rows: [
+            {
+              id: 1,
+              name,
+              description: description || '',
+              color: color || 'gray',
+              icon: icon || 'Package',
+              display_order: display_order || 1,
+              is_active: true,
+              user_id: user_id || 1,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+          ],
+        };
       }
       // UPDATE categories (data fields update)
       if (text.includes('UPDATE categories') && text.includes('name = $1')) {
-        const [name, description, color, icon, display_order] = params || []
-        const cats = this.mockData.categories || []
-        const existing = cats.length > 0 ? cats[0] : {}
-        return { rows: [{ ...existing, name, description, color, icon, display_order, updated_at: new Date().toISOString() }] }
+        const [name, description, color, icon, display_order] = params || [];
+        const cats = this.mockData.categories || [];
+        const existing = cats.length > 0 ? cats[0] : {};
+        return {
+          rows: [
+            {
+              ...existing,
+              name,
+              description,
+              color,
+              icon,
+              display_order,
+              updated_at: new Date().toISOString(),
+            },
+          ],
+        };
       }
       // Soft delete or other UPDATE
       if (text.includes('UPDATE categories') || text.includes('DELETE FROM categories')) {
-        return { rows: [] }
+        return { rows: [] };
       }
     }
 
     // Count orders by category_id (DELETE category check - query uses FROM orders not FROM categories)
-    if (text.includes('COUNT(*)') && text.includes('category_id') && !text.includes('FROM categories')) {
-      const orders = this.mockData.orders || []
-      const categoryId = params?.[0]
-      const count = orders.filter((o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)).length
-      return { rows: [{ count: count.toString() }] }
+    if (
+      text.includes('COUNT(*)') &&
+      text.includes('category_id') &&
+      !text.includes('FROM categories')
+    ) {
+      const orders = this.mockData.orders || [];
+      const categoryId = params?.[0];
+      const count = orders.filter(
+        (o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)
+      ).length;
+      return { rows: [{ count: count.toString() }] };
     }
     if (text.includes('SELECT') && text.includes('orders')) {
-      let orders = this.mockData.orders || []
+      let orders = this.mockData.orders || [];
       // Filter by order IDs if specified in query
       if (params && params.length > 0 && text.includes('IN')) {
-        const orderIds = params.slice(1) // Skip user_id parameter
-        orders = orders.filter((order: any) => orderIds.includes(order.id))
+        const orderIds = params.slice(1); // Skip user_id parameter
+        orders = orders.filter((order: any) => orderIds.includes(order.id));
       }
-      return { rows: orders }
+      return { rows: orders };
     }
     if (text.includes('INSERT INTO orders')) {
       const mockOrder = {
@@ -119,97 +164,144 @@ export class MockDbClient {
         extra_data: params?.[9] || '{}',
         user_id: params?.[10] || 1,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-      return { rows: [mockOrder] }
+        updated_at: new Date().toISOString(),
+      };
+      return { rows: [mockOrder] };
     }
     if (text.includes('INSERT')) {
-      return { rows: [{ id: 1, ...params }] }
+      return { rows: [{ id: 1, ...params }] };
     }
     if (text.includes('UPDATE')) {
-      return { rows: [{ id: 1, ...params }] }
+      return { rows: [{ id: 1, ...params }] };
     }
     if (text.includes('DELETE')) {
-      return { rows: [] }
+      return { rows: [] };
     }
 
-    return { rows: [] }
-  })
+    return { rows: [] };
+  });
 
   setMockData(table: string, data: any[]) {
-    this.mockData[table] = data
+    this.mockData[table] = data;
   }
 
   setMockError(error: Error | null) {
-    this.mockError = error
+    this.mockError = error;
   }
 
   clearMockData() {
-    this.mockData = {}
-    this.mockError = null
+    this.mockData = {};
+    this.mockError = null;
     // Reset query mock to default implementation
     this.query = jest.fn().mockImplementation(async (text: string, params?: any[]) => {
       if (this.mockError) {
-        throw this.mockError
+        throw this.mockError;
       }
       if (text.includes('user_settings')) {
-        return { rows: this.mockData.user_settings || [] }
+        return { rows: this.mockData.user_settings || [] };
       }
       if (text.includes('SELECT') && text.includes('users')) {
-        return { rows: this.mockData.users || [] }
+        return { rows: this.mockData.users || [] };
       }
       // Categories queries - must be before orders
       if (text.includes('categories')) {
         if (text.includes('COALESCE') && text.includes('display_order')) {
-          return { rows: [{ next_order: (this.mockData.categories?.length || 0) + 1 }] }
+          return { rows: [{ next_order: (this.mockData.categories?.length || 0) + 1 }] };
         }
-        if (text.includes('COUNT(*)') && text.includes('category_id') && !text.includes('FROM categories')) {
-          const orders = this.mockData.orders || []
-          const categoryId = params?.[0]
-          const count = orders.filter((o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)).length
-          return { rows: [{ count: count.toString() }] }
+        if (
+          text.includes('COUNT(*)') &&
+          text.includes('category_id') &&
+          !text.includes('FROM categories')
+        ) {
+          const orders = this.mockData.orders || [];
+          const categoryId = params?.[0];
+          const count = orders.filter(
+            (o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)
+          ).length;
+          return { rows: [{ count: count.toString() }] };
         }
         if (text.includes('SELECT') && text.includes('FROM categories')) {
-          const cats = this.mockData.categories || []
+          const cats = this.mockData.categories || [];
           if (params && text.includes('name = $1') && text.includes('user_id = $2')) {
-            return { rows: cats.filter((c: any) => c.name === params[0] && c.user_id === params[1]) }
+            return {
+              rows: cats.filter((c: any) => c.name === params[0] && c.user_id === params[1]),
+            };
           }
           if (params && text.includes('name = $1') && text.includes('id !=')) {
-            return { rows: cats.filter((c: any) => c.name === params[0] && c.id !== params[1] && c.id !== Number(params[1])) }
+            return {
+              rows: cats.filter(
+                (c: any) => c.name === params[0] && c.id !== params[1] && c.id !== Number(params[1])
+              ),
+            };
           }
           if (params && text.includes('id = $1') && !text.includes('user_id = $1')) {
-            return { rows: cats.filter((c: any) => c.id === params[0] || c.id === Number(params[0])) }
+            return {
+              rows: cats.filter((c: any) => c.id === params[0] || c.id === Number(params[0])),
+            };
           }
-          return { rows: cats }
+          return { rows: cats };
         }
         if (text.includes('INSERT INTO categories')) {
-          const [name, description, color, icon, display_order, user_id] = params || []
-          return { rows: [{ id: 1, name, description: description || '', color: color || 'gray', icon: icon || 'Package', display_order: display_order || 1, is_active: true, user_id: user_id || 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }] }
+          const [name, description, color, icon, display_order, user_id] = params || [];
+          return {
+            rows: [
+              {
+                id: 1,
+                name,
+                description: description || '',
+                color: color || 'gray',
+                icon: icon || 'Package',
+                display_order: display_order || 1,
+                is_active: true,
+                user_id: user_id || 1,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              },
+            ],
+          };
         }
         if (text.includes('UPDATE categories') && text.includes('name = $1')) {
-          const [name, description, color, icon, display_order] = params || []
-          const cats = this.mockData.categories || []
-          const existing = cats.length > 0 ? cats[0] : {}
-          return { rows: [{ ...existing, name, description, color, icon, display_order, updated_at: new Date().toISOString() }] }
+          const [name, description, color, icon, display_order] = params || [];
+          const cats = this.mockData.categories || [];
+          const existing = cats.length > 0 ? cats[0] : {};
+          return {
+            rows: [
+              {
+                ...existing,
+                name,
+                description,
+                color,
+                icon,
+                display_order,
+                updated_at: new Date().toISOString(),
+              },
+            ],
+          };
         }
         if (text.includes('UPDATE categories') || text.includes('DELETE FROM categories')) {
-          return { rows: [] }
+          return { rows: [] };
         }
       }
       // Count orders by category_id (DELETE category check)
-      if (text.includes('COUNT(*)') && text.includes('category_id') && !text.includes('FROM categories')) {
-        const orders = this.mockData.orders || []
-        const categoryId = params?.[0]
-        const count = orders.filter((o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)).length
-        return { rows: [{ count: count.toString() }] }
+      if (
+        text.includes('COUNT(*)') &&
+        text.includes('category_id') &&
+        !text.includes('FROM categories')
+      ) {
+        const orders = this.mockData.orders || [];
+        const categoryId = params?.[0];
+        const count = orders.filter(
+          (o: any) => o.category_id === categoryId || o.category_id === Number(categoryId)
+        ).length;
+        return { rows: [{ count: count.toString() }] };
       }
       if (text.includes('SELECT') && text.includes('orders')) {
-        let orders = this.mockData.orders || []
+        let orders = this.mockData.orders || [];
         if (params && params.length > 0 && text.includes('IN')) {
-          const orderIds = params.slice(1)
-          orders = orders.filter((order: any) => orderIds.includes(order.id))
+          const orderIds = params.slice(1);
+          orders = orders.filter((order: any) => orderIds.includes(order.id));
         }
-        return { rows: orders }
+        return { rows: orders };
       }
       if (text.includes('INSERT INTO orders')) {
         const mockOrder = {
@@ -226,46 +318,52 @@ export class MockDbClient {
           extra_data: params?.[9] || '{}',
           user_id: params?.[10] || 1,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-        return { rows: [mockOrder] }
+          updated_at: new Date().toISOString(),
+        };
+        return { rows: [mockOrder] };
       }
       if (text.includes('INSERT')) {
-        return { rows: [{ id: 1, ...params }] }
+        return { rows: [{ id: 1, ...params }] };
       }
       if (text.includes('UPDATE')) {
-        return { rows: [{ id: 1, ...params }] }
+        return { rows: [{ id: 1, ...params }] };
       }
       if (text.includes('DELETE')) {
-        return { rows: [] }
+        return { rows: [] };
       }
-      return { rows: [] }
-    })
+      return { rows: [] };
+    });
   }
 }
 
 // Mock NextRequest helper
 export function createMockRequest(options: {
-  method?: string
-  url?: string
-  body?: any
-  headers?: Record<string, string>
-  cookies?: Record<string, string>
+  method?: string;
+  url?: string;
+  body?: any;
+  headers?: Record<string, string>;
+  cookies?: Record<string, string>;
 }): NextRequest {
-  const { method = 'GET', url = 'http://localhost:3000', body, headers = {}, cookies = {} } = options
+  const {
+    method = 'GET',
+    url = 'http://localhost:3000',
+    body,
+    headers = {},
+    cookies = {},
+  } = options;
 
   const request = new NextRequest(url, {
     method,
     headers: new Headers(headers),
     body: body ? JSON.stringify(body) : undefined,
-  })
+  });
 
   // Mock cookies
   Object.entries(cookies).forEach(([name, value]) => {
-    request.cookies.set(name, value)
-  })
+    request.cookies.set(name, value);
+  });
 
-  return request
+  return request;
 }
 
 // Test data factories
@@ -276,8 +374,8 @@ export const createMockUser = (overrides = {}) => ({
   is_active: true,
   is_super_admin: false,
   created_at: '2024-01-01T00:00:00Z',
-  ...overrides
-})
+  ...overrides,
+});
 
 export const createMockSession = (user: any = null) => ({
   user: user || createMockUser(),
@@ -287,9 +385,9 @@ export const createMockSession = (user: any = null) => ({
     session_token: 'mock-session-token',
     csrf_token: 'mock-csrf-token',
     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    is_active: true
-  }
-})
+    is_active: true,
+  },
+});
 
 export const createMockCategory = (overrides = {}) => ({
   id: 1,
@@ -302,8 +400,8 @@ export const createMockCategory = (overrides = {}) => ({
   user_id: 1,
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
-  ...overrides
-})
+  ...overrides,
+});
 
 export const createMockOrder = (overrides = {}) => ({
   id: 1,
@@ -320,20 +418,23 @@ export const createMockOrder = (overrides = {}) => ({
   user_id: 1,
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
-  ...overrides
-})
+  ...overrides,
+});
 
 // Mock authentication helper
-export const createMockAuthHeaders = (sessionToken = 'mock-session-token', csrfToken = 'mock-csrf-token') => ({
+export const createMockAuthHeaders = (
+  sessionToken = 'mock-session-token',
+  csrfToken = 'mock-csrf-token'
+) => ({
   'x-session-token': sessionToken,
   'x-csrf-token': csrfToken,
   'Content-Type': 'application/json',
-})
+});
 
 // Mock file utilities for testing
 export function createMockCsvFile(content: string, fileName = 'test.csv'): File {
-  const blob = new Blob([content], { type: 'text/csv' })
-  return new File([blob], fileName, { type: 'text/csv' })
+  const blob = new Blob([content], { type: 'text/csv' });
+  return new File([blob], fileName, { type: 'text/csv' });
 }
 
 export function createFormDataRequest(
@@ -341,57 +442,57 @@ export function createFormDataRequest(
   sessionToken = 'session-token',
   csrfToken = 'csrf-token'
 ): NextRequest {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('csrf_token', csrfToken)
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('csrf_token', csrfToken);
 
   return createMockRequest({
     method: 'POST',
     headers: {
       'x-session-token': sessionToken,
-      'x-csrf-token': csrfToken
+      'x-csrf-token': csrfToken,
     },
-    body: formData
-  })
+    body: formData,
+  });
 }
 
 // Database test utilities
 export async function resetTestDatabase() {
-  const mockClient = MockDbClient.getInstance()
-  mockClient.clearMockData()
+  const mockClient = MockDbClient.getInstance();
+  mockClient.clearMockData();
 }
 
 export async function seedTestData() {
-  const mockClient = MockDbClient.getInstance()
+  const mockClient = MockDbClient.getInstance();
 
   // Seed users
   mockClient.setMockData('users', [
     createMockUser({ id: 1, username: 'testuser' }),
     createMockUser({ id: 2, username: 'admin', is_super_admin: true }),
-  ])
+  ]);
 
   // Seed orders
   mockClient.setMockData('orders', [
     createMockOrder({ id: 1, order_number: 'ORD-001', user_id: 1 }),
     createMockOrder({ id: 2, order_number: 'ORD-002', user_id: 1 }),
-  ])
+  ]);
 }
 
 // Error simulation utilities (requires fetch to be mocked separately)
 export const simulateNetworkError = () => {
-  const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>
+  const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
   if (mockFetch && mockFetch.mockRejectedValueOnce) {
-    mockFetch.mockRejectedValueOnce(new Error('Network error'))
+    mockFetch.mockRejectedValueOnce(new Error('Network error'));
   }
-}
+};
 
 export const simulateServerError = (status = 500) => {
-  const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>
+  const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
   if (mockFetch && mockFetch.mockResolvedValueOnce) {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status,
-      json: async () => ({ error: 'Server error' })
-    } as Response)
+      json: async () => ({ error: 'Server error' }),
+    } as Response);
   }
-}
+};

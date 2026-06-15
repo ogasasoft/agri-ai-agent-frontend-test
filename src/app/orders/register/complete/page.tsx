@@ -20,9 +20,7 @@ function CompleteContent() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            注文登録が完了しました
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">注文登録が完了しました</h1>
           <p className="text-gray-600">
             {isManual && '新しい注文が正常に登録されました。'}
             {isCsv && 'CSVファイルからの注文データが正常に登録されました。'}
@@ -41,9 +39,7 @@ function CompleteContent() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-gray-600">登録日時</span>
-              <span className="font-medium">
-                {new Date().toLocaleString('ja-JP')}
-              </span>
+              <span className="font-medium">{new Date().toLocaleString('ja-JP')}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-gray-600">ステータス</span>
@@ -57,7 +53,7 @@ function CompleteContent() {
         {/* Next Actions */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900">次にできること</h3>
-          
+
           <div className="grid grid-cols-1 gap-4">
             <button
               onClick={() => router.push('/orders/shipping/pending')}
@@ -99,13 +95,15 @@ function CompleteContent() {
 
 export default function OrderRegisterCompletePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-full bg-gray-50 py-12">
-        <div className="max-w-2xl mx-auto px-4 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+    <Suspense
+      fallback={
+        <div className="min-h-full bg-gray-50 py-12">
+          <div className="max-w-2xl mx-auto px-4 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CompleteContent />
     </Suspense>
   );

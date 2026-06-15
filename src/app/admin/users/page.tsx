@@ -1,9 +1,18 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  UserPlus, Users, Search, Filter, Mail, 
-  Calendar, CheckCircle, XCircle, AlertCircle, Eye, EyeOff 
+import {
+  UserPlus,
+  Users,
+  Search,
+  Filter,
+  Mail,
+  Calendar,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 interface User {
@@ -53,14 +62,14 @@ export default function UsersPage() {
     email: '',
     username: '',
     password: '',
-    isAdmin: false
+    isAdmin: false,
   });
   const [creating, setCreating] = useState(false);
   const [showCustomerSetup, setShowCustomerSetup] = useState(false);
   const [customerSetup, setCustomerSetup] = useState<CustomerPasswordSetup>({
     customerEmail: '',
     verificationCode: '',
-    password: ''
+    password: '',
   });
   const [settingUpPassword, setSettingUpPassword] = useState(false);
   const [showCreateCustomerId, setShowCreateCustomerId] = useState(false);
@@ -75,7 +84,7 @@ export default function UsersPage() {
         headers: {
           'x-session-token': getCookieValue('session_token'),
           'x-csrf-token': getCookieValue('csrf_token'),
-        }
+        },
       });
 
       if (response.ok) {
@@ -111,9 +120,9 @@ export default function UsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeaders()
+          ...getAuthHeaders(),
         },
-        body: JSON.stringify(newUser)
+        body: JSON.stringify(newUser),
       });
 
       if (response.ok) {
@@ -135,7 +144,7 @@ export default function UsersPage() {
 
   const createCustomerId = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!newCustomerEmail) {
       alert('お客様のメールアドレスを入力してください');
       return;
@@ -155,16 +164,18 @@ export default function UsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeaders()
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
-          customerEmail: newCustomerEmail
-        })
+          customerEmail: newCustomerEmail,
+        }),
       });
 
       if (response.ok) {
         const result = await response.json();
-        alert(`お客様IDが作成されました！\n\nメールアドレス: ${newCustomerEmail}\n初期パスワード: 1995\n\nお客様にお伝えください。`);
+        alert(
+          `お客様IDが作成されました！\n\nメールアドレス: ${newCustomerEmail}\n初期パスワード: 1995\n\nお客様にお伝えください。`
+        );
         setNewCustomerEmail('');
         setShowCreateCustomerId(false);
         loadUsers();
@@ -183,7 +194,7 @@ export default function UsersPage() {
 
   const setupCustomerPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Verify customer ID and code
     if (customerSetup.verificationCode !== '1995') {
       alert('認証コードが正しくありません');
@@ -202,17 +213,19 @@ export default function UsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeaders()
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           customerEmail: customerSetup.customerEmail,
-          password: customerSetup.password
-        })
+          password: customerSetup.password,
+        }),
       });
 
       if (response.ok) {
         const result = await response.json();
-        alert(`パスワードが設定されました。\nメールアドレス: ${customerSetup.customerEmail}\nパスワード: ${customerSetup.password}`);
+        alert(
+          `パスワードが設定されました。\nメールアドレス: ${customerSetup.customerEmail}\nパスワード: ${customerSetup.password}`
+        );
         setCustomerSetup({ customerEmail: '', verificationCode: '', password: '' });
         setShowCustomerSetup(false);
         loadUsers();
@@ -229,9 +242,10 @@ export default function UsersPage() {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredUsers = users.filter(
+    (user) =>
+      (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (loading) {
@@ -250,20 +264,22 @@ export default function UsersPage() {
             <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">
               ユーザーID発行
             </h1>
-            <p className="mt-2 text-sm text-gray-700">
-              システム利用者のアカウント管理
-            </p>
+            <p className="mt-2 text-sm text-gray-700">システム利用者のアカウント管理</p>
           </div>
           <div className="flex space-x-3">
             <button
               onClick={togglePasswordView}
               className={`inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                showPasswords 
-                  ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500' 
+                showPasswords
+                  ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500'
                   : 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100 focus:ring-green-500'
               }`}
             >
-              {showPasswords ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+              {showPasswords ? (
+                <EyeOff className="h-4 w-4 mr-2" />
+              ) : (
+                <Eye className="h-4 w-4 mr-2" />
+              )}
               {showPasswords ? 'パスワードを非表示' : 'パスワードを表示'}
             </button>
             <button
@@ -319,7 +335,7 @@ export default function UsersPage() {
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">アクティブユーザー</dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {users.filter(u => !u.account_locked_until).length}
+                    {users.filter((u) => !u.account_locked_until).length}
                   </dd>
                 </dl>
               </div>
@@ -335,9 +351,11 @@ export default function UsersPage() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">ロックされたアカウント</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    ロックされたアカウント
+                  </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {users.filter(u => u.account_locked_until).length}
+                    {users.filter((u) => u.account_locked_until).length}
                   </dd>
                 </dl>
               </div>
@@ -424,7 +442,9 @@ export default function UsersPage() {
                     {user.last_login && (
                       <div className="flex items-center text-sm text-gray-500 mt-1">
                         <CheckCircle className="h-4 w-4 mr-1" />
-                        <span>最終ログイン: {new Date(user.last_login).toLocaleDateString('ja-JP')}</span>
+                        <span>
+                          最終ログイン: {new Date(user.last_login).toLocaleDateString('ja-JP')}
+                        </span>
                       </div>
                     )}
                     {user.failed_login_attempts > 0 && (
@@ -456,7 +476,9 @@ export default function UsersPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-4">お客様ID作成</h3>
               <form onSubmit={createCustomerId} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">お客様のメールアドレス</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    お客様のメールアドレス
+                  </label>
                   <input
                     type="email"
                     required
@@ -502,14 +524,18 @@ export default function UsersPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-4">お客様用パスワード設定</h3>
               <form onSubmit={setupCustomerPassword} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">お客様のメールアドレス</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    お客様のメールアドレス
+                  </label>
                   <input
                     type="email"
                     required
                     placeholder="customer@example.com"
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                     value={customerSetup.customerEmail}
-                    onChange={(e) => setCustomerSetup({ ...customerSetup, customerEmail: e.target.value })}
+                    onChange={(e) =>
+                      setCustomerSetup({ ...customerSetup, customerEmail: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -520,19 +546,25 @@ export default function UsersPage() {
                     placeholder="1995"
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                     value={customerSetup.verificationCode}
-                    onChange={(e) => setCustomerSetup({ ...customerSetup, verificationCode: e.target.value })}
+                    onChange={(e) =>
+                      setCustomerSetup({ ...customerSetup, verificationCode: e.target.value })
+                    }
                   />
                   <p className="mt-1 text-xs text-gray-500">認証コード「1995」を入力してください</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">新しいパスワード</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    新しいパスワード
+                  </label>
                   <input
                     type="password"
                     required
                     placeholder="6文字以上のパスワード"
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                     value={customerSetup.password}
-                    onChange={(e) => setCustomerSetup({ ...customerSetup, password: e.target.value })}
+                    onChange={(e) =>
+                      setCustomerSetup({ ...customerSetup, password: e.target.value })
+                    }
                   />
                 </div>
                 <div className="flex justify-end space-x-3 pt-4">

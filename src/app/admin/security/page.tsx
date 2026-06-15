@@ -1,10 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Shield, AlertTriangle, Eye, Lock, 
-  Activity, TrendingUp, RefreshCw, Download,
-  Clock, MapPin, Monitor, AlertCircle
+import {
+  Shield,
+  AlertTriangle,
+  Eye,
+  Lock,
+  Activity,
+  TrendingUp,
+  RefreshCw,
+  Download,
+  Clock,
+  MapPin,
+  Monitor,
+  AlertCircle,
 } from 'lucide-react';
 
 interface SecurityEvent {
@@ -49,20 +58,20 @@ export default function SecurityPage() {
           headers: {
             'x-session-token': document.cookie.split('session_token=')[1]?.split(';')[0] || '',
             'x-csrf-token': document.cookie.split('csrf_token=')[1]?.split(';')[0] || '',
-          }
+          },
         }),
         fetch('/api/admin/security/stats', {
           headers: {
             'x-session-token': document.cookie.split('session_token=')[1]?.split(';')[0] || '',
             'x-csrf-token': document.cookie.split('csrf_token=')[1]?.split(';')[0] || '',
-          }
+          },
         }),
         fetch('/api/admin/security/rate-limits', {
           headers: {
             'x-session-token': document.cookie.split('session_token=')[1]?.split(';')[0] || '',
             'x-csrf-token': document.cookie.split('csrf_token=')[1]?.split(';')[0] || '',
-          }
-        })
+          },
+        }),
       ]);
 
       if (eventsResponse.ok) {
@@ -87,7 +96,6 @@ export default function SecurityPage() {
   };
 
   useEffect(() => {
-     
     loadSecurityData();
   }, []);
 
@@ -103,7 +111,7 @@ export default function SecurityPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
       });
 
       if (response.ok) {
@@ -118,24 +126,32 @@ export default function SecurityPage() {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'text-red-600 bg-red-100';
-      case 'high': return 'text-orange-600 bg-orange-100';
-      case 'medium': return 'text-yellow-600 bg-yellow-100';
-      case 'low': return 'text-green-600 bg-green-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'critical':
+        return 'text-red-600 bg-red-100';
+      case 'high':
+        return 'text-orange-600 bg-orange-100';
+      case 'medium':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'low':
+        return 'text-green-600 bg-green-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
-      case 'critical': return <AlertTriangle className="h-4 w-4" />;
-      case 'high': return <AlertCircle className="h-4 w-4" />;
-      default: return <Activity className="h-4 w-4" />;
+      case 'critical':
+        return <AlertTriangle className="h-4 w-4" />;
+      case 'high':
+        return <AlertCircle className="h-4 w-4" />;
+      default:
+        return <Activity className="h-4 w-4" />;
     }
   };
 
-  const filteredEvents = events.filter(event => 
-    filterSeverity === 'all' || event.severity === filterSeverity
+  const filteredEvents = events.filter(
+    (event) => filterSeverity === 'all' || event.severity === filterSeverity
   );
 
   if (loading) {
@@ -154,9 +170,7 @@ export default function SecurityPage() {
             <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">
               セキュリティ監視
             </h1>
-            <p className="mt-2 text-sm text-gray-700">
-              システムセキュリティイベントと脅威の監視
-            </p>
+            <p className="mt-2 text-sm text-gray-700">システムセキュリティイベントと脅威の監視</p>
           </div>
           <div className="flex space-x-3">
             <button
@@ -205,7 +219,9 @@ export default function SecurityPage() {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">重要なイベント</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats?.criticalEvents || 0}</dd>
+                  <dd className="text-lg font-medium text-gray-900">
+                    {stats?.criticalEvents || 0}
+                  </dd>
                 </dl>
               </div>
             </div>
@@ -298,9 +314,7 @@ export default function SecurityPage() {
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
-              セキュリティイベント
-            </h3>
+            <h3 className="text-lg leading-6 font-medium text-gray-900">セキュリティイベント</h3>
             <div className="flex items-center space-x-2">
               <select
                 value={filterSeverity}
@@ -323,18 +337,25 @@ export default function SecurityPage() {
                   <li key={event.id}>
                     <div className="relative">
                       <div className="flex items-start space-x-3">
-                        <div className={`relative px-1 ${
-                          event.severity === 'critical' ? 'text-red-500' :
-                          event.severity === 'high' ? 'text-orange-500' :
-                          event.severity === 'medium' ? 'text-yellow-500' :
-                          'text-green-500'
-                        }`}>
+                        <div
+                          className={`relative px-1 ${
+                            event.severity === 'critical'
+                              ? 'text-red-500'
+                              : event.severity === 'high'
+                                ? 'text-orange-500'
+                                : event.severity === 'medium'
+                                  ? 'text-yellow-500'
+                                  : 'text-green-500'
+                          }`}
+                        >
                           {getSeverityIcon(event.severity)}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div>
                             <div className="flex items-center space-x-2 mb-1">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(event.severity)}`}>
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(event.severity)}`}
+                              >
                                 {event.event_type}
                               </span>
                               <span className="text-xs text-gray-500">
@@ -376,7 +397,9 @@ export default function SecurityPage() {
             <div className="text-center py-12">
               <Eye className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">
-                {filterSeverity === 'all' ? 'セキュリティイベントがありません' : `${filterSeverity}レベルのイベントがありません`}
+                {filterSeverity === 'all'
+                  ? 'セキュリティイベントがありません'
+                  : `${filterSeverity}レベルのイベントがありません`}
               </h3>
             </div>
           )}

@@ -5,6 +5,7 @@ Thank you for your interest in contributing to this project!
 ## Development Setup
 
 ### Prerequisites
+
 - Node.js 18+ installed
 - npm or yarn package manager
 - PostgreSQL database for local development
@@ -140,6 +141,7 @@ Follow conventional commit format:
 - `chore:` - Maintenance tasks
 
 Examples:
+
 - `feat: add user authentication flow`
 - `fix: resolve shipping API error handling`
 - `docs: update README with new features`
@@ -165,11 +167,13 @@ If you have questions about the project or need help getting started:
 ## Security
 
 Please be aware that this project handles sensitive data including:
+
 - User authentication credentials
 - Order data
 - Customer information
 
 When working on security-related features:
+
 - Always use secure password hashing (bcryptjs)
 - Validate all user inputs
 - Sanitize all data before database operations
@@ -179,6 +183,7 @@ When working on security-related features:
 ## Dependencies
 
 When adding new dependencies:
+
 1. Check if the functionality is available in existing packages
 2. Prefer stable, well-maintained packages
 3. Check for security vulnerabilities using `npm audit`

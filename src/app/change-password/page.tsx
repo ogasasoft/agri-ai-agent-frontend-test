@@ -10,12 +10,12 @@ function ChangePasswordForm() {
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
-    confirm: false
+    confirm: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,12 +44,12 @@ function ChangePasswordForm() {
   }, []);
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (error) setError(null);
   };
 
   const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
-    setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   const validatePasswords = () => {
@@ -73,7 +73,7 @@ function ChangePasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validatePasswords()) {
       return;
     }
@@ -126,9 +126,7 @@ function ChangePasswordForm() {
             <Shield className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">パスワード変更</h1>
-          {user && (
-            <p className="text-gray-600 mt-2">ユーザー: {user.username}</p>
-          )}
+          {user && <p className="text-gray-600 mt-2">ユーザー: {user.username}</p>}
           {isForced && (
             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
@@ -148,10 +146,7 @@ function ChangePasswordForm() {
               <ArrowLeft className="w-4 h-4" />
               戻る
             </button>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-red-600 hover:text-red-700"
-            >
+            <button onClick={handleLogout} className="text-sm text-red-600 hover:text-red-700">
               ログアウト
             </button>
           </div>
@@ -163,7 +158,10 @@ function ChangePasswordForm() {
             {/* Current Password (skip for forced change) */}
             {!isForced && (
               <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="currentPassword"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   現在のパスワード
                 </label>
                 <div className="relative">
@@ -230,7 +228,10 @@ function ChangePasswordForm() {
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 新しいパスワード（確認）
               </label>
               <div className="relative">
@@ -266,12 +267,20 @@ function ChangePasswordForm() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h4 className="font-medium text-blue-900 mb-2">パスワード要件</h4>
             <ul className="text-sm text-blue-800 space-y-1">
-              <li className={`flex items-center gap-2 ${formData.newPassword.length >= 8 ? 'text-green-700' : ''}`}>
-                <span className={`w-2 h-2 rounded-full ${formData.newPassword.length >= 8 ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+              <li
+                className={`flex items-center gap-2 ${formData.newPassword.length >= 8 ? 'text-green-700' : ''}`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${formData.newPassword.length >= 8 ? 'bg-green-500' : 'bg-gray-300'}`}
+                ></span>
                 8文字以上
               </li>
-              <li className={`flex items-center gap-2 ${formData.newPassword === formData.confirmPassword && formData.confirmPassword ? 'text-green-700' : ''}`}>
-                <span className={`w-2 h-2 rounded-full ${formData.newPassword === formData.confirmPassword && formData.confirmPassword ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+              <li
+                className={`flex items-center gap-2 ${formData.newPassword === formData.confirmPassword && formData.confirmPassword ? 'text-green-700' : ''}`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${formData.newPassword === formData.confirmPassword && formData.confirmPassword ? 'bg-green-500' : 'bg-gray-300'}`}
+                ></span>
                 確認パスワードと一致
               </li>
             </ul>
@@ -297,7 +306,9 @@ function ChangePasswordForm() {
                 <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-green-800 text-sm">{success}</p>
-                  <p className="text-green-700 text-xs mt-1">まもなくメイン画面にリダイレクトします...</p>
+                  <p className="text-green-700 text-xs mt-1">
+                    まもなくメイン画面にリダイレクトします...
+                  </p>
                 </div>
               </div>
             </div>
@@ -328,11 +339,13 @@ function ChangePasswordForm() {
 
 export default function ChangePasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        </div>
+      }
+    >
       <ChangePasswordForm />
     </Suspense>
   );

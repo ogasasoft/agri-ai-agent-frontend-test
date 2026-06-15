@@ -2,7 +2,17 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Package, Calendar, User, Phone, MapPin, DollarSign, FileText } from 'lucide-react';
+import {
+  ArrowLeft,
+  Save,
+  Package,
+  Calendar,
+  User,
+  Phone,
+  MapPin,
+  DollarSign,
+  FileText,
+} from 'lucide-react';
 import { Suspense } from 'react';
 import { useFormErrorHandler } from '@/hooks/useErrorHandler';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -29,14 +39,14 @@ function ManualRegistrationContent() {
     price: '',
     orderDate: new Date().toISOString().split('T')[0], // 今日の日付をデフォルト
     deliveryDate: '',
-    notes: ''
+    notes: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { handleSubmissionError } = useFormErrorHandler('manual-order-form', {
-    componentName: 'ManualRegistrationContent'
+    componentName: 'ManualRegistrationContent',
   });
 
   const validateForm = (): boolean => {
@@ -65,10 +75,10 @@ function ManualRegistrationContent() {
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // エラーをクリア
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -102,7 +112,7 @@ function ManualRegistrationContent() {
           order_date: formData.orderDate,
           delivery_date: formData.deliveryDate || null,
           notes: formData.notes.trim(),
-          source: 'manual_entry'
+          source: 'manual_entry',
         }),
       });
 
@@ -129,7 +139,7 @@ function ManualRegistrationContent() {
       const errorDetails = handleSubmissionError(error, formData);
       setErrors({
         submit: errorDetails.message,
-        details: errorDetails.suggestions?.join(' ') || ''
+        details: errorDetails.suggestions?.join(' ') || '',
       });
     } finally {
       setIsSubmitting(false);
@@ -182,7 +192,9 @@ function ManualRegistrationContent() {
                     errors.orderCode ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
-                {errors.orderCode && <p className="text-red-500 text-sm mt-1">{errors.orderCode}</p>}
+                {errors.orderCode && (
+                  <p className="text-red-500 text-sm mt-1">{errors.orderCode}</p>
+                )}
               </div>
 
               <div>
@@ -198,7 +210,9 @@ function ManualRegistrationContent() {
                     errors.customerName ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
-                {errors.customerName && <p className="text-red-500 text-sm mt-1">{errors.customerName}</p>}
+                {errors.customerName && (
+                  <p className="text-red-500 text-sm mt-1">{errors.customerName}</p>
+                )}
               </div>
             </div>
           </div>
@@ -272,7 +286,9 @@ function ManualRegistrationContent() {
                     errors.orderDate ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
-                {errors.orderDate && <p className="text-red-500 text-sm mt-1">{errors.orderDate}</p>}
+                {errors.orderDate && (
+                  <p className="text-red-500 text-sm mt-1">{errors.orderDate}</p>
+                )}
               </div>
 
               <div>
@@ -337,13 +353,15 @@ function ManualRegistrationContent() {
 
 export default function ManualRegistrationPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-full bg-gray-50 py-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+    <Suspense
+      fallback={
+        <div className="min-h-full bg-gray-50 py-12">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ErrorBoundary>
         <ManualRegistrationContent />
       </ErrorBoundary>

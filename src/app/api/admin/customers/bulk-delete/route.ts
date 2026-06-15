@@ -7,9 +7,9 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const sessionToken = request.headers.get('x-session-token') || 
-                         request.cookies.get('session_token')?.value;
-    
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+
     if (!sessionToken) {
       return createErrorResponse('認証が必要です。', 401);
     }
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate all customer IDs are numbers
-    const validIds = customerIds.filter(id => typeof id === 'number' && !isNaN(id));
+    const validIds = customerIds.filter((id) => typeof id === 'number' && !isNaN(id));
     if (validIds.length !== customerIds.length) {
       return createErrorResponse('無効な顧客IDが含まれています。', 400);
     }
@@ -47,8 +47,8 @@ export async function POST(request: NextRequest) {
       );
 
       const existingCustomers = customerCheck.rows;
-      const existingIds = existingCustomers.map(c => c.id);
-      const notFoundIds = validIds.filter(id => !existingIds.includes(id));
+      const existingIds = existingCustomers.map((c) => c.id);
+      const notFoundIds = validIds.filter((id) => !existingIds.includes(id));
 
       if (existingIds.length === 0) {
         return createErrorResponse('指定された顧客は見つかりませんでした。', 404);
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
           await client.query('DELETE FROM categories WHERE user_id = $1', [customerId]);
           await client.query('DELETE FROM sessions WHERE user_id = $1', [customerId]);
           await client.query('DELETE FROM remember_tokens WHERE user_id = $1', [customerId]);
-          
+
           // Delete the user
           const deleteResult = await client.query('DELETE FROM users WHERE id = $1', [customerId]);
           if (deleteResult.rowCount && deleteResult.rowCount > 0) {
@@ -88,10 +88,10 @@ export async function POST(request: NextRequest) {
               deletedIds: existingIds,
               notFoundIds: notFoundIds,
               deletedCount: deletedCount,
-              customers: existingCustomers.map(c => ({ id: c.id, email: c.email }))
+              customers: existingCustomers.map((c) => ({ id: c.id, email: c.email })),
             }),
             request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
-            request.headers.get('user-agent') || 'unknown'
+            request.headers.get('user-agent') || 'unknown',
           ]
         );
 
@@ -100,20 +100,17 @@ export async function POST(request: NextRequest) {
           message: `${deletedCount}人の顧客が正常に削除されました。`,
           deletedCount,
           notFoundCount: notFoundIds.length,
-          notFoundIds
+          notFoundIds,
         });
 
         return addSecurityHeaders(response);
-
       } catch (deleteError) {
         await client.query('ROLLBACK');
         throw deleteError;
       }
-
     } finally {
       await client.end();
     }
-
   } catch (error: unknown) {
     console.error('Bulk delete customers error:', error);
     return createErrorResponse('顧客の一括削除に失敗しました。', 500);

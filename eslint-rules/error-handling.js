@@ -8,10 +8,10 @@ module.exports = {
         docs: {
           description: 'Disallow simple error responses without ErrorBuilder',
           category: 'Possible Errors',
-          recommended: true
+          recommended: true,
         },
         fixable: 'code',
-        schema: []
+        schema: [],
       },
       create(context) {
         return {
@@ -34,36 +34,41 @@ module.exports = {
               if (
                 secondArg &&
                 secondArg.type === 'ObjectExpression' &&
-                secondArg.properties.some(prop =>
-                  prop.key.name === 'status' &&
-                  prop.value.type === 'Literal' &&
-                  prop.value.value >= 400
+                secondArg.properties.some(
+                  (prop) =>
+                    prop.key.name === 'status' &&
+                    prop.value.type === 'Literal' &&
+                    prop.value.value >= 400
                 )
               ) {
                 // ErrorBuilderが使用されているかチェック
                 if (
                   !firstArg ||
                   firstArg.type !== 'Identifier' ||
-                  !context.getScope().variables.some(variable =>
-                    variable.name.includes('Error') && variable.name.includes('Builder')
-                  )
+                  !context
+                    .getScope()
+                    .variables.some(
+                      (variable) =>
+                        variable.name.includes('Error') && variable.name.includes('Builder')
+                    )
                 ) {
                   context.report({
                     node: node.argument,
-                    message: 'Use ErrorBuilder classes instead of simple error responses. Import AuthErrorBuilder, DatabaseErrorBuilder, or ExternalAPIErrorBuilder.',
+                    message:
+                      'Use ErrorBuilder classes instead of simple error responses. Import AuthErrorBuilder, DatabaseErrorBuilder, or ExternalAPIErrorBuilder.',
                     fix(fixer) {
                       return fixer.replaceText(
                         firstArg,
                         'new ErrorBuilder("エラーが発生しました", "GENERAL_ERROR").build()'
                       );
-                    }
+                    },
                   });
                 }
               }
             }
-          }
+          },
         };
-      }
+      },
     },
 
     // ErrorBuilderのインポートを必須化
@@ -73,9 +78,9 @@ module.exports = {
         docs: {
           description: 'Require ErrorBuilder imports in API routes',
           category: 'Best Practices',
-          recommended: true
+          recommended: true,
         },
-        schema: []
+        schema: [],
       },
       create(context) {
         const filename = context.getFilename();
@@ -92,8 +97,8 @@ module.exports = {
           ImportDeclaration(node) {
             if (
               node.source.value.includes('error-details') ||
-              node.specifiers.some(spec =>
-                spec.imported && spec.imported.name.includes('ErrorBuilder')
+              node.specifiers.some(
+                (spec) => spec.imported && spec.imported.name.includes('ErrorBuilder')
               )
             ) {
               hasErrorBuilderImport = true;
@@ -108,12 +113,13 @@ module.exports = {
             if (hasErrorHandling && !hasErrorBuilderImport) {
               context.report({
                 node: context.getSourceCode().ast,
-                message: 'API routes with error handling must import ErrorBuilder classes. Add: import { AuthErrorBuilder } from "@/lib/auth-error-details";'
+                message:
+                  'API routes with error handling must import ErrorBuilder classes. Add: import { AuthErrorBuilder } from "@/lib/auth-error-details";',
               });
             }
-          }
+          },
         };
-      }
+      },
     },
 
     // Error Boundaryの使用を推奨
@@ -123,9 +129,9 @@ module.exports = {
         docs: {
           description: 'Recommend ErrorBoundary usage in page components',
           category: 'Best Practices',
-          recommended: false
+          recommended: false,
         },
-        schema: []
+        schema: [],
       },
       create(context) {
         const filename = context.getFilename();
@@ -141,8 +147,8 @@ module.exports = {
         return {
           ImportDeclaration(node) {
             if (
-              node.specifiers.some(spec =>
-                spec.imported && spec.imported.name === 'ErrorBoundary'
+              node.specifiers.some(
+                (spec) => spec.imported && spec.imported.name === 'ErrorBoundary'
               )
             ) {
               hasErrorBoundaryImport = true;
@@ -150,10 +156,7 @@ module.exports = {
           },
 
           JSXElement(node) {
-            if (
-              node.openingElement.name &&
-              node.openingElement.name.name === 'ErrorBoundary'
-            ) {
+            if (node.openingElement.name && node.openingElement.name.name === 'ErrorBoundary') {
               hasErrorBoundaryUsage = true;
             }
           },
@@ -162,13 +165,14 @@ module.exports = {
             if (!hasErrorBoundaryImport || !hasErrorBoundaryUsage) {
               context.report({
                 node: context.getSourceCode().ast,
-                message: 'Consider wrapping page components with ErrorBoundary for better error handling. Import from "@/components/ErrorBoundary".',
-                severity: 1 // warning
+                message:
+                  'Consider wrapping page components with ErrorBoundary for better error handling. Import from "@/components/ErrorBoundary".',
+                severity: 1, // warning
               });
             }
-          }
+          },
         };
-      }
+      },
     },
 
     // console.errorの単独使用を警告
@@ -178,9 +182,9 @@ module.exports = {
         docs: {
           description: 'Discourage console.error without structured error handling',
           category: 'Best Practices',
-          recommended: true
+          recommended: true,
         },
-        schema: []
+        schema: [],
       },
       create(context) {
         return {
@@ -205,7 +209,8 @@ module.exports = {
                   ) {
                     context.report({
                       node,
-                      message: 'Consider using ErrorBuilder classes for structured error handling instead of console.error only.'
+                      message:
+                        'Consider using ErrorBuilder classes for structured error handling instead of console.error only.',
                     });
                   }
                   break;
@@ -213,9 +218,9 @@ module.exports = {
                 parent = parent.parent;
               }
             }
-          }
+          },
         };
-      }
+      },
     },
 
     // useErrorHandlerの使用を推奨（React components）
@@ -225,9 +230,9 @@ module.exports = {
         docs: {
           description: 'Recommend useErrorHandler hooks in React components',
           category: 'Best Practices',
-          recommended: false
+          recommended: false,
         },
-        schema: []
+        schema: [],
       },
       create(context) {
         const filename = context.getFilename();
@@ -244,12 +249,12 @@ module.exports = {
           ImportDeclaration(node) {
             if (
               node.source.value.includes('useErrorHandler') ||
-              node.specifiers.some(spec =>
-                spec.imported && (
-                  spec.imported.name.includes('useErrorHandler') ||
-                  spec.imported.name.includes('useFormErrorHandler') ||
-                  spec.imported.name.includes('useApiErrorHandler')
-                )
+              node.specifiers.some(
+                (spec) =>
+                  spec.imported &&
+                  (spec.imported.name.includes('useErrorHandler') ||
+                    spec.imported.name.includes('useFormErrorHandler') ||
+                    spec.imported.name.includes('useApiErrorHandler'))
               )
             ) {
               hasUseErrorHandlerImport = true;
@@ -262,10 +267,7 @@ module.exports = {
 
           CallExpression(node) {
             // fetch API の使用を検出
-            if (
-              node.callee &&
-              node.callee.name === 'fetch'
-            ) {
+            if (node.callee && node.callee.name === 'fetch') {
               hasErrorHandling = true;
             }
           },
@@ -274,13 +276,14 @@ module.exports = {
             if (hasErrorHandling && !hasUseErrorHandlerImport) {
               context.report({
                 node: context.getSourceCode().ast,
-                message: 'Consider using useErrorHandler hooks for consistent error handling. Import from "@/hooks/useErrorHandler".',
-                severity: 1 // warning
+                message:
+                  'Consider using useErrorHandler hooks for consistent error handling. Import from "@/hooks/useErrorHandler".',
+                severity: 1, // warning
               });
             }
-          }
+          },
         };
-      }
-    }
-  }
+      },
+    },
+  },
 };

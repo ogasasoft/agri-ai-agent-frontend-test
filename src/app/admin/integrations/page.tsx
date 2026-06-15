@@ -2,9 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Settings, Power, RefreshCw, ExternalLink,
-  Key, Globe, Zap, AlertCircle, CheckCircle,
-  Edit, Save, X
+  Settings,
+  Power,
+  RefreshCw,
+  ExternalLink,
+  Key,
+  Globe,
+  Zap,
+  AlertCircle,
+  CheckCircle,
+  Edit,
+  Save,
+  X,
 } from 'lucide-react';
 
 interface APIIntegration {
@@ -36,8 +45,13 @@ function safeMergeConfig(record: unknown): IntegrationConfig {
     sync_interval: typeof config.sync_interval === 'number' ? config.sync_interval : 3600,
     auto_import: typeof config.auto_import === 'boolean' ? config.auto_import : false,
     webhook_enabled: config.webhook_enabled as boolean | undefined,
-    sync_categories: Array.isArray(config.sync_categories) ? config.sync_categories as string[] : undefined,
-    field_mapping: config.field_mapping && typeof config.field_mapping === 'object' ? config.field_mapping as { [key: string]: string } : undefined
+    sync_categories: Array.isArray(config.sync_categories)
+      ? (config.sync_categories as string[])
+      : undefined,
+    field_mapping:
+      config.field_mapping && typeof config.field_mapping === 'object'
+        ? (config.field_mapping as { [key: string]: string })
+        : undefined,
   };
 }
 
@@ -63,8 +77,8 @@ const INTEGRATION_TEMPLATES: Record<string, IntegrationTemplate> = {
     fields: [
       { key: 'api_key', label: 'APIキー', type: 'password', required: true },
       { key: 'shop_id', label: 'ショップID', type: 'text', required: true },
-      { key: 'base_url', label: 'APIベースURL', type: 'url', required: true }
-    ]
+      { key: 'base_url', label: 'APIベースURL', type: 'url', required: true },
+    ],
   },
   tabechoku: {
     displayName: '食べチョク',
@@ -74,9 +88,9 @@ const INTEGRATION_TEMPLATES: Record<string, IntegrationTemplate> = {
     fields: [
       { key: 'api_key', label: 'APIキー', type: 'password', required: true },
       { key: 'seller_id', label: '販売者ID', type: 'text', required: true },
-      { key: 'webhook_secret', label: 'Webhook秘密鍵', type: 'password', required: false }
-    ]
-  }
+      { key: 'webhook_secret', label: 'Webhook秘密鍵', type: 'password', required: false },
+    ],
+  },
 };
 
 export default function APIIntegrationsManagement() {
@@ -101,7 +115,6 @@ export default function APIIntegrationsManagement() {
 
   useEffect(() => {
     loadIntegrations();
-     
   }, []);
 
   const handleUpdateIntegration = async (integration: APIIntegration) => {
@@ -109,14 +122,14 @@ export default function APIIntegrationsManagement() {
       const response = await fetch('/api/admin/integrations', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(integration)
+        body: JSON.stringify(integration),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setIntegrations(integrations.map(i => i.id === integration.id ? data.integration : i));
+        setIntegrations(integrations.map((i) => (i.id === integration.id ? data.integration : i)));
         setEditingIntegration(null);
         alert('設定を保存しました。');
       } else {
@@ -132,15 +145,15 @@ export default function APIIntegrationsManagement() {
       const response = await fetch(`/api/admin/integrations/${integrationId}/toggle`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ is_active: isActive })
+        body: JSON.stringify({ is_active: isActive }),
       });
 
       if (response.ok) {
-        setIntegrations(integrations.map(i =>
-          i.id === integrationId ? { ...i, is_active: isActive } : i
-        ));
+        setIntegrations(
+          integrations.map((i) => (i.id === integrationId ? { ...i, is_active: isActive } : i))
+        );
       } else {
         alert('状態の変更に失敗しました。');
       }
@@ -153,7 +166,7 @@ export default function APIIntegrationsManagement() {
     setTestingConnection(integration.name);
     try {
       const response = await fetch(`/api/admin/integrations/${integration.id}/test`, {
-        method: 'POST'
+        method: 'POST',
       });
 
       const data = await response.json();
@@ -175,7 +188,7 @@ export default function APIIntegrationsManagement() {
 
     try {
       const response = await fetch(`/api/admin/integrations/${integrationId}/sync`, {
-        method: 'POST'
+        method: 'POST',
       });
 
       if (response.ok) {
@@ -206,16 +219,17 @@ export default function APIIntegrationsManagement() {
         <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">
           API連携管理
         </h1>
-        <p className="mt-2 text-sm text-gray-700">
-          外部サービスとのAPI連携を設定・管理します
-        </p>
+        <p className="mt-2 text-sm text-gray-700">外部サービスとのAPI連携を設定・管理します</p>
       </div>
 
       {/* Integrations Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {integrations.map((integration) => {
-          const template = INTEGRATION_TEMPLATES[integration.name as keyof typeof INTEGRATION_TEMPLATES];
-          const config = safeMergeConfig(integration.configuration as unknown as Record<string, unknown>);
+          const template =
+            INTEGRATION_TEMPLATES[integration.name as keyof typeof INTEGRATION_TEMPLATES];
+          const config = safeMergeConfig(
+            integration.configuration as unknown as Record<string, unknown>
+          );
 
           return (
             <div key={integration.id} className="bg-white shadow rounded-lg overflow-hidden">
@@ -235,11 +249,13 @@ export default function APIIntegrationsManagement() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
-                      integration.is_active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <div
+                      className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${
+                        integration.is_active
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {integration.is_active ? (
                         <CheckCircle className="h-3 w-3" />
                       ) : (
@@ -274,7 +290,11 @@ export default function APIIntegrationsManagement() {
                 ) : (
                   <ViewIntegrationDetails
                     integration={integration}
-                    config={safeMergeConfig(integration.configuration as unknown as Record<string, unknown>) as IntegrationConfig}
+                    config={
+                      safeMergeConfig(
+                        integration.configuration as unknown as Record<string, unknown>
+                      ) as IntegrationConfig
+                    }
                     onEdit={() => setEditingIntegration(integration)}
                     onTestConnection={() => handleTestConnection(integration)}
                     onSyncData={() => handleSyncData(integration.id)}
@@ -296,7 +316,7 @@ function EditIntegrationForm({
   template,
   onSave,
   onCancel,
-  onChange
+  onChange,
 }: {
   integration: APIIntegration;
   template: IntegrationTemplate;
@@ -310,26 +330,33 @@ function EditIntegrationForm({
       <div>
         <h4 className="text-sm font-medium text-gray-900 mb-3">API設定</h4>
         <div className="space-y-3">
-          {template?.fields?.map((field: { key: string; label: string; type: string; required: boolean }) => (
-            <div key={field.key}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {field.label}
-                {field.required && <span className="text-red-500 ml-1">*</span>}
-              </label>
-              <input
-                type={field.type}
-                value={field.type === 'checkbox' && integration[field.key as keyof APIIntegration] === true ? 'checked' : (String(integration[field.key as keyof APIIntegration] || ''))}
-                onChange={(e) => {
-                  const newValue = field.type === 'checkbox' ? e.target.checked : e.target.value;
-                  const updated: any = { ...integration };
-                  updated[field.key] = newValue;
-                  onChange(updated);
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder={`${field.label}を入力`}
-              />
-            </div>
-          ))}
+          {template?.fields?.map(
+            (field: { key: string; label: string; type: string; required: boolean }) => (
+              <div key={field.key}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {field.label}
+                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                </label>
+                <input
+                  type={field.type}
+                  value={
+                    field.type === 'checkbox' &&
+                    integration[field.key as keyof APIIntegration] === true
+                      ? 'checked'
+                      : String(integration[field.key as keyof APIIntegration] || '')
+                  }
+                  onChange={(e) => {
+                    const newValue = field.type === 'checkbox' ? e.target.checked : e.target.value;
+                    const updated: any = { ...integration };
+                    updated[field.key] = newValue;
+                    onChange(updated);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={`${field.label}を入力`}
+                />
+              </div>
+            )
+          )}
         </div>
       </div>
 
@@ -338,19 +365,19 @@ function EditIntegrationForm({
         <h4 className="text-sm font-medium text-gray-900 mb-3">同期設定</h4>
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              同期間隔(秒)
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">同期間隔(秒)</label>
             <input
               type="number"
               value={integration.configuration?.sync_interval || 3600}
-              onChange={(e) => onChange({
-                ...integration,
-                configuration: {
-                  ...integration.configuration,
-                  sync_interval: parseInt(e.target.value)
-                }
-              })}
+              onChange={(e) =>
+                onChange({
+                  ...integration,
+                  configuration: {
+                    ...integration.configuration,
+                    sync_interval: parseInt(e.target.value),
+                  },
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               min="60"
             />
@@ -361,16 +388,21 @@ function EditIntegrationForm({
               type="checkbox"
               id={`auto-import-${integration.id}`}
               checked={integration.configuration?.auto_import || false}
-              onChange={(e) => onChange({
-                ...integration,
-                configuration: {
-                  ...integration.configuration,
-                  auto_import: e.target.checked
-                }
-              })}
+              onChange={(e) =>
+                onChange({
+                  ...integration,
+                  configuration: {
+                    ...integration.configuration,
+                    auto_import: e.target.checked,
+                  },
+                })
+              }
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
             />
-            <label htmlFor={`auto-import-${integration.id}`} className="ml-2 block text-sm text-gray-700">
+            <label
+              htmlFor={`auto-import-${integration.id}`}
+              className="ml-2 block text-sm text-gray-700"
+            >
               自動インポートを有効にする
             </label>
           </div>
@@ -405,7 +437,7 @@ function ViewIntegrationDetails({
   onEdit,
   onTestConnection,
   onSyncData,
-  testingConnection
+  testingConnection,
 }: {
   integration: APIIntegration;
   config: IntegrationConfig;
@@ -423,29 +455,30 @@ function ViewIntegrationDetails({
           <div className="font-medium">
             {integration.last_sync_at
               ? new Date(integration.last_sync_at).toLocaleString('ja-JP')
-              : '未実行'
-            }
+              : '未実行'}
           </div>
         </div>
         <div>
           <span className="text-gray-500">同期間隔:</span>
-          <div className="font-medium">
-            {Math.floor((config.sync_interval || 3600) / 60)}分
-          </div>
+          <div className="font-medium">{Math.floor((config.sync_interval || 3600) / 60)}分</div>
         </div>
       </div>
 
       {/* Configuration Status */}
       <div className="flex items-center gap-4 text-sm">
-        <div className={`flex items-center gap-2 ${
-          integration.api_key ? 'text-green-600' : 'text-red-600'
-        }`}>
+        <div
+          className={`flex items-center gap-2 ${
+            integration.api_key ? 'text-green-600' : 'text-red-600'
+          }`}
+        >
           <Key className="h-4 w-4" />
           <span>API認証: {integration.api_key ? '設定済み' : '未設定'}</span>
         </div>
-        <div className={`flex items-center gap-2 ${
-          config.auto_import ? 'text-green-600' : 'text-gray-600'
-        }`}>
+        <div
+          className={`flex items-center gap-2 ${
+            config.auto_import ? 'text-green-600' : 'text-gray-600'
+          }`}
+        >
           <Zap className="h-4 w-4" />
           <span>自動同期: {config.auto_import ? '有効' : '無効'}</span>
         </div>

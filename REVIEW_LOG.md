@@ -1,4 +1,5 @@
 ## 2026-06-05 レビュー記録
+
 - 判定: NEEDS_FIX
 - ブランチ: fix/security-vulnerabilities-2026-06-04
 - 指摘事項:
@@ -11,6 +12,7 @@
   3. 最終的なセキュリティ脆弱性修正 PR は、next 16.2.1 → 16.2.7、postcss 8.4.0 → 8.5.15 の変更のみ
 
 ## 2026-06-04 レビュー記録
+
 - 判定: NEEDS_FIX
 - ブランチ: feature/fix/security-updates-2026-06-04
 - 指摘事項:
@@ -27,6 +29,7 @@
   - package.json の整理として、typescript が dependencies から devDependencies に移動したことを明記する
 
 ## 2026-06-04 レビュー記録
+
 - 判定: NEEDS_FIX
 - ブランチ: docs/fix-readme-ts-version
 - 指摘事項:

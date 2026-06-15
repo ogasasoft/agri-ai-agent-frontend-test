@@ -2,7 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, CheckCircle, Package, User, DollarSign, FileText, Upload, Edit } from 'lucide-react';
+import {
+  ArrowLeft,
+  CheckCircle,
+  Package,
+  User,
+  DollarSign,
+  FileText,
+  Upload,
+  Edit,
+} from 'lucide-react';
 import { Suspense } from 'react';
 
 type RegistrationMethod = 'csv' | 'manual';
@@ -24,7 +33,9 @@ function ConfirmationContent() {
   const searchParams = useSearchParams();
   const orderCode = searchParams.get('orderCode') || '';
   const method = (searchParams.get('method') as RegistrationMethod) || 'manual';
-  const registrationCount = searchParams.get('count') ? parseInt(searchParams.get('count')!) : undefined;
+  const registrationCount = searchParams.get('count')
+    ? parseInt(searchParams.get('count')!)
+    : undefined;
 
   const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +53,7 @@ function ConfirmationContent() {
           orderDate: '',
           deliveryDate: null,
           notes: '',
-          registrationCount: registrationCount || 0
+          registrationCount: registrationCount || 0,
         });
         setLoading(false);
         return;
@@ -63,7 +74,7 @@ function ConfirmationContent() {
               price: order.price,
               orderDate: order.order_date,
               deliveryDate: order.delivery_date,
-              notes: order.notes || ''
+              notes: order.notes || '',
             });
           }
         } catch (error) {
@@ -81,14 +92,14 @@ function ConfirmationContent() {
     return new Date(dateStr).toLocaleDateString('ja-JP', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
-      currency: 'JPY'
+      currency: 'JPY',
     }).format(price);
   };
 
@@ -145,7 +156,9 @@ function ConfirmationContent() {
                     <Upload className="w-5 h-5 text-blue-600" />
                     <span className="font-medium text-gray-900">登録結果</span>
                   </div>
-                  <p className="text-2xl font-bold text-green-600">{orderSummary.registrationCount} 件</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {orderSummary.registrationCount} 件
+                  </p>
                   <p className="text-sm text-gray-600">新規注文が登録されました</p>
                 </div>
               )}
@@ -187,7 +200,9 @@ function ConfirmationContent() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-600">金額</label>
-                  <p className="text-gray-900 font-medium text-lg">{formatPrice(orderSummary.price)}</p>
+                  <p className="text-gray-900 font-medium text-lg">
+                    {formatPrice(orderSummary.price)}
+                  </p>
                 </div>
 
                 <div>
@@ -265,13 +280,15 @@ function ConfirmationContent() {
 
 export default function ConfirmationPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-full bg-gray-50 py-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+    <Suspense
+      fallback={
+        <div className="min-h-full bg-gray-50 py-12">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ConfirmationContent />
     </Suspense>
   );

@@ -2,7 +2,11 @@
 'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { ClientErrorBuilder, logClientError, ClientErrorResponse } from '@/lib/client-error-details';
+import {
+  ClientErrorBuilder,
+  logClientError,
+  ClientErrorResponse,
+} from '@/lib/client-error-details';
 
 interface UserAction {
   label: string;
@@ -29,14 +33,14 @@ export class ErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
       errorInfo: null,
-      errorDetails: null
+      errorDetails: null,
     };
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     return {
       hasError: true,
-      error
+      error,
     };
   }
 
@@ -48,8 +52,8 @@ export class ErrorBoundary extends Component<Props, State> {
       browserInfo: {
         userAgent: navigator.userAgent,
         viewport: `${window.innerWidth}x${window.innerHeight}`,
-        url: window.location.href
-      }
+        url: window.location.href,
+      },
     };
 
     // AI判断型エラー分析
@@ -60,7 +64,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
     this.setState({
       errorInfo,
-      errorDetails
+      errorDetails,
     });
   }
 
@@ -74,17 +78,15 @@ export class ErrorBoundary extends Component<Props, State> {
   private analyzeComponentError(error: Error, errorInfo: ErrorInfo, context: any) {
     const builder = new ClientErrorBuilder('コンポーネントエラーが発生しました', 'COMPONENT_CRASH');
 
-    builder
-      .setContext(context)
-      .addProcessingStep('Component Rendering', 'failed', {
-        error_name: error.name,
-        error_message: error.message,
-        component_stack: errorInfo.componentStack?.split('\n').slice(0, 5) || ['No stack available'] // 最初の5行のみ
-      });
+    builder.setContext(context).addProcessingStep('Component Rendering', 'failed', {
+      error_name: error.name,
+      error_message: error.message,
+      component_stack: errorInfo.componentStack?.split('\n').slice(0, 5) || ['No stack available'], // 最初の5行のみ
+    });
 
     // エラーの種類に応じた分析と提案
     const suggestions = this.generateErrorSuggestions(error, errorInfo);
-    suggestions.forEach(suggestion => builder.addSuggestion(suggestion));
+    suggestions.forEach((suggestion) => builder.addSuggestion(suggestion));
 
     // ユーザーアクション
     builder
@@ -92,7 +94,7 @@ export class ErrorBoundary extends Component<Props, State> {
       .addUserAction('前のページに戻る', 'navigate', { url: 'javascript:history.back()' })
       .addUserAction('サポートに連絡', 'contact_support', {
         error: error.message,
-        component: context.componentName
+        component: context.componentName,
       });
 
     return builder.build();
@@ -104,7 +106,10 @@ export class ErrorBoundary extends Component<Props, State> {
     const componentStack = errorInfo.componentStack?.toLowerCase() || '';
 
     // 一般的なReactエラーパターンの分析
-    if (errorMessage.includes('cannot read property') || errorMessage.includes('cannot read properties')) {
+    if (
+      errorMessage.includes('cannot read property') ||
+      errorMessage.includes('cannot read properties')
+    ) {
       suggestions.push('データの読み込みが完了していない可能性があります');
       suggestions.push('コンポーネントでnullチェックが不足している可能性があります');
     }
@@ -141,7 +146,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
     // メモリ不足の可能性
     const performanceMemory = (performance as any).memory;
-    if (performanceMemory && performanceMemory.usedJSHeapSize > 50000000) { // 50MB
+    if (performanceMemory && performanceMemory.usedJSHeapSize > 50000000) {
+      // 50MB
       suggestions.push('ブラウザのメモリ使用量が多くなっています。他のタブを閉じてください');
     }
 
@@ -162,8 +168,18 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
               <div className="text-center">
                 <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                  <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  <svg
+                    className="h-6 w-6 text-red-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
                   </svg>
                 </div>
 
@@ -173,32 +189,35 @@ export class ErrorBoundary extends Component<Props, State> {
 
                 {this.state.errorDetails && (
                   <>
-                    <p className="mt-2 text-sm text-gray-600">
-                      {this.state.errorDetails.message}
-                    </p>
+                    <p className="mt-2 text-sm text-gray-600">{this.state.errorDetails.message}</p>
 
-                    {this.state.errorDetails.suggestions && this.state.errorDetails.suggestions.length > 0 && (
-                      <div className="mt-4 p-4 bg-blue-50 rounded-md">
-                        <h4 className="text-sm font-medium text-blue-800 mb-2">解決方法:</h4>
-                        <ul className="text-sm text-blue-700 space-y-1">
-                          {this.state.errorDetails.suggestions.map((suggestion: string, index: number) => (
-                            <li key={index}>• {suggestion}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    {this.state.errorDetails.suggestions &&
+                      this.state.errorDetails.suggestions.length > 0 && (
+                        <div className="mt-4 p-4 bg-blue-50 rounded-md">
+                          <h4 className="text-sm font-medium text-blue-800 mb-2">解決方法:</h4>
+                          <ul className="text-sm text-blue-700 space-y-1">
+                            {this.state.errorDetails.suggestions.map(
+                              (suggestion: string, index: number) => (
+                                <li key={index}>• {suggestion}</li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      )}
 
                     {this.state.errorDetails.user_actions && (
                       <div className="mt-6 space-y-2">
-                        {this.state.errorDetails.user_actions.map((userAction: UserAction, index: number) => (
-                          <button
-                            key={index}
-                            onClick={() => this.handleUserAction(userAction)}
-                            className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                          >
-                            {userAction.label}
-                          </button>
-                        ))}
+                        {this.state.errorDetails.user_actions.map(
+                          (userAction: UserAction, index: number) => (
+                            <button
+                              key={index}
+                              onClick={() => this.handleUserAction(userAction)}
+                              className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                              {userAction.label}
+                            </button>
+                          )
+                        )}
                       </div>
                     )}
                   </>
@@ -246,11 +265,11 @@ export class ErrorBoundary extends Component<Props, State> {
         const subject = encodeURIComponent('アプリケーションエラー報告');
         const body = encodeURIComponent(
           `エラーの詳細:\n\n` +
-          `エラーメッセージ: ${params?.error || 'Unknown'}\n` +
-          `コンポーネント: ${params?.component || 'Unknown'}\n` +
-          `ページ: ${window.location.href}\n` +
-          `ブラウザ: ${navigator.userAgent}\n` +
-          `時刻: ${new Date().toISOString()}`
+            `エラーメッセージ: ${params?.error || 'Unknown'}\n` +
+            `コンポーネント: ${params?.component || 'Unknown'}\n` +
+            `ページ: ${window.location.href}\n` +
+            `ブラウザ: ${navigator.userAgent}\n` +
+            `時刻: ${new Date().toISOString()}`
         );
         window.open(`mailto:support@example.com?subject=${subject}&body=${body}`);
         break;
@@ -261,7 +280,7 @@ export class ErrorBoundary extends Component<Props, State> {
           hasError: false,
           error: null,
           errorInfo: null,
-          errorDetails: null
+          errorDetails: null,
         });
         break;
     }

@@ -5,14 +5,11 @@ import { addSecurityHeaders, createErrorResponse } from '@/lib/security';
 
 export const dynamic = 'force-dynamic';
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { customerId: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { customerId: string } }) {
   try {
-    const sessionToken = request.headers.get('x-session-token') || 
-                         request.cookies.get('session_token')?.value;
-    
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+
     if (!sessionToken) {
       return createErrorResponse('認証が必要です。', 401);
     }
@@ -47,16 +44,16 @@ export async function DELETE(
       try {
         // Delete related orders first (if any)
         await client.query('DELETE FROM orders WHERE user_id = $1', [customerId]);
-        
+
         // Delete related categories (if any)
         await client.query('DELETE FROM categories WHERE user_id = $1', [customerId]);
-        
+
         // Delete sessions
         await client.query('DELETE FROM sessions WHERE user_id = $1', [customerId]);
-        
+
         // Delete remember tokens
         await client.query('DELETE FROM remember_tokens WHERE user_id = $1', [customerId]);
-        
+
         // Finally delete the user
         await client.query('DELETE FROM users WHERE id = $1', [customerId]);
 
@@ -71,29 +68,26 @@ export async function DELETE(
             'DELETE_CUSTOMER',
             JSON.stringify({
               customerId: customerId,
-              customerEmail: customer.email
+              customerEmail: customer.email,
             }),
             request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
-            request.headers.get('user-agent') || 'unknown'
+            request.headers.get('user-agent') || 'unknown',
           ]
         );
 
         const response = NextResponse.json({
           success: true,
-          message: '顧客が正常に削除されました。'
+          message: '顧客が正常に削除されました。',
         });
 
         return addSecurityHeaders(response);
-
       } catch (deleteError) {
         await client.query('ROLLBACK');
         throw deleteError;
       }
-
     } finally {
       await client.end();
     }
-
   } catch (error: unknown) {
     console.error('Delete customer error:', error);
     return createErrorResponse('顧客の削除に失敗しました。', 500);

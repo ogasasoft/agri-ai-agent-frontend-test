@@ -18,10 +18,10 @@ interface CsvGenerationResult {
   message?: string;
 }
 
-export default function YamatoCsvButton({ 
-  selectedOrders, 
+export default function YamatoCsvButton({
+  selectedOrders,
   onCsvGenerated,
-  disabled 
+  disabled,
 }: YamatoCsvButtonProps) {
   const [generating, setGenerating] = useState(false);
   const [showResult, setShowResult] = useState(false);
@@ -31,11 +31,11 @@ export default function YamatoCsvButton({
     // BOM付きUTF-8でエンコード（Excel対応）
     const bom = '\uFEFF';
     const csvWithBom = bom + csvContent;
-    
-    const blob = new Blob([csvWithBom], { 
-      type: 'text/csv;charset=utf-8;' 
+
+    const blob = new Blob([csvWithBom], {
+      type: 'text/csv;charset=utf-8;',
     });
-    
+
     const link = document.createElement('a');
     if (link.download !== undefined) {
       const url = URL.createObjectURL(blob);
@@ -53,7 +53,7 @@ export default function YamatoCsvButton({
     if (!selectedOrders || selectedOrders.length === 0) {
       setResult({
         success: false,
-        message: '注文を選択してください'
+        message: '注文を選択してください',
       });
       setShowResult(true);
       return;
@@ -63,8 +63,8 @@ export default function YamatoCsvButton({
     setShowResult(false);
 
     try {
-      const orderIds = selectedOrders.map(order => order.id);
-      
+      const orderIds = selectedOrders.map((order) => order.id);
+
       const response = await fetch('/api/yamato-csv', {
         method: 'POST',
         headers: {
@@ -72,7 +72,7 @@ export default function YamatoCsvButton({
           'x-session-token': document.cookie.split('session_token=')[1]?.split(';')[0] || '',
           'x-csrf-token': document.cookie.split('csrf_token=')[1]?.split(';')[0] || '',
         },
-        body: JSON.stringify({ orderIds })
+        body: JSON.stringify({ orderIds }),
       });
 
       const data = await response.json();
@@ -80,12 +80,12 @@ export default function YamatoCsvButton({
       if (data.success && data.csv) {
         // CSVをダウンロード
         downloadCsv(data.csv, data.filename || 'yamato_b2.csv');
-        
+
         setResult({
           success: true,
           order_count: data.order_count,
           filename: data.filename,
-          message: `${data.order_count}件の注文データをCSVでダウンロードしました`
+          message: `${data.order_count}件の注文データをCSVでダウンロードしました`,
         });
 
         // コールバック実行
@@ -95,14 +95,14 @@ export default function YamatoCsvButton({
       } else {
         setResult({
           success: false,
-          message: data.message || 'CSVの生成に失敗しました'
+          message: data.message || 'CSVの生成に失敗しました',
         });
       }
     } catch (error) {
       console.error('CSV generation error:', error);
       setResult({
         success: false,
-        message: 'ネットワークエラーが発生しました'
+        message: 'ネットワークエラーが発生しました',
       });
     } finally {
       setGenerating(false);
@@ -158,10 +158,8 @@ export default function YamatoCsvButton({
                 </>
               )}
             </div>
-            
-            <p className="text-gray-700 mb-4">
-              {result.message}
-            </p>
+
+            <p className="text-gray-700 mb-4">{result.message}</p>
 
             {result.success && result.filename && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
@@ -170,8 +168,10 @@ export default function YamatoCsvButton({
                   <span className="text-sm font-medium">次の手順</span>
                 </div>
                 <p className="text-sm text-blue-600 mt-1">
-                  1. ダウンロードしたCSVをヤマトB2クラウドにアップロード<br />
-                  2. 伝票を印刷して発送準備<br />
+                  1. ダウンロードしたCSVをヤマトB2クラウドにアップロード
+                  <br />
+                  2. 伝票を印刷して発送準備
+                  <br />
                   3. 発送完了後、下記の確認画面で発送済みに移動
                 </p>
               </div>
@@ -183,7 +183,7 @@ export default function YamatoCsvButton({
                   onClick={() => {
                     setShowResult(false);
                     if (onCsvGenerated) {
-                      onCsvGenerated(selectedOrders.map(order => order.id));
+                      onCsvGenerated(selectedOrders.map((order) => order.id));
                     }
                   }}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"

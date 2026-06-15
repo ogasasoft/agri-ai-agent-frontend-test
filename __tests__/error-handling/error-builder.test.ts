@@ -13,7 +13,7 @@ describe('ErrorBuilder Classes', () => {
     Object.defineProperty(process.env, 'NODE_ENV', {
       writable: true,
       configurable: true,
-      value: 'development'
+      value: 'development',
     });
   });
 
@@ -23,7 +23,7 @@ describe('ErrorBuilder Classes', () => {
       Object.defineProperty(process.env, 'NODE_ENV', {
         writable: true,
         configurable: true,
-        value: (global as any).__savedNodeEnv
+        value: (global as any).__savedNodeEnv,
       });
     }
   });
@@ -37,7 +37,7 @@ describe('ErrorBuilder Classes', () => {
         success: false,
         message: 'Test error message',
         error_code: 'TEST_ERROR',
-        suggestions: []
+        suggestions: [],
       });
 
       expect(response.debug_info).toHaveProperty('timestamp');
@@ -56,12 +56,12 @@ describe('ErrorBuilder Classes', () => {
       if (steps) {
         expect(steps[0]).toMatchObject({
           step: 'Step 1',
-          status: 'completed'
+          status: 'completed',
         });
         expect(steps[1]).toMatchObject({
           step: 'Step 2',
           status: 'failed',
-          details: { error: 'Step failed' }
+          details: { error: 'Step failed' },
         });
       }
     });
@@ -76,7 +76,7 @@ describe('ErrorBuilder Classes', () => {
       expect(response.suggestions).toEqual([
         'First suggestion',
         'Second suggestion',
-        'Third suggestion'
+        'Third suggestion',
       ]);
     });
 
@@ -84,9 +84,7 @@ describe('ErrorBuilder Classes', () => {
       (process.env as any).NODE_ENV = 'production';
 
       const builder = new ErrorDetailBuilder('Test error', 'TEST_ERROR');
-      const response = builder
-        .addProcessingStep('Step 1', 'completed')
-        .build();
+      const response = builder.addProcessingStep('Step 1', 'completed').build();
 
       expect(response.debug_info).toBeUndefined();
     });
@@ -106,28 +104,19 @@ describe('ErrorBuilder Classes', () => {
       expect(response.message).toContain('必須フィールドが見つかりません');
       expect(response.debug_info?.data_analysis?.headers).toEqual(availableHeaders);
       expect(response.suggestions).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('カラーミー')
-        ])
+        expect.arrayContaining([expect.stringContaining('カラーミー')])
       );
     });
 
     it('should create validation error', () => {
-      const validationErrors = [
-        'Row 1: 金額が必須です',
-        'Row 2: 電話番号の形式が正しくありません'
-      ];
-      const response = CSVErrorBuilder.validationError(
-        validationErrors,
-        100,
-        85
-      );
+      const validationErrors = ['Row 1: 金額が必須です', 'Row 2: 電話番号の形式が正しくありません'];
+      const response = CSVErrorBuilder.validationError(validationErrors, 100, 85);
 
       expect(response.error_code).toBe('CSV_PROCESSING_ERROR');
       expect(response.debug_info?.data_analysis).toMatchObject({
         total_rows: 100,
         processed_rows: 85,
-        failed_rows: 15
+        failed_rows: 15,
       });
     });
   });
@@ -138,14 +127,10 @@ describe('ErrorBuilder Classes', () => {
         username: 'test_user',
         ipAddress: '192.168.1.1',
         userAgent: 'Mozilla/5.0...',
-        attemptCount: 3
+        attemptCount: 3,
       };
 
-      const response = AuthErrorBuilder.loginFailure(
-        'test_user',
-        'INVALID_CREDENTIALS',
-        context
-      );
+      const response = AuthErrorBuilder.loginFailure('test_user', 'INVALID_CREDENTIALS', context);
 
       expect(response.error_code).toBe('AUTHENTICATION_ERROR');
       expect(response.debug_info?.user_id).toBe('test_user');
@@ -160,33 +145,27 @@ describe('ErrorBuilder Classes', () => {
         username: 'test_user',
         ipAddress: '192.168.1.1',
         userAgent: 'Mozilla/5.0...',
-        attemptCount: 6 // 高回数でブルートフォース検出
+        attemptCount: 6, // 高回数でブルートフォース検出
       };
 
-      const response = AuthErrorBuilder.loginFailure(
-        'test_user',
-        'RATE_LIMITED',
-        context
-      );
+      const response = AuthErrorBuilder.loginFailure('test_user', 'RATE_LIMITED', context);
 
       expect(response.suggestions).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('ブルートフォース')
-        ])
+        expect.arrayContaining([expect.stringContaining('ブルートフォース')])
       );
     });
 
     it('should create session error', () => {
       const response = AuthErrorBuilder.sessionError('CSRF_MISMATCH', {
         token: 'invalid_token',
-        userId: '123'
+        userId: '123',
       });
 
       expect(response.error_code).toBe('AUTHENTICATION_ERROR');
       expect(response.suggestions).toEqual(
         expect.arrayContaining([
           expect.stringContaining('CSRF'),
-          expect.stringContaining('ページを更新')
+          expect.stringContaining('ページを更新'),
         ])
       );
     });
@@ -199,14 +178,12 @@ describe('ErrorBuilder Classes', () => {
 
       const response = DatabaseErrorBuilder.connectionError(error, {
         table: 'users',
-        operation: 'SELECT'
+        operation: 'SELECT',
       });
 
       expect(response.error_code).toBe('DATABASE_ERROR');
       expect(response.suggestions).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('データベースサーバーが起動していません')
-        ])
+        expect.arrayContaining([expect.stringContaining('データベースサーバーが起動していません')])
       );
     });
 
@@ -217,15 +194,13 @@ describe('ErrorBuilder Classes', () => {
       const response = DatabaseErrorBuilder.queryError(query, error, {
         table: 'unknown_table',
         operation: 'SELECT',
-        userId: '123'
+        userId: '123',
       });
 
       expect(response.error_code).toBe('DATABASE_ERROR');
       expect(response.debug_info?.operation).toBe('DB_SELECT');
       expect(response.suggestions).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('テーブルが存在しません')
-        ])
+        expect.arrayContaining([expect.stringContaining('テーブルが存在しません')])
       );
     });
   });
@@ -234,43 +209,39 @@ describe('ErrorBuilder Classes', () => {
     it('should create OpenAI error', () => {
       const error = {
         message: 'Rate limit exceeded',
-        code: 'rate_limit_exceeded'
+        code: 'rate_limit_exceeded',
       };
 
       const response = ExternalAPIErrorBuilder.openAIError(error, {
         endpoint: '/v1/chat/completions',
         method: 'POST',
         statusCode: 429,
-        responseTime: 1500
+        responseTime: 1500,
       });
 
       expect(response.error_code).toBe('EXTERNAL_API_ERROR');
       expect(response.details?.status_code).toBe(429);
       expect(response.details?.response_time).toBe(1500);
       expect(response.suggestions).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('レート制限')
-        ])
+        expect.arrayContaining([expect.stringContaining('レート制限')])
       );
     });
 
     it('should create shipping API error', () => {
       const error = {
-        message: 'Invalid address format'
+        message: 'Invalid address format',
       };
 
       const response = ExternalAPIErrorBuilder.shippingAPIError(error, {
         apiName: 'Yamato Transport',
         endpoint: '/api/shipping/label',
-        method: 'POST'
+        method: 'POST',
       });
 
       expect(response.error_code).toBe('EXTERNAL_API_ERROR');
       expect(response.details?.api_name).toBe('Yamato Transport');
       expect(response.suggestions).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('住所')
-        ])
+        expect.arrayContaining([expect.stringContaining('住所')])
       );
     });
   });
@@ -292,7 +263,7 @@ describe('ErrorBuilder Classes', () => {
       const invalidResponse = {
         success: true, // should be false
         message: 123, // should be string
-        error_code: null // should be string
+        error_code: null, // should be string
       };
 
       const validation = validateCompleteErrorResponse(invalidResponse);

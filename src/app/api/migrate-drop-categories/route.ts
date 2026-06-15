@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         steps.push('✓ Dropped foreign key constraint: orders_category_id_fkey');
         console.log('✓ Foreign key constraint dropped');
       } catch (error: unknown) {
-        const errorMsg = `Failed to drop FK constraint: ${error instanceof Error ? error.message : "Internal server error"}`;
+        const errorMsg = `Failed to drop FK constraint: ${error instanceof Error ? error.message : 'Internal server error'}`;
         errors.push(errorMsg);
         console.error('❌', errorMsg);
       }
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         steps.push('✓ Dropped column: orders.category_id (CASCADE)');
         console.log('✓ category_id column dropped from orders table');
       } catch (error: unknown) {
-        const errorMsg = `Failed to drop category_id column: ${error instanceof Error ? error.message : "Internal server error"}`;
+        const errorMsg = `Failed to drop category_id column: ${error instanceof Error ? error.message : 'Internal server error'}`;
         errors.push(errorMsg);
         console.error('❌', errorMsg);
       }
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
         steps.push('✓ Dropped column: orders.product_category (CASCADE)');
         console.log('✓ product_category column dropped from orders table');
       } catch (error: unknown) {
-        const errorMsg = `Failed to drop product_category column: ${error instanceof Error ? error.message : "Internal server error"}`;
+        const errorMsg = `Failed to drop product_category column: ${error instanceof Error ? error.message : 'Internal server error'}`;
         errors.push(errorMsg);
         console.error('❌', errorMsg);
       }
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
         steps.push('✓ Dropped table: categories (CASCADE)');
         console.log('✓ categories table dropped');
       } catch (error: unknown) {
-        const errorMsg = `Failed to drop categories table: ${error instanceof Error ? error.message : "Internal server error"}`;
+        const errorMsg = `Failed to drop categories table: ${error instanceof Error ? error.message : 'Internal server error'}`;
         errors.push(errorMsg);
         console.error('❌', errorMsg);
       }
@@ -98,24 +98,26 @@ export async function POST(request: NextRequest) {
         message: 'Category feature successfully removed from database',
         steps,
         errors: errors.length > 0 ? errors : undefined,
-        warning: errors.length > 0
-          ? 'Some steps failed but migration partially completed. Check errors array.'
-          : undefined
+        warning:
+          errors.length > 0
+            ? 'Some steps failed but migration partially completed. Check errors array.'
+            : undefined,
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: unknown) {
     console.error('❌ Migration failed with critical error:', error);
 
-    return NextResponse.json({
-      success: false,
-      message: 'Migration failed with critical error',
-      error: error instanceof Error ? error.message : "Internal server error",
-      steps,
-      errors
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Migration failed with critical error',
+        error: error instanceof Error ? error.message : 'Internal server error',
+        steps,
+        errors,
+      },
+      { status: 500 }
+    );
   }
 }

@@ -46,20 +46,19 @@ function ShippingCompleteContent() {
         body: JSON.stringify({
           order_ids: ids,
           delivery_type: 'normal',
-          notes: '通常配送'
+          notes: '通常配送',
         }),
       });
 
       const result = await response.json();
       setShippingResult(result);
-
     } catch (error) {
       console.error('発送処理エラー:', error);
       setShippingResult({
         success: false,
         message: '発送処理中にエラーが発生しました',
         orders: [],
-        errors: [error instanceof Error ? error.message : '不明なエラー']
+        errors: [error instanceof Error ? error.message : '不明なエラー'],
       });
     } finally {
       setLoading(false);
@@ -84,14 +83,14 @@ function ShippingCompleteContent() {
       const sessionToken = document.cookie.split('session_token=')[1]?.split(';')[0] || '';
 
       // 顧客情報をDB登録用の形式に変換
-      const customerData: CustomerRegistration[] = shippingResult.orders.map(order => ({
+      const customerData: CustomerRegistration[] = shippingResult.orders.map((order) => ({
         order_code: order.order_number,
         customer_name: order.customer_name,
         customer_phone: order.customer_phone,
         customer_address: order.customer_address,
         delivery_date: order.delivery_date,
         total_amount: order.total_amount,
-        memo: order.memo
+        memo: order.memo,
       }));
 
       const response = await fetch('/api/customers', {
@@ -110,7 +109,6 @@ function ShippingCompleteContent() {
       } else {
         console.error('顧客情報登録エラー:', result.message);
       }
-
     } catch (error) {
       console.error('顧客情報登録エラー:', error);
     } finally {
@@ -215,7 +213,9 @@ function ShippingCompleteContent() {
             <div className="flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
-                <h3 className="font-medium text-green-900">CSVファイルのダウンロードが完了しました</h3>
+                <h3 className="font-medium text-green-900">
+                  CSVファイルのダウンロードが完了しました
+                </h3>
                 <p className="text-sm text-green-800 mt-1">
                   ヤマトB2クラウド用のCSVファイルが自動的にダウンロードされました。ブラウザのダウンロードフォルダをご確認ください。
                 </p>
@@ -247,17 +247,14 @@ function ShippingCompleteContent() {
                         ヤマトB2 CSV ダウンロード
                       </button>
                     )}
-                    <button
-                      onClick={handleClose}
-                      className="btn-primary flex items-center gap-2"
-                    >
+                    <button onClick={handleClose} className="btn-primary flex items-center gap-2">
                       <CheckCircle className="w-4 h-4" />
                       完了
                     </button>
                   </div>
                 </div>
               </div>
-              
+
               <div className="divide-y divide-gray-200">
                 {shippingResult.orders.map((order, index) => (
                   <div key={order.id} className="p-6">
@@ -281,9 +278,7 @@ function ShippingCompleteContent() {
                       </div>
                       <div>
                         <span className="text-gray-500">配達予定日</span>
-                        <p className="font-medium">
-                          {order.delivery_date || '指定なし'}
-                        </p>
+                        <p className="font-medium">{order.delivery_date || '指定なし'}</p>
                       </div>
                       <div>
                         <span className="text-gray-500">追跡番号</span>
@@ -319,10 +314,7 @@ function ShippingCompleteContent() {
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-3">
-            <button
-              onClick={handleClose}
-              className="btn-primary flex items-center gap-2"
-            >
+            <button onClick={handleClose} className="btn-primary flex items-center gap-2">
               <CheckCircle className="w-4 h-4" />
               完了
             </button>
@@ -344,7 +336,7 @@ function ShippingCompleteContent() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="mt-6 flex justify-end gap-3">
                   <button
                     onClick={() => setShowConfirmDialog(false)}
@@ -382,13 +374,15 @@ function ShippingCompleteContent() {
 
 export default function ShippingCompletePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-full bg-gray-50 py-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+    <Suspense
+      fallback={
+        <div className="min-h-full bg-gray-50 py-12">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ShippingCompleteContent />
     </Suspense>
   );
