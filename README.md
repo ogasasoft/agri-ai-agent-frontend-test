@@ -20,8 +20,8 @@
 
 ### フロントエンド
 
-- **Next.js 9.3.3** - App Router使用
-- **TypeScript** - 型安全性
+- **Next.js 16.2.7** - App Router使用
+- **TypeScript 6.0.3** - 型安全性
 - **Tailwind CSS** - スタイリング
 - **Lucide React** - アイコン
 - **Zustand** - 状態管理
@@ -336,7 +336,7 @@ npm run dev
 ### 最新の改善
 
 - 修正 README のヤマトAPIパス記述と CI/CD デプロイ条件
-- TypeScript 6.0.2 にアップグレード
+
 - 包括的な GitHub Actions CI/CD パイプラインの追加
 - テストを完全に修正
 
