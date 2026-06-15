@@ -53,7 +53,11 @@ export default function NewOrderPage() {
     name: 'items',
   });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
+  // Note: This calculation is intentionally not memoized because:
+  // 1. It's computed from form state that changes frequently
+  // 2. The values are small and cheap to compute
+  // 3. React Compiler will skip memoization if needed
+  // This is a deliberate trade-off between performance and code simplicity
   const totalAmount =
     watch('items')?.reduce((sum, item) => sum + (item.quantity || 0) * (item.unit_price || 0), 0) ||
     0;
