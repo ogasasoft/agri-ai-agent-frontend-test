@@ -10,7 +10,7 @@ function LoginForm() {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    rememberMe: false
+    rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,9 +43,9 @@ function LoginForm() {
     try {
       // First check user info to get admin flag
       const userResponse = await fetch('/api/auth/me', {
-        credentials: 'include'
+        credentials: 'include',
       });
-      
+
       if (userResponse.ok) {
         const userData = await userResponse.json();
         if (userData.success && userData.isAdmin) {
@@ -70,7 +70,7 @@ function LoginForm() {
     try {
       const response = await fetch('/api/auth/auto-login', {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -95,7 +95,7 @@ function LoginForm() {
     if (field === 'username' || field === 'password') {
       value = typeof value === 'string' ? value.trim() : value;
     }
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (error) setError(null);
   };
 
@@ -109,7 +109,7 @@ function LoginForm() {
     const trimmedData = {
       ...formData,
       username: formData.username.trim(),
-      password: formData.password.trim()
+      password: formData.password.trim(),
     };
 
     try {
@@ -126,7 +126,7 @@ function LoginForm() {
 
       if (data.success) {
         setSuccess('ログインしました。');
-        
+
         // Check if password change is required
         if (data.requiresPasswordChange) {
           router.push('/change-password?forced=true');
@@ -154,9 +154,7 @@ function LoginForm() {
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Agri AI</h1>
           <p className="text-gray-600 mt-2">EC統合管理システム</p>
-          <h2 className="mt-6 text-2xl font-semibold text-gray-900">
-            アカウントにログイン
-          </h2>
+          <h2 className="mt-6 text-2xl font-semibold text-gray-900">アカウントにログイン</h2>
         </div>
 
         {/* Login Form */}
@@ -307,11 +305,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        </div>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

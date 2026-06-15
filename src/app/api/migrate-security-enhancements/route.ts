@@ -3,10 +3,10 @@ import { getDbClient } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   // Starting security enhancements migration
-  
+
   try {
     const client = await getDbClient();
-    
+
     try {
       // 1. Create remember tokens table for persistent login
       await client.query(`
@@ -114,12 +114,14 @@ export async function POST(request: NextRequest) {
 
       // Get stats
       const usersCount = await client.query('SELECT COUNT(*) FROM users');
-      const sessionsCount = await client.query('SELECT COUNT(*) FROM sessions WHERE is_active = true');
-      
+      const sessionsCount = await client.query(
+        'SELECT COUNT(*) FROM sessions WHERE is_active = true'
+      );
+
       // Security enhancements migration completed successfully
 
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         message: 'Security enhancements migration completed successfully',
         features: [
           'Remember Me tokens for persistent login',
@@ -127,24 +129,25 @@ export async function POST(request: NextRequest) {
           'IP-based rate limiting',
           'Password spray attack detection',
           'Advanced security event monitoring',
-          'Automatic cleanup of expired data'
+          'Automatic cleanup of expired data',
         ],
         stats: {
           users_count: usersCount.rows[0].count,
-          active_sessions: sessionsCount.rows[0].count
-        }
+          active_sessions: sessionsCount.rows[0].count,
+        },
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
     console.error('❌ Migration error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      message: 'Security enhancements migration failed',
-      error: error.message 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Security enhancements migration failed',
+        error: error.message,
+      },
+      { status: 500 }
+    );
   }
 }

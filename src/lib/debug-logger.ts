@@ -33,13 +33,13 @@ class DebugLogger {
 
   debug(message: string, data?: any, context?: LogContext) {
     if (!this.isDebugMode) return;
-    
+
     const logData: LogData = {
       level: 'DEBUG',
       message,
       context,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     console.log('🐛 ' + this.formatLog(logData));
@@ -56,7 +56,7 @@ class DebugLogger {
       message,
       context,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     console.log('ℹ️ ' + this.formatLog(logData));
@@ -71,7 +71,7 @@ class DebugLogger {
       message,
       context,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     console.warn('⚠️ ' + this.formatLog(logData));
@@ -87,7 +87,7 @@ class DebugLogger {
       context,
       data: error,
       timestamp: new Date().toISOString(),
-      stack: error?.stack
+      stack: error?.stack,
     };
 
     console.error('❌ ' + this.formatLog(logData));
@@ -102,23 +102,23 @@ class DebugLogger {
   // CSV専用のデバッグ機能
   csvDebug(phase: string, data: any, context?: LogContext) {
     if (!this.isDebugMode) return;
-    
+
     console.log(`📄 CSV Debug [${phase}]:`, data);
-    
+
     if (phase === 'headers' && Array.isArray(data)) {
       console.log('📋 CSV Headers Analysis:');
       data.forEach((header, index) => {
         console.log(`  ${index + 1}: "${header}" (length: ${header.length})`);
       });
     }
-    
+
     if (phase === 'mapping' && typeof data === 'object') {
       console.log('🗺️ Field Mapping Results:');
       Object.entries(data).forEach(([field, value]) => {
         console.log(`  ${field}: "${value}" ${value ? '✅' : '❌'}`);
       });
     }
-    
+
     if (phase === 'validation_errors' && Array.isArray(data)) {
       console.log('🚨 Validation Errors Summary:');
       const errorCounts = data.reduce((acc: Record<string, number>, error: string) => {
@@ -126,7 +126,7 @@ class DebugLogger {
         acc[errorType] = (acc[errorType] || 0) + 1;
         return acc;
       }, {});
-      
+
       Object.entries(errorCounts).forEach(([errorType, count]) => {
         console.log(`  ${errorType}: ${count} occurrences`);
       });
@@ -136,7 +136,7 @@ class DebugLogger {
   // API リクエスト/レスポンスのトレース
   apiTrace(phase: 'REQUEST' | 'RESPONSE' | 'ERROR', data: any, context?: LogContext) {
     if (!this.isDebugMode) return;
-    
+
     const emoji = phase === 'REQUEST' ? '📤' : phase === 'RESPONSE' ? '📥' : '💥';
     console.log(`${emoji} API ${phase}:`, data);
   }
@@ -144,10 +144,10 @@ class DebugLogger {
   // パフォーマンス測定
   startTimer(label: string): () => void {
     if (!this.isDebugMode) return () => {};
-    
+
     const start = performance.now();
     console.log(`⏱️ Timer Started: ${label}`);
-    
+
     return () => {
       const end = performance.now();
       const duration = end - start;
@@ -168,26 +168,14 @@ export const logCSVProcessing = (
   debugLogger.csvDebug(phase, data, context);
 };
 
-export const logAPICall = (
-  method: string,
-  url: string,
-  data?: any,
-  context?: LogContext
-) => {
+export const logAPICall = (method: string, url: string, data?: any, context?: LogContext) => {
   debugLogger.apiTrace('REQUEST', { method, url, ...data }, context);
 };
 
-export const logAPIResponse = (
-  status: number,
-  data?: any,
-  context?: LogContext
-) => {
+export const logAPIResponse = (status: number, data?: any, context?: LogContext) => {
   debugLogger.apiTrace('RESPONSE', { status, ...data }, context);
 };
 
-export const logAPIError = (
-  error: any,
-  context?: LogContext
-) => {
+export const logAPIError = (error: any, context?: LogContext) => {
   debugLogger.apiTrace('ERROR', error, context);
 };

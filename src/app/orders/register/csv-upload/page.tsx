@@ -51,99 +51,110 @@ function CSVUploadContent() {
     };
   }, []);
 
-  const analyzeCSV = useCallback(async (file: File) => {
-    setAnalyzing(true);
-    setError(null);
+  const analyzeCSV = useCallback(
+    async (file: File) => {
+      setAnalyzing(true);
+      setError(null);
 
-    try {
-      // エンコーディング自動検出・変換
-      const buffer = await file.arrayBuffer();
-      const encodingResult = detectAndConvertEncoding(buffer);
+      try {
+        // エンコーディング自動検出・変換
+        const buffer = await file.arrayBuffer();
+        const encodingResult = detectAndConvertEncoding(buffer);
 
-      if (encodingResult.hasGarbledText || encodingResult.confidence < 0.3) {
-        setError(`文字エンコーディングの問題が検出されました。検出されたエンコーディング: ${encodingResult.detectedEncoding} (信頼度: ${Math.round(encodingResult.confidence * 100)}%)`);
-        setAnalyzing(false);
-        return Promise.reject(new Error('Encoding error'));
-      }
-
-      const text = encodingResult.text;
-
-      return new Promise<CSVPreviewData>((resolve, reject) => {
-        Papa.parse(text, {
-          header: false,
-          skipEmptyLines: true,
-          complete: (results) => {
-          const data = results.data as string[][];
-
-          if (data.length === 0) {
-            reject(new Error('CSVファイルが空です'));
-            return;
-          }
-
-          const headers = data[0];
-          const rows = data.slice(1);
-
-          // データソースに基づく必須項目のチェック
-          let requiredColumns: string[];
-          let errorMessage: string;
-
-          if (dataSource === 'colormi') {
-            requiredColumns = ['売上ID'];
-            errorMessage = '必須列（売上ID）が見つかりません';
-          } else {
-            requiredColumns = ['注文番号', 'order_code'];
-            errorMessage = '必須列（注文番号/order_code）が見つかりません';
-          }
-
-          const hasRequiredColumn = requiredColumns.some(col =>
-            headers.some(header => header.toLowerCase().includes(col.toLowerCase()) ||
-                                  col.toLowerCase().includes(header.toLowerCase()))
+        if (encodingResult.hasGarbledText || encodingResult.confidence < 0.3) {
+          setError(
+            `文字エンコーディングの問題が検出されました。検出されたエンコーディング: ${encodingResult.detectedEncoding} (信頼度: ${Math.round(encodingResult.confidence * 100)}%)`
           );
-
-          if (!hasRequiredColumn) {
-            reject(new Error(errorMessage));
-            return;
-          }
-
-          // データの妥当性チェック
-          const invalidRows: string[] = [];
-          let validRows = 0;
-
-          rows.forEach((row, index) => {
-            // 空行や不正な行をチェック
-            const nonEmptyValues = row.filter(cell => cell && cell.trim());
-            if (nonEmptyValues.length < 2) {
-              invalidRows.push(`行 ${index + 2}: データが不足しています`);
-            } else {
-              validRows++;
-            }
-          });
-
-          const previewData: CSVPreviewData = {
-            headers,
-            data: rows.slice(0, 5), // 最初の5行のみプレビュー
-            totalRows: rows.length,
-            validRows,
-            invalidRows
-          };
-
-          resolve(previewData);
-        },
-        error: (error: any) => {
-          reject(new Error(`CSVファイルの解析に失敗しました: ${error.message}`));
+          setAnalyzing(false);
+          return Promise.reject(new Error('Encoding error'));
         }
-      });
-    });
-    } catch (error) {
-      setAnalyzing(false);
-      return Promise.reject(error);
-    }
-  }, [dataSource]);
+
+        const text = encodingResult.text;
+
+        return new Promise<CSVPreviewData>((resolve, reject) => {
+          Papa.parse(text, {
+            header: false,
+            skipEmptyLines: true,
+            complete: (results) => {
+              const data = results.data as string[][];
+
+              if (data.length === 0) {
+                reject(new Error('CSVファイルが空です'));
+                return;
+              }
+
+              const headers = data[0];
+              const rows = data.slice(1);
+
+              // データソースに基づく必須項目のチェック
+              let requiredColumns: string[];
+              let errorMessage: string;
+
+              if (dataSource === 'colormi') {
+                requiredColumns = ['売上ID'];
+                errorMessage = '必須列（売上ID）が見つかりません';
+              } else {
+                requiredColumns = ['注文番号', 'order_code'];
+                errorMessage = '必須列（注文番号/order_code）が見つかりません';
+              }
+
+              const hasRequiredColumn = requiredColumns.some((col) =>
+                headers.some(
+                  (header) =>
+                    header.toLowerCase().includes(col.toLowerCase()) ||
+                    col.toLowerCase().includes(header.toLowerCase())
+                )
+              );
+
+              if (!hasRequiredColumn) {
+                reject(new Error(errorMessage));
+                return;
+              }
+
+              // データの妥当性チェック
+              const invalidRows: string[] = [];
+              let validRows = 0;
+
+              rows.forEach((row, index) => {
+                // 空行や不正な行をチェック
+                const nonEmptyValues = row.filter((cell) => cell && cell.trim());
+                if (nonEmptyValues.length < 2) {
+                  invalidRows.push(`行 ${index + 2}: データが不足しています`);
+                } else {
+                  validRows++;
+                }
+              });
+
+              const previewData: CSVPreviewData = {
+                headers,
+                data: rows.slice(0, 5), // 最初の5行のみプレビュー
+                totalRows: rows.length,
+                validRows,
+                invalidRows,
+              };
+
+              resolve(previewData);
+            },
+            error: (error: any) => {
+              reject(new Error(`CSVファイルの解析に失敗しました: ${error.message}`));
+            },
+          });
+        });
+      } catch (error) {
+        setAnalyzing(false);
+        return Promise.reject(error);
+      }
+    },
+    [dataSource]
+  );
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       const selectedFile = acceptedFiles[0];
-      if (selectedFile && (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv'))) {
+      if (
+        selectedFile &&
+        (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv'))
+      ) {
         setFile(selectedFile);
         setError(null);
         setPreviewData(null);
@@ -158,11 +169,11 @@ function CSVUploadContent() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'text/csv': ['.csv']
+      'text/csv': ['.csv'],
     },
     multiple: false,
     preventDropOnDocument: true,
-    noClick: false
+    noClick: false,
   });
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -300,11 +311,13 @@ function CSVUploadContent() {
               <p className="text-gray-600">注文データをCSVファイルで一括登録</p>
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-sm text-gray-500">データソース:</span>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  dataSource === 'colormi'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-green-100 text-green-800'
-                }`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    dataSource === 'colormi'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-green-100 text-green-800'
+                  }`}
+                >
                   {dataSource === 'colormi' ? 'カラーミー' : 'たべちょく'}
                 </span>
               </div>
@@ -345,25 +358,28 @@ function CSVUploadContent() {
               {...getRootProps()}
               className={`
                 border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-                ${isDragActive
-                  ? 'border-primary-500 bg-primary-50'
-                  : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
+                ${
+                  isDragActive
+                    ? 'border-primary-500 bg-primary-50'
+                    : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'
                 }
               `}
             >
               <input {...getInputProps()} />
-              <Upload className={`w-12 h-12 mx-auto mb-4 ${isDragActive ? 'text-primary-500' : 'text-gray-400'}`} />
+              <Upload
+                className={`w-12 h-12 mx-auto mb-4 ${isDragActive ? 'text-primary-500' : 'text-gray-400'}`}
+              />
 
               <div>
                 {isDragActive ? (
-                  <p className="text-primary-600 mb-4 font-medium">ファイルをここにドロップしてください</p>
+                  <p className="text-primary-600 mb-4 font-medium">
+                    ファイルをここにドロップしてください
+                  </p>
                 ) : (
                   <>
                     <p className="text-gray-600 mb-2">CSVファイルをドラッグ&ドロップ</p>
                     <p className="text-sm text-gray-500 mb-4">または</p>
-                    <span className="btn-primary cursor-pointer inline-block">
-                      ファイルを選択
-                    </span>
+                    <span className="btn-primary cursor-pointer inline-block">ファイルを選択</span>
                   </>
                 )}
               </div>
@@ -444,7 +460,9 @@ function CSVUploadContent() {
                 <div className="text-sm text-gray-600">有効データ数</div>
               </div>
               <div className="bg-orange-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-orange-600">{previewData.invalidRows.length}</div>
+                <div className="text-2xl font-bold text-orange-600">
+                  {previewData.invalidRows.length}
+                </div>
                 <div className="text-sm text-gray-600">問題のあるデータ</div>
               </div>
             </div>
@@ -457,7 +475,10 @@ function CSVUploadContent() {
                   <thead className="bg-gray-50">
                     <tr>
                       {previewData.headers.map((header, index) => (
-                        <th key={index} className="px-4 py-2 text-left text-xs font-medium text-gray-700 border-b border-gray-200 whitespace-nowrap">
+                        <th
+                          key={index}
+                          className="px-4 py-2 text-left text-xs font-medium text-gray-700 border-b border-gray-200 whitespace-nowrap"
+                        >
                           {header || `列${index + 1}`}
                         </th>
                       ))}
@@ -467,7 +488,10 @@ function CSVUploadContent() {
                     {previewData.data.map((row, rowIndex) => (
                       <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         {row.map((cell, cellIndex) => (
-                          <td key={cellIndex} className="px-4 py-2 text-sm text-gray-900 border-b border-gray-200 whitespace-nowrap">
+                          <td
+                            key={cellIndex}
+                            className="px-4 py-2 text-sm text-gray-900 border-b border-gray-200 whitespace-nowrap"
+                          >
                             {cell || '-'}
                           </td>
                         ))}
@@ -515,7 +539,9 @@ function CSVUploadContent() {
                 className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Upload className="w-4 h-4 mr-2" />
-                {uploading ? 'アップロード中...' : `${previewData.validRows}件のデータをアップロード`}
+                {uploading
+                  ? 'アップロード中...'
+                  : `${previewData.validRows}件のデータをアップロード`}
               </button>
             </div>
           </div>
@@ -536,7 +562,9 @@ function CSVUploadContent() {
 
         {/* CSV Format Help */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium text-blue-900 mb-2">💡 {dataSource === 'colormi' ? 'カラーミー' : 'たべちょく'}CSVファイルの形式について</h4>
+          <h4 className="font-medium text-blue-900 mb-2">
+            💡 {dataSource === 'colormi' ? 'カラーミー' : 'たべちょく'}CSVファイルの形式について
+          </h4>
           {dataSource === 'colormi' ? (
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• 必須ヘッダー: 売上ID, 購入者 名前, 購入者 住所, 購入単価</li>
@@ -564,13 +592,15 @@ function CSVUploadContent() {
 
 export default function CSVUploadPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-full bg-gray-50 py-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+    <Suspense
+      fallback={
+        <div className="min-h-full bg-gray-50 py-12">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CSVUploadContent />
     </Suspense>
   );

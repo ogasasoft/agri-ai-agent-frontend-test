@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import {
-  Users, Database, Shield, BarChart3,
-  LogOut, Menu, X, Home, Plug
-} from 'lucide-react';
+import { Users, Database, Shield, BarChart3, LogOut, Menu, X, Home, Plug } from 'lucide-react';
 
 interface AdminUser {
   id: number;
@@ -15,11 +12,7 @@ interface AdminUser {
   is_super_admin: boolean;
 }
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
@@ -77,8 +70,8 @@ export default function AdminLayout({
     { name: 'セキュリティ監視', href: '/admin/security', icon: Shield, superAdminOnly: true },
   ];
 
-  const filteredNavigation = navigation.filter(item => 
-    !item.superAdminOnly || adminUser.is_super_admin
+  const filteredNavigation = navigation.filter(
+    (item) => !item.superAdminOnly || adminUser.is_super_admin
   );
 
   return (
@@ -86,7 +79,10 @@ export default function AdminLayout({
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+          <div
+            className="fixed inset-0 bg-gray-600 bg-opacity-75"
+            onClick={() => setSidebarOpen(false)}
+          />
           <div className="relative flex w-full max-w-xs flex-1 flex-col bg-white">
             <div className="absolute top-0 right-0 p-2">
               <button
@@ -96,9 +92,9 @@ export default function AdminLayout({
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <SidebarContent 
-              navigation={filteredNavigation} 
-              pathname={pathname} 
+            <SidebarContent
+              navigation={filteredNavigation}
+              pathname={pathname}
               adminUser={adminUser}
               onLogout={handleLogout}
             />
@@ -109,9 +105,9 @@ export default function AdminLayout({
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4 shadow-sm">
-          <SidebarContent 
-            navigation={filteredNavigation} 
-            pathname={pathname} 
+          <SidebarContent
+            navigation={filteredNavigation}
+            pathname={pathname}
             adminUser={adminUser}
             onLogout={handleLogout}
           />
@@ -126,29 +122,25 @@ export default function AdminLayout({
         >
           <Menu className="h-6 w-6" />
         </button>
-        <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
-          管理者パネル
-        </div>
+        <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">管理者パネル</div>
       </div>
 
       {/* Main content */}
       <div className="lg:pl-72">
-        <div className="px-4 py-6 sm:px-6 lg:px-8">
-          {children}
-        </div>
+        <div className="px-4 py-6 sm:px-6 lg:px-8">{children}</div>
       </div>
     </div>
   );
 }
 
-function SidebarContent({ 
-  navigation, 
-  pathname, 
-  adminUser, 
-  onLogout 
-}: { 
-  navigation: any[]; 
-  pathname: string; 
+function SidebarContent({
+  navigation,
+  pathname,
+  adminUser,
+  onLogout,
+}: {
+  navigation: any[];
+  pathname: string;
   adminUser: AdminUser;
   onLogout: () => void;
 }) {
@@ -175,7 +167,7 @@ function SidebarContent({
               {navigation.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
-                
+
                 return (
                   <li key={item.name}>
                     <a
@@ -206,15 +198,13 @@ function SidebarContent({
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">
-              {adminUser.username}
-            </p>
+            <p className="text-sm font-semibold text-gray-900 truncate">{adminUser.username}</p>
             <p className="text-xs text-gray-500 truncate">
               {adminUser.is_super_admin ? 'スーパー管理者' : '管理者'}
             </p>
           </div>
         </div>
-        
+
         <button
           onClick={onLogout}
           className="group flex w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700 hover:text-red-700 hover:bg-red-50"

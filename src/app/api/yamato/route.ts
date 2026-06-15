@@ -11,11 +11,11 @@ const YAMATO_CONFIG = {
 export async function POST(request: NextRequest) {
   try {
     const body: YamatoShippingRequest = await request.json();
-    
+
     // NOTE: Currently using mock API - replace with actual Yamato API when credentials are available
     // Mock implementation for development/testing purposes
     const mockResponse = await generateMockYamatoResponse(body);
-    
+
     // 実際のヤマトAPI呼び出しは以下のようになる予定
     /*
     const yamatoResponse = await fetch(`${YAMATO_CONFIG.baseUrl}/shipping/create`, {
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(mockResponse);
   } catch (error) {
     console.error('Yamato API Error:', error);
-    
+
     return NextResponse.json(
       {
         success: false,
@@ -57,10 +57,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function generateMockYamatoResponse(request: YamatoShippingRequest): Promise<YamatoApiResponse> {
+async function generateMockYamatoResponse(
+  request: YamatoShippingRequest
+): Promise<YamatoApiResponse> {
   // モック処理: 実際のAPIでは2-5秒程度かかる想定
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+
   const results = request.recipients.map((recipient, index) => ({
     order_id: recipient.order_id,
     success: Math.random() > 0.1, // 90%の成功率
@@ -70,8 +72,8 @@ async function generateMockYamatoResponse(request: YamatoShippingRequest): Promi
     error_message: Math.random() > 0.9 ? '住所が不正です' : undefined,
   }));
 
-  const successCount = results.filter(r => r.success).length;
-  
+  const successCount = results.filter((r) => r.success).length;
+
   return {
     success: successCount > 0,
     results,

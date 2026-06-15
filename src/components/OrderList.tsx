@@ -13,18 +13,23 @@ interface OrderListProps {
   showShippingInfo?: boolean;
 }
 
-export function OrderList({ orders, selectedOrders, onSelectionChange, showShippingInfo = false }: OrderListProps) {
+export function OrderList({
+  orders,
+  selectedOrders,
+  onSelectionChange,
+  showShippingInfo = false,
+}: OrderListProps) {
   const [selectAll, setSelectAll] = useState(false);
 
   const handleSelectAll = (checked: boolean) => {
     setSelectAll(checked);
     if (checked) {
-      const allOrderIds = orders.map(order => order.id.toString());
+      const allOrderIds = orders.map((order) => order.id.toString());
       const uniqueOrderIds = Array.from(new Set([...selectedOrders, ...allOrderIds]));
       onSelectionChange(uniqueOrderIds);
     } else {
-      const orderIds = orders.map(order => order.id.toString());
-      onSelectionChange(selectedOrders.filter(id => !orderIds.includes(id)));
+      const orderIds = orders.map((order) => order.id.toString());
+      onSelectionChange(selectedOrders.filter((id) => !orderIds.includes(id)));
     }
   };
 
@@ -32,14 +37,14 @@ export function OrderList({ orders, selectedOrders, onSelectionChange, showShipp
     if (checked) {
       onSelectionChange([...selectedOrders, orderId]);
     } else {
-      onSelectionChange(selectedOrders.filter(id => id !== orderId));
+      onSelectionChange(selectedOrders.filter((id) => id !== orderId));
     }
   };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
-      currency: 'JPY'
+      currency: 'JPY',
     }).format(amount);
   };
 
@@ -93,9 +98,7 @@ export function OrderList({ orders, selectedOrders, onSelectionChange, showShipp
             onChange={(e) => handleSelectAll(e.target.checked)}
             className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
-          <span className="text-sm font-medium text-gray-700">
-            すべて選択 ({orders.length}件)
-          </span>
+          <span className="text-sm font-medium text-gray-700">すべて選択 ({orders.length}件)</span>
         </label>
       </div>
 
@@ -103,7 +106,7 @@ export function OrderList({ orders, selectedOrders, onSelectionChange, showShipp
       <div className="divide-y divide-gray-200">
         {orders.map((order) => {
           const isSelected = selectedOrders.includes(order.id.toString());
-          
+
           return (
             <div
               key={order.id}
@@ -118,23 +121,21 @@ export function OrderList({ orders, selectedOrders, onSelectionChange, showShipp
                   onChange={(e) => handleSelectOrder(order.id.toString(), e.target.checked)}
                   className="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                
+
                 <div className="flex-1 min-w-0">
                   {/* Order number and status */}
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">
-                        {order.order_number}
-                      </span>
-                      {order.has_memo && (
-                        <MessageSquare className="w-4 h-4 text-yellow-600" />
-                      )}
+                      <span className="font-medium text-gray-900">{order.order_number}</span>
+                      {order.has_memo && <MessageSquare className="w-4 h-4 text-yellow-600" />}
                     </div>
-                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(order.status)}`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${getStatusColor(order.status)}`}
+                    >
                       {getStatusText(order.status)}
                     </span>
                   </div>
-                  
+
                   {/* Customer and amount */}
                   <div className="text-sm text-gray-600 mb-2">
                     <div className="flex justify-between">
@@ -147,7 +148,7 @@ export function OrderList({ orders, selectedOrders, onSelectionChange, showShipp
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Dates */}
                   <div className="text-sm text-gray-500">
                     <div className="flex justify-between">
@@ -156,7 +157,8 @@ export function OrderList({ orders, selectedOrders, onSelectionChange, showShipp
                       </span>
                       {order.delivery_date && (
                         <span>
-                          希望日: {format(new Date(order.delivery_date), 'yyyy/MM/dd', { locale: ja })}
+                          希望日:{' '}
+                          {format(new Date(order.delivery_date), 'yyyy/MM/dd', { locale: ja })}
                         </span>
                       )}
                     </div>

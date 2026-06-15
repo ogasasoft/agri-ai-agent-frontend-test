@@ -1,9 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Search, Plus, Edit, Trash2, Eye, Download, 
-  Filter, MoreHorizontal, User, Mail, Phone, MapPin 
+import {
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Download,
+  Filter,
+  MoreHorizontal,
+  User,
+  Mail,
+  Phone,
+  MapPin,
 } from 'lucide-react';
 
 interface Customer {
@@ -51,11 +61,11 @@ export default function CustomersManagement() {
 
     try {
       const response = await fetch(`/api/admin/customers/${customerId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       if (response.ok) {
-        setCustomers(customers.filter(c => c.id !== customerId));
+        setCustomers(customers.filter((c) => c.id !== customerId));
       } else {
         alert('削除に失敗しました。');
       }
@@ -72,11 +82,11 @@ export default function CustomersManagement() {
       const response = await fetch('/api/admin/customers/bulk-delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerIds: selectedCustomers })
+        body: JSON.stringify({ customerIds: selectedCustomers }),
       });
 
       if (response.ok) {
-        setCustomers(customers.filter(c => !selectedCustomers.includes(c.id)));
+        setCustomers(customers.filter((c) => !selectedCustomers.includes(c.id)));
         setSelectedCustomers([]);
       } else {
         alert('一括削除に失敗しました。');
@@ -86,11 +96,12 @@ export default function CustomersManagement() {
     }
   };
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone?.includes(searchTerm) ||
-    customer.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.username.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCustomers = customers.filter(
+    (customer) =>
+      customer.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.phone?.includes(searchTerm) ||
+      customer.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -109,9 +120,7 @@ export default function CustomersManagement() {
           <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">
             顧客管理
           </h1>
-          <p className="mt-2 text-sm text-gray-700">
-            システム内のすべての顧客データを管理できます
-          </p>
+          <p className="mt-2 text-sm text-gray-700">システム内のすべての顧客データを管理できます</p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <button
@@ -138,7 +147,7 @@ export default function CustomersManagement() {
             />
           </div>
         </div>
-        
+
         <div className="flex gap-2">
           <button className="inline-flex items-center gap-x-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
             <Filter className="h-4 w-4" />
@@ -190,7 +199,7 @@ export default function CustomersManagement() {
                     checked={selectedCustomers.length === filteredCustomers.length}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setSelectedCustomers(filteredCustomers.map(c => c.id));
+                        setSelectedCustomers(filteredCustomers.map((c) => c.id));
                       } else {
                         setSelectedCustomers([]);
                       }
@@ -229,7 +238,9 @@ export default function CustomersManagement() {
                         if (e.target.checked) {
                           setSelectedCustomers([...selectedCustomers, customer.id]);
                         } else {
-                          setSelectedCustomers(selectedCustomers.filter(id => id !== customer.id));
+                          setSelectedCustomers(
+                            selectedCustomers.filter((id) => id !== customer.id)
+                          );
                         }
                       }}
                     />
@@ -245,9 +256,7 @@ export default function CustomersManagement() {
                         <div className="text-sm font-medium text-gray-900">
                           {customer.customer_name}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          ID: {customer.id}
-                        </div>
+                        <div className="text-sm text-gray-500">ID: {customer.id}</div>
                       </div>
                     </div>
                   </td>
@@ -298,7 +307,9 @@ export default function CustomersManagement() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => {/* View details */}}
+                        onClick={() => {
+                          /* View details */
+                        }}
                         className="text-primary-600 hover:text-primary-900"
                       >
                         <Eye className="h-4 w-4" />
@@ -328,7 +339,9 @@ export default function CustomersManagement() {
             <User className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">顧客データなし</h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm ? '検索条件に一致する顧客が見つかりません。' : 'まだ顧客データが登録されていません。'}
+              {searchTerm
+                ? '検索条件に一致する顧客が見つかりません。'
+                : 'まだ顧客データが登録されていません。'}
             </p>
           </div>
         )}

@@ -2,16 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { CustomerRegistration } from '@/types/shipping';
 import { validateSession } from '@/lib/auth';
 
-
 export async function POST(request: NextRequest) {
   try {
     // Session validation
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
-      return NextResponse.json(
-        { success: false, message: '認証が必要です' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: '認証が必要です' }, { status: 401 });
     }
 
     const sessionData = await validateSession(sessionToken);
@@ -34,9 +31,9 @@ export async function POST(request: NextRequest) {
 
     // Customer data is already saved in orders table with 'shipped' status
     // This endpoint just confirms the registration completion
-    const processedCustomers = customers.map(customer => ({
+    const processedCustomers = customers.map((customer) => ({
       ...customer,
-      registered_at: new Date().toISOString()
+      registered_at: new Date().toISOString(),
     }));
 
     const insertedCount = processedCustomers.length;
@@ -45,15 +42,14 @@ export async function POST(request: NextRequest) {
       success: true,
       message: `${insertedCount}件の顧客情報を確認しました`,
       inserted: insertedCount,
-      customers: processedCustomers
+      customers: processedCustomers,
     });
-
   } catch (error) {
     console.error('Customer registration error:', error);
     return NextResponse.json(
       {
         success: false,
-        message: error instanceof Error ? error.message : '顧客情報の登録中にエラーが発生しました'
+        message: error instanceof Error ? error.message : '顧客情報の登録中にエラーが発生しました',
       },
       { status: 500 }
     );
@@ -77,14 +73,14 @@ export async function GET(request: NextRequest) {
         customer_name: '田中太郎',
         customer_phone: '090-1234-5678',
         customer_address: '東京都渋谷区',
-        registered_at: new Date().toISOString()
-      }
+        registered_at: new Date().toISOString(),
+      },
     ];
 
-    const filteredCustomers = search 
-      ? mockCustomers.filter(customer => 
-          customer.customer_name.includes(search) ||
-          customer.order_code.includes(search)
+    const filteredCustomers = search
+      ? mockCustomers.filter(
+          (customer) =>
+            customer.customer_name.includes(search) || customer.order_code.includes(search)
         )
       : mockCustomers;
 
@@ -95,15 +91,14 @@ export async function GET(request: NextRequest) {
       customers: paginatedCustomers,
       total: filteredCustomers.length,
       limit,
-      offset
+      offset,
     });
-
   } catch (error) {
     console.error('Customer fetch error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        message: error instanceof Error ? error.message : '顧客情報の取得中にエラーが発生しました' 
+      {
+        success: false,
+        message: error instanceof Error ? error.message : '顧客情報の取得中にエラーが発生しました',
       },
       { status: 500 }
     );

@@ -50,10 +50,10 @@ export class ClientErrorBuilder {
       error_code: errorCode,
       debug_info: {
         timestamp: new Date().toISOString(),
-        processing_steps: []
+        processing_steps: [],
       },
       suggestions: [],
-      user_actions: []
+      user_actions: [],
     };
   }
 
@@ -78,7 +78,7 @@ export class ClientErrorBuilder {
         step,
         status,
         details,
-        error
+        error,
       });
     }
     return this;
@@ -116,7 +116,9 @@ export class FormErrorBuilder extends ClientErrorBuilder {
     context: ClientErrorContext
   ): ClientErrorResponse {
     const errorCount = Object.keys(errors).length;
-    const builder = new FormErrorBuilder(`フォーム検証エラー: ${errorCount}個のフィールドに問題があります`);
+    const builder = new FormErrorBuilder(
+      `フォーム検証エラー: ${errorCount}個のフィールドに問題があります`
+    );
 
     builder
       .setContext({ ...context, userAction: 'form_submit' })
@@ -124,12 +126,12 @@ export class FormErrorBuilder extends ClientErrorBuilder {
         errors,
         form_name: formName,
         field_count: Object.keys(formData).length,
-        error_count: errorCount
+        error_count: errorCount,
       });
 
     // エラーの種類を分析して提案を生成
     const suggestions = FormErrorBuilder.analyzeFormErrors(errors, formName);
-    suggestions.forEach(suggestion => builder.addSuggestion(suggestion));
+    suggestions.forEach((suggestion) => builder.addSuggestion(suggestion));
 
     // ユーザーアクションを追加
     builder
@@ -153,12 +155,12 @@ export class FormErrorBuilder extends ClientErrorBuilder {
       .addProcessingStep('API Request', 'failed', {
         status: apiResponse?.status,
         error: apiResponse?.message || apiResponse?.error,
-        form_name: formName
+        form_name: formName,
       });
 
     // APIエラーレスポンスを分析
     const suggestions = FormErrorBuilder.analyzeAPIError(apiResponse, formName);
-    suggestions.forEach(suggestion => builder.addSuggestion(suggestion));
+    suggestions.forEach((suggestion) => builder.addSuggestion(suggestion));
 
     // ユーザーアクションを追加
     builder
@@ -169,10 +171,7 @@ export class FormErrorBuilder extends ClientErrorBuilder {
     return builder.build();
   }
 
-  private static analyzeFormErrors(
-    errors: Record<string, string[]>,
-    formName: string
-  ): string[] {
+  private static analyzeFormErrors(errors: Record<string, string[]>, formName: string): string[] {
     const suggestions: string[] = [];
     const errorFields = Object.keys(errors);
 
@@ -230,11 +229,7 @@ export class DataFetchErrorBuilder extends ClientErrorBuilder {
     super(message, 'DATA_FETCH_ERROR');
   }
 
-  static apiError(
-    endpoint: string,
-    error: any,
-    context: ClientErrorContext
-  ): ClientErrorResponse {
+  static apiError(endpoint: string, error: any, context: ClientErrorContext): ClientErrorResponse {
     const builder = new DataFetchErrorBuilder('データの取得に失敗しました');
 
     builder
@@ -242,17 +237,15 @@ export class DataFetchErrorBuilder extends ClientErrorBuilder {
       .addProcessingStep('API Request', 'failed', {
         endpoint,
         error: error.message,
-        status: error.status
+        status: error.status,
       });
 
     // エラーの種類に応じて提案を生成
     const suggestions = DataFetchErrorBuilder.analyzeDataError(error, endpoint);
-    suggestions.forEach(suggestion => builder.addSuggestion(suggestion));
+    suggestions.forEach((suggestion) => builder.addSuggestion(suggestion));
 
     // ユーザーアクションを追加
-    builder
-      .addUserAction('再読み込み', 'retry')
-      .addUserAction('ページを更新', 'refresh');
+    builder.addUserAction('再読み込み', 'retry').addUserAction('ページを更新', 'refresh');
 
     return builder.build();
   }
@@ -289,7 +282,7 @@ export const logClientError = (
     timestamp: new Date().toISOString(),
     user_agent: navigator.userAgent,
     url: window.location.href,
-    viewport: `${window.innerWidth}x${window.innerHeight}`
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
   };
 
   debugLogger.error(`Client Error: ${errorType}`, logData);
@@ -310,7 +303,7 @@ export const executeUserAction = (
       if (params?.clear_form) {
         // フォームクリア処理
         const forms = document.querySelectorAll('form');
-        forms.forEach(form => form.reset());
+        forms.forEach((form) => form.reset());
       }
       window.location.reload();
       break;
@@ -324,7 +317,9 @@ export const executeUserAction = (
     case 'contact_support':
       // サポート連絡機能（メール送信など）
       const subject = encodeURIComponent('技術サポート要請');
-      const body = encodeURIComponent(`エラーが発生しました。\n\n詳細: ${JSON.stringify(params, null, 2)}`);
+      const body = encodeURIComponent(
+        `エラーが発生しました。\n\n詳細: ${JSON.stringify(params, null, 2)}`
+      );
       window.open(`mailto:support@example.com?subject=${subject}&body=${body}`);
       break;
   }

@@ -8,10 +8,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     // Session validation
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       return createErrorResponse('認証が必要です', 401);
     }
@@ -37,14 +38,13 @@ export async function GET(request: NextRequest) {
       failedLogins: parseInt(failedLoginsResult.rows[0]?.count || '0'),
       blockedIPs: 3,
       todayEvents: 8,
-      activeThreats: 1
+      activeThreats: 1,
     };
 
     return NextResponse.json({
       success: true,
-      stats
+      stats,
     });
-
   } catch (error) {
     console.error('Get security stats error:', error);
     return createErrorResponse('サーバーエラーが発生しました', 500);

@@ -5,14 +5,17 @@ import { getDbClient } from '@/lib/db';
 export async function POST(request: NextRequest) {
   // Only allow in development environment
   if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json({
-      success: false,
-      message: 'This API is not available in production'
-    }, { status: 404 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'This API is not available in production',
+      },
+      { status: 404 }
+    );
   }
 
   let client: Client | null = null;
-  
+
   try {
     client = await getDbClient();
 
@@ -25,26 +28,32 @@ export async function POST(request: NextRequest) {
       'sato@greenfield.org',
       'test@demo.com',
       'customer01@example.jp',
-      'farmer@local.jp'
+      'farmer@local.jp',
     ];
 
     let deletedCount = 0;
 
     for (const email of testUserEmails) {
       // Delete from user_passwords first (foreign key constraint)
-      await client.query(`
+      await client.query(
+        `
         DELETE FROM user_passwords 
         WHERE user_id IN (
           SELECT id FROM users WHERE email = $1 OR username = $1
         )
-      `, [email]);
+      `,
+        [email]
+      );
 
       // Delete user
-      const result = await client.query(`
+      const result = await client.query(
+        `
         DELETE FROM users 
         WHERE email = $1 OR username = $1
         RETURNING id, username
-      `, [email]);
+      `,
+        [email]
+      );
 
       if (result.rows.length > 0) {
         deletedCount++;
@@ -55,16 +64,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `${deletedCount}人のテストユーザーを削除しました`,
-      deleted_count: deletedCount
+      deleted_count: deletedCount,
     });
-
   } catch (error) {
     console.error('Delete test users error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'テストユーザー削除に失敗しました',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'テストユーザー削除に失敗しました',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   } finally {
     if (client) {
       await client.end();

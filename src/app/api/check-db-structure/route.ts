@@ -4,7 +4,7 @@ import { getDbClient } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   let client: Client | null = null;
-  
+
   try {
     client = await getDbClient();
 
@@ -22,16 +22,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       table_structure: tableStructure.rows,
-      existing_users: existingUsers.rows
+      existing_users: existingUsers.rows,
     });
-
   } catch (error) {
     console.error('Check DB structure error:', error);
-    return NextResponse.json({
-      success: false,
-      message: 'データベース構造確認に失敗しました',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'データベース構造確認に失敗しました',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   } finally {
     if (client) {
       await client.end();

@@ -13,7 +13,8 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     // Session validation
-    const sessionToken = request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
     if (!sessionToken) {
       const authError = AuthErrorBuilder.sessionError('INVALID_SESSION');
       return NextResponse.json(authError, { status: 401 });
@@ -28,10 +29,13 @@ export async function POST(request: NextRequest) {
     // CSRF validation
     const csrfToken = request.headers.get('x-csrf-token');
     if (!csrfToken || csrfToken !== sessionData.session.csrf_token) {
-      return NextResponse.json({
-        success: false,
-        message: 'CSRF検証に失敗しました。'
-      }, { status: 403 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'CSRF検証に失敗しました。',
+        },
+        { status: 403 }
+      );
     }
 
     const userId = sessionData.user.id.toString();
@@ -49,11 +53,14 @@ export async function POST(request: NextRequest) {
 
     try {
       // Verify all orders belong to the user and are shipped
-      const verifyResult = await client.query(`
+      const verifyResult = await client.query(
+        `
         SELECT id, order_code, status
         FROM orders
         WHERE id = ANY($1::int[]) AND user_id = $2
-      `, [order_ids, userId]);
+      `,
+        [order_ids, userId]
+      );
 
       if (verifyResult.rows.length !== order_ids.length) {
         return NextResponse.json(
@@ -63,20 +70,21 @@ export async function POST(request: NextRequest) {
       }
 
       // Check if any order is not in 'shipped' status
-      const nonShippedOrders = verifyResult.rows.filter(order => order.status !== 'shipped');
+      const nonShippedOrders = verifyResult.rows.filter((order) => order.status !== 'shipped');
       if (nonShippedOrders.length > 0) {
         return NextResponse.json(
           {
             success: false,
             message: '発送済みステータスではない注文が含まれています',
-            non_shipped_orders: nonShippedOrders.map(o => o.order_code)
+            non_shipped_orders: nonShippedOrders.map((o) => o.order_code),
           },
           { status: 400 }
         );
       }
 
       // Update orders back to 'pending' status
-      const updateResult = await client.query(`
+      const updateResult = await client.query(
+        `
         UPDATE orders
         SET status = 'pending',
             shipped_at = NULL,
@@ -84,34 +92,36 @@ export async function POST(request: NextRequest) {
             updated_at = NOW()
         WHERE id = ANY($1::int[]) AND user_id = $2
         RETURNING id, order_code, customer_name, status
-      `, [order_ids, userId]);
+      `,
+        [order_ids, userId]
+      );
 
-      logDatabaseOperation('UPDATE', 'orders', true, {
-        count: updateResult.rows.length,
-        action: 'cancel_shipping'
-      }, userId);
+      logDatabaseOperation(
+        'UPDATE',
+        'orders',
+        true,
+        {
+          count: updateResult.rows.length,
+          action: 'cancel_shipping',
+        },
+        userId
+      );
 
       return NextResponse.json({
         success: true,
         message: `${updateResult.rows.length}件の注文を発送待ちに戻しました`,
-        orders: updateResult.rows
+        orders: updateResult.rows,
       });
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
     console.error('Shipping cancel API error:', error);
 
-    const dbError = DatabaseErrorBuilder.queryError(
-      'UPDATE orders - cancel shipping',
-      error,
-      {
-        table: 'orders',
-        operation: 'UPDATE'
-      }
-    );
+    const dbError = DatabaseErrorBuilder.queryError('UPDATE orders - cancel shipping', error, {
+      table: 'orders',
+      operation: 'UPDATE',
+    });
 
     return NextResponse.json(dbError, { status: 500 });
   }

@@ -10,9 +10,9 @@ export async function POST(
   { params }: { params: { integrationId: string } }
 ) {
   try {
-    const sessionToken = request.headers.get('x-session-token') || 
-                         request.cookies.get('session_token')?.value;
-    
+    const sessionToken =
+      request.headers.get('x-session-token') || request.cookies.get('session_token')?.value;
+
     if (!sessionToken) {
       return createErrorResponse('認証が必要です。', 401);
     }
@@ -50,7 +50,7 @@ export async function POST(
         success: false,
         message: '',
         responseTime: 0,
-        status: 'unknown'
+        status: 'unknown',
       };
 
       const startTime = Date.now();
@@ -62,52 +62,49 @@ export async function POST(
           const testResponse = await fetch(`${integration.api_endpoint}/api/test`, {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${integration.api_key}`,
-              'Content-Type': 'application/json'
+              Authorization: `Bearer ${integration.api_key}`,
+              'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(10000) // 10 second timeout
+            signal: AbortSignal.timeout(10000), // 10 second timeout
           });
 
           testResult.responseTime = Date.now() - startTime;
           testResult.success = testResponse.ok;
           testResult.status = testResponse.status.toString();
-          testResult.message = testResponse.ok 
-            ? 'ColorMi API接続テストに成功しました。' 
+          testResult.message = testResponse.ok
+            ? 'ColorMi API接続テストに成功しました。'
             : `ColorMi API接続テストに失敗しました。(${testResponse.status})`;
-
         } else if (integration.type === 'tabechoku') {
           // Test Tabechoku API connection
           const testResponse = await fetch(`${integration.api_endpoint}/health`, {
             method: 'GET',
             headers: {
               'X-API-Key': integration.api_key,
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
             },
-            signal: AbortSignal.timeout(10000) // 10 second timeout
+            signal: AbortSignal.timeout(10000), // 10 second timeout
           });
 
           testResult.responseTime = Date.now() - startTime;
           testResult.success = testResponse.ok;
           testResult.status = testResponse.status.toString();
-          testResult.message = testResponse.ok 
-            ? 'Tabechoku API接続テストに成功しました。' 
+          testResult.message = testResponse.ok
+            ? 'Tabechoku API接続テストに成功しました。'
             : `Tabechoku API接続テストに失敗しました。(${testResponse.status})`;
-
         } else {
           // Generic API test
           const testResponse = await fetch(integration.api_endpoint, {
             method: 'HEAD',
-            signal: AbortSignal.timeout(10000) // 10 second timeout
+            signal: AbortSignal.timeout(10000), // 10 second timeout
           });
 
           testResult.responseTime = Date.now() - startTime;
           testResult.success = testResponse.ok;
           testResult.status = testResponse.status.toString();
-          testResult.message = testResponse.ok 
-            ? 'API接続テストに成功しました。' 
+          testResult.message = testResponse.ok
+            ? 'API接続テストに成功しました。'
             : `API接続テストに失敗しました。(${testResponse.status})`;
         }
-
       } catch (testError: any) {
         testResult.responseTime = Date.now() - startTime;
         testResult.success = false;
@@ -116,10 +113,9 @@ export async function POST(
       }
 
       // Update last_tested timestamp
-      await client.query(
-        'UPDATE api_integrations SET last_tested_at = NOW() WHERE id = $1',
-        [integrationId]
-      );
+      await client.query('UPDATE api_integrations SET last_tested_at = NOW() WHERE id = $1', [
+        integrationId,
+      ]);
 
       // Log admin action
       await client.query(
@@ -132,10 +128,10 @@ export async function POST(
             integrationId,
             integrationName: integration.name,
             integrationType: integration.type,
-            testResult
+            testResult,
           }),
           request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
-          request.headers.get('user-agent') || 'unknown'
+          request.headers.get('user-agent') || 'unknown',
         ]
       );
 
@@ -145,16 +141,14 @@ export async function POST(
         integration: {
           id: integrationId,
           name: integration.name,
-          type: integration.type
-        }
+          type: integration.type,
+        },
       });
 
       return addSecurityHeaders(response);
-
     } finally {
       await client.end();
     }
-
   } catch (error: any) {
     console.error('Test integration error:', error);
     return createErrorResponse('統合設定のテストに失敗しました。', 500);
