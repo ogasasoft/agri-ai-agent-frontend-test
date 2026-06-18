@@ -1,0 +1,11 @@
+node_modules
+.next
+npm-debug.log*
+.pnpm-debug.log*
+.yarn
+dist
+build
+.env*.local
+.git
+.github
+README.md

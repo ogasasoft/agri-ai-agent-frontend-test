@@ -1,6 +1,12 @@
 # Agri AI Agent Frontend
 
-農業EC統合管理システム - Next.js 14 + TypeScript + PostgreSQL
+農業EC統合管理システム - Next.js 16 + React 18 + TypeScript 6.0.3 + PostgreSQL
+
+## 前提条件
+
+- Node.js 20以上
+- PostgreSQL データベース
+- OpenAI API キー
 
 ## 🌟 概要
 
@@ -20,13 +26,14 @@
 
 ### フロントエンド
 
-- **Next.js 14** - App Router使用
-- **TypeScript** - 型安全性
-- **Tailwind CSS** - スタイリング
-- **Lucide React** - アイコン
-- **Zustand** - 状態管理
-- **React Hook Form + Zod** - フォームバリデーション
-- **TanStack Query** - API通信
+- **Next.js 16.2.1** - App Router使用
+- **React 18.3.0** - 最新React
+- **TypeScript 6.0.3** - 型安全性
+- **Tailwind CSS 3.4.0** - スタイリング
+- **Lucide React 0.417.0** - アイコン
+- **Zustand 5.0.2** - 状態管理
+- **React Hook Form 7.54.2 + Zod 3.24.1** - フォームバリデーション
+- **TanStack Query 5.74.3** - API通信
 
 ### バックエンド
 
@@ -121,7 +128,7 @@ npm run dev
 
 ```
 src/
-├── app/                    # Next.js 14 App Router
+├── app/                    # Next.js 16 App Router
 │   ├── admin/             # 管理者画面
 │   │   ├── customers/     # 顧客管理
 │   │   ├── prompts/       # AIプロンプト設定
@@ -313,6 +320,59 @@ npm run dev
 - **認証必須**: 全保護ルートで認証確認
 - **権限チェック**: ロールベースアクセス制御
 - **監査ログ**: 重要操作の記録
+
+## 🐳 Docker
+
+### Build Docker Image
+
+```bash
+docker build -t agri-ai-agent-frontend:latest .
+```
+
+### Run Docker Container
+
+```bash
+docker run -p 3000:3000 agri-ai-agent-frontend:latest
+```
+
+### Run with Environment Variables
+
+```bash
+docker run -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e DATABASE_URL=postgresql://username:password@host:port/database \
+  -e OPENAI_API_KEY=sk-your-openai-api-key \
+  agri-ai-agent-frontend:latest
+```
+
+### Docker Compose (Development)
+
+Create a `docker-compose.yml` file:
+
+```yaml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://username:password@host:port/database
+      - OPENAI_API_KEY=sk-your-openai-api-key
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: pnpm dev
+```
+
+Run with Docker Compose:
+
+```bash
+docker-compose up
+```
 
 ## 📊 プロジェクトステータス
 
