@@ -123,6 +123,37 @@ http://localhost:3000/api/migrate-admin-system
 npm run dev
 ```
 
+## 🔄 CI/CD
+
+- [CI/CD Pipeline](#-ci-cd-pipeline) - Continuous integration and deployment
+- [Docker Deployment](#-docker) - Containerized deployment
+
+### CI/CD Pipeline
+
+The project uses GitHub Actions for continuous integration and deployment:
+
+1. **TypeScript Type Check**: Validates type safety
+2. **Lint Check**: Checks code quality with ESLint and Prettier
+3. **Testing**: Runs comprehensive test suite (199 tests)
+4. **Coverage Report**: Generates coverage reports
+5. **Security Scan**: Runs npm audit for vulnerabilities
+6. **Build Check**: Builds production bundle
+
+### Deploying to Vercel
+
+1. **Connect Repository**: Import the repository in Vercel
+2. **Configure Environment Variables**: Set up any required variables
+3. **Deploy**: Vercel will automatically deploy on push to main
+
+### Environment Variables
+
+Required environment variables for production:
+
+```env
+DATABASE_URL=postgresql://username:password@host:port/database
+OPENAI_API_KEY=sk-your-openai-api-key
+```
+
 ## 👤 ログイン情報
 
 ### 一般ユーザー
