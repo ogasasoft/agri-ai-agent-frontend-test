@@ -1,4 +1,4 @@
-# Agri AI Agent Frontend
+# Agri AI Agent Frontend v0.1.0
 
 農業EC統合管理システム - Next.js 16 + React 18 + TypeScript 6.0.3 + PostgreSQL
 
