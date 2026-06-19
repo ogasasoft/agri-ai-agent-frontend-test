@@ -116,6 +116,30 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         continue-on-error: true
 
+  lint-staged-check:
+    name: Lint Staged Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [typecheck, lint, test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install lint-staged
+        run: npm install --save-dev lint-staged
+
+      - name: Run lint-staged
+        run: npx lint-staged
+
   code-quality-badge:
     name: Create Quality Badge
     runs-on: ubuntu-latest
