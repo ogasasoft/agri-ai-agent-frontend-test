@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { validateAdminSession } from '@/lib/admin-auth';
 import { createErrorResponse } from '@/lib/security';
 import { getDbClient } from '@/lib/db';
+import { getClientInfo } from '@/lib/request-helpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -173,8 +174,8 @@ export async function POST(request: NextRequest) {
           email: newUser.email,
           is_admin: newUser.is_admin,
         }),
-        request.ip || request.headers.get('x-forwarded-for') || 'unknown',
-        request.headers.get('user-agent') || 'unknown',
+        getClientInfo(request).ipAddress,
+        getClientInfo(request).userAgent,
       ]
     );
 

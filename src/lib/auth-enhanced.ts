@@ -4,17 +4,10 @@ import { randomBytes } from 'crypto';
 import { NextRequest } from 'next/server';
 import { validateSession, logAuditEvent, User, Session } from './auth';
 import { getDbClient } from '@/lib/db';
+import { getClientInfo as getCommonClientInfo } from './request-helpers';
 
 export function getClientInfo(request: NextRequest): { ipAddress: string; userAgent: string } {
-  const ipAddress =
-    request.ip ||
-    request.headers.get('x-forwarded-for')?.split(',')[0] ||
-    request.headers.get('x-real-ip') ||
-    'unknown';
-
-  const userAgent = request.headers.get('user-agent') || 'unknown';
-
-  return { ipAddress, userAgent };
+  return getCommonClientInfo(request);
 }
 
 // Enhanced security constants

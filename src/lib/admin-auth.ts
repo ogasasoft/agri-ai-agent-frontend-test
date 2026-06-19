@@ -2,6 +2,7 @@ import { Client } from 'pg';
 import { NextRequest } from 'next/server';
 import { validateSession } from './auth';
 import { getDbClient } from '@/lib/db';
+import { getClientInfo as getCommonClientInfo } from './request-helpers';
 
 export interface AdminUser {
   id: number;
@@ -81,15 +82,7 @@ export async function logAdminAction(
 }
 
 export function getClientInfo(request: NextRequest): { ipAddress: string; userAgent: string } {
-  const ipAddress =
-    request.ip ||
-    request.headers.get('x-forwarded-for')?.split(',')[0] ||
-    request.headers.get('x-real-ip') ||
-    'unknown';
-
-  const userAgent = request.headers.get('user-agent') || 'unknown';
-
-  return { ipAddress, userAgent };
+  return getCommonClientInfo(request);
 }
 
 // Admin role checks
