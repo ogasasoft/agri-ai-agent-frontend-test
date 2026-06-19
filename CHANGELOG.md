@@ -12,13 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Docker Support**: Added Dockerfile and .dockerignore for containerized deployment
 - **Code Quality Metrics**: Added GitHub Actions workflow for code climate analysis and metrics collection
 - **Docker Documentation**: Added Docker usage section to README with build, run, and compose examples
+- **Security Scanning**: Added security-scan.yml workflow for daily vulnerability scanning
+- **Lint Staged**: Added lint-staged configuration for pre-commit code quality checks
+- **Lint Staged Check**: Added lint-staged-check job to code-quality.yml workflow
 
 ### Changed
 - Updated dependency management with Dependabot integration
 - Enhanced CI/CD pipeline with quality metrics and analysis
+- Updated lint-staged configuration with React/TypeScript support
 
 ### Security
 - Dependency updates now managed automatically via Dependabot
+- Daily vulnerability scanning via GitHub Actions workflow
 
 ## [Unreleased]
 
