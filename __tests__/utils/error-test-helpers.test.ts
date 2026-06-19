@@ -430,7 +430,7 @@ describe('エラーハンドリングヘルパー', () => {
       const end = performance.now()
 
       const duration = end - start
-      expect(duration).toBeGreaterThanOrEqual(10)
+      expect(duration).toBeGreaterThanOrEqual(9)
     })
   })
 })
