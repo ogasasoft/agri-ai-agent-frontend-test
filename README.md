@@ -411,7 +411,7 @@ docker-compose up
 
 ## 🙋‍♂️ サポート
 
-問題や質問がある場合は、GitHubのIssuesまたは開発者まで連絡してください。
+問題や質問がある場合は、[GitHub Issues](https://github.com/ogasasoft/agri-ai-agent-frontend/issues)または開発者まで連絡してください。
 
 ---
 
