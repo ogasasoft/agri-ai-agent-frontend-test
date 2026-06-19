@@ -24,6 +24,9 @@
 
 ## 🏗️ 技術スタック
 
+- [Architecture](#-architecture) - System design overview
+- [API Documentation](#-api-連携) - API integration guide
+
 ### フロントエンド
 
 - **Next.js 16.2.1** - App Router使用
@@ -48,6 +51,16 @@
 - **ヤマト運輸API** - 配送ラベル作成（予定）
 - **カラーミーショップAPI** - 注文同期（予定）
 - **食べチョクAPI** - 注文同期（予定）
+
+### アーキテクチャ
+
+- **Frontend**: Next.js 16 App Router, React 19, TypeScript 6
+- **State Management**: Zustand, React Hook Form
+- **Backend**: Next.js API Routes, Server Actions
+- **Database**: PostgreSQL (Neon cloud)
+- **Authentication**: Session-based auth, bcryptjs
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
 
 ## 🚀 セットアップ
 
@@ -404,6 +417,15 @@ docker-compose up
 - セキュリティ: ✅ 日次スキャン有効化
 
 すべてのプロジェクトは本番環境デプロイ準備が整っています。
+
+## 📚 Documentation
+
+- [Getting Started](#前提条件) - Initial setup guide
+- [Architecture](#-architecture) - System design overview
+- [API Documentation](#-api-連携) - API integration guide
+- [Security Policy](#-セキュリティ機能) - Security best practices and reporting
+- [Changelog](./CHANGELOG.md) - Version history and changes
+- [Releases](https://github.com/ogasasasasoft/agri-ai-agent-frontend/releases) - Official releases and download links
 
 ## 📝 ライセンス
 
