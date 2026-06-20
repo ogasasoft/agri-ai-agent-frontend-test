@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Advanced Analytics Dashboard**: Enhanced admin dashboard with comprehensive analytics
+  - Weekly growth calculation based on order and user metrics
+  - Order status analytics panel with visual progress bars
+  - Status breakdown: pending, processing, shipped, delivered, cancelled, refunded
+  - Real-time metrics: total users, orders, customers, today's orders
+  - System health monitoring display
+
+### Changed
+- **Dashboard API Enhancement**: Added weekly growth calculation and order status statistics
+  - New SQL queries for 7-day period tracking
+  - Order status distribution data
+  - Enhanced data structure with statusStats object
+- Admin dashboard frontend updated to display new analytics data
+
+## [Unreleased]
+
+### Added
 - **CI/CD Enhancement**: Added Dependabot configuration for automated dependency updates
 - **Docker Support**: Added Dockerfile and .dockerignore for containerized deployment
 - **Code Quality Metrics**: Added GitHub Actions workflow for code climate analysis and metrics collection
