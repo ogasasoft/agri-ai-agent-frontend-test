@@ -38,6 +38,16 @@ interface DashboardStats {
   };
 }
 
+interface StatusStats {
+  total: number;
+  pending: number;
+  processing: number;
+  shipped: number;
+  delivered: number;
+  cancelled: number;
+  refunded: number;
+}
+
 interface RecentActivity {
   id: string;
   type: string;
