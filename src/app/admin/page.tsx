@@ -10,6 +10,12 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
+  Package,
+  XCircle,
+  Truck,
+  Check,
+  Ban,
+  RotateCcw,
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -21,6 +27,15 @@ interface DashboardStats {
   weeklyGrowth: number;
   systemHealth: 'healthy' | 'warning' | 'error';
   lastBackup: string;
+  statusStats?: {
+    total: number;
+    pending: number;
+    processing: number;
+    shipped: number;
+    delivered: number;
+    cancelled: number;
+    refunded: number;
+  };
 }
 
 interface RecentActivity {
@@ -99,6 +114,51 @@ export default function AdminDashboard() {
       icon: TrendingUp,
       color: 'orange',
       change: '+23%',
+    },
+  ];
+
+  const statusConfig = [
+    {
+      key: 'pending',
+      label: '保留中',
+      icon: Package,
+      color: 'bg-yellow-100 text-yellow-600',
+      borderColor: 'border-yellow-200',
+    },
+    {
+      key: 'processing',
+      label: '処理中',
+      icon: RotateCcw,
+      color: 'bg-blue-100 text-blue-600',
+      borderColor: 'border-blue-200',
+    },
+    {
+      key: 'shipped',
+      label: '出荷済み',
+      icon: Truck,
+      color: 'bg-indigo-100 text-indigo-600',
+      borderColor: 'border-indigo-200',
+    },
+    {
+      key: 'delivered',
+      label: '配達完了',
+      icon: Check,
+      color: 'bg-green-100 text-green-600',
+      borderColor: 'border-green-200',
+    },
+    {
+      key: 'cancelled',
+      label: 'キャンセル',
+      icon: XCircle,
+      color: 'bg-red-100 text-red-600',
+      borderColor: 'border-red-200',
+    },
+    {
+      key: 'refunded',
+      label: '返金済み',
+      icon: Ban,
+      color: 'bg-gray-100 text-gray-600',
+      borderColor: 'border-gray-200',
     },
   ];
 
@@ -233,6 +293,54 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Order Status Analytics */}
+      {stats?.statusStats && (
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">注文ステータス分析</h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {statusConfig.map((config) => {
+                const Icon = config.icon;
+                const count = stats.statusStats[config.key] || 0;
+                const percentage = stats.statusStats.total
+                  ? ((count / stats.statusStats.total) * 100).toFixed(1)
+                  : 0;
+
+                return (
+                  <div
+                    key={config.key}
+                    className={`relative overflow-hidden rounded-lg border p-4 ${
+                      config.borderColor
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <div className={`p-2 rounded-md ${config.color}`}>
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <span className="ml-3 text-sm font-medium text-gray-900">
+                          {config.label}
+                        </span>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-700">
+                        {count.toLocaleString()} ({percentage}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-primary-600 h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Admin Quick Actions */}
       <div className="bg-white shadow rounded-lg">
