@@ -106,6 +106,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Initial release
+- TypeScript 6.0.3 and React 19 upgrade
+- Updated dependencies (@testing-library/react 16.3.2, Jest @types/jest 30.0.0, TypeScript ESLint 8.61.1)
+- Updated README with dependency upgrade information
 
 ### Security
 - Session-based authentication

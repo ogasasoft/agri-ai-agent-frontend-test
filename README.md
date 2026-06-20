@@ -422,9 +422,11 @@ docker-compose up
 ### 最新の改善
 
 - 修正 README のヤマトAPIパス記述と CI/CD デプロイ条件
-- TypeScript 6.0.2 にアップグレード
+- TypeScript 6.0.3 にアップグレード
+- React 19.2.7 にアップグレード
 - 包括的な GitHub Actions CI/CD パイプラインの追加
 - テストを完全に修正
+- 依存関係アップデート（TypeScript 6.0.3, React 19, @testing-library/react 16, Jest @types/jest 30.0.0, TypeScript ESLint 8.61.1）
 - Security-scan workflow 追加（日次脆弱性スキャン）
 - Lint-staged 構成追加（コミット前コード品質チェック）
 
