@@ -447,6 +447,7 @@ docker-compose up
 - [Architecture](#-architecture) - System design overview
 - [Security Policy](#-セキュリティ機能) - Security best practices and reporting
 - [Changelog](./CHANGELOG.md) - Version history and changes
+- [Security Guide](./SECURITY_GUIDE.md) - Comprehensive security documentation
 - [Releases](https://github.com/ogasasasasoft/agri-ai-agent-frontend/releases) - Official releases and download links
 
 ## 📝 ライセンス
