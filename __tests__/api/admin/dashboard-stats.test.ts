@@ -2,6 +2,10 @@ import { GET } from '@/app/api/admin/dashboard/stats/route'
 import { createMockRequest, MockDbClient, createMockUser, resetTestDatabase } from '../../setup/test-utils'
 
 // Mock dependencies
+jest.mock('@/lib/db', () => ({
+  getDbClient: jest.fn(),
+}))
+
 jest.mock('pg', () => ({
   Client: jest.fn().mockImplementation(() => MockDbClient.getInstance())
 }))
@@ -9,6 +13,11 @@ jest.mock('pg', () => ({
 jest.mock('@/lib/admin-auth', () => ({
   validateAdminSession: jest.fn(),
 }))
+
+// Mock getDbClient to return MockDbClient instance
+const { getDbClient } = require('@/lib/db')
+const mockClient = MockDbClient.getInstance()
+getDbClient.mockResolvedValue(mockClient)
 
 describe('/api/admin/dashboard/stats', () => {
   let mockClient: MockDbClient
@@ -18,6 +27,7 @@ describe('/api/admin/dashboard/stats', () => {
     await resetTestDatabase()
     mockClient = MockDbClient.getInstance()
     validateAdminSession.mockClear()
+    console.log('Before test: mockClient initialized', mockClient)
   })
 
   describe('GET /api/admin/dashboard/stats', () => {
@@ -59,7 +69,8 @@ describe('/api/admin/dashboard/stats', () => {
         todayOrders: 12,
         weeklyGrowth: 0,
         systemHealth: 'healthy',
-        lastBackup: expect.any(String)
+        lastBackup: expect.any(String),
+        statusStats: expect.any(Object)
       })
 
       // Verify all stat queries were executed
@@ -99,7 +110,8 @@ describe('/api/admin/dashboard/stats', () => {
         todayOrders: 0,
         weeklyGrowth: 0,
         systemHealth: 'healthy',
-        lastBackup: expect.any(String)
+        lastBackup: expect.any(String),
+        statusStats: expect.any(Object)
       })
     })
 

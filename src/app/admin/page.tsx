@@ -27,6 +27,14 @@ interface DashboardStats {
   weeklyGrowth: number;
   systemHealth: 'healthy' | 'warning' | 'error';
   lastBackup: string;
+  statusStats: {
+    [key: string]: number;
+    pending: number;
+    processing: number;
+    completed: number;
+    cancelled: number;
+    total: number;
+  };
 }
 
 interface RecentActivity {
@@ -38,11 +46,13 @@ interface RecentActivity {
 }
 
 interface StatusStats {
+  [key: string]: number;
   total: number;
   pending: number;
   processing: number;
   shipped: number;
   delivered: number;
+  completed: number;
   cancelled: number;
   refunded: number;
 }
@@ -146,6 +156,13 @@ export default function AdminDashboard() {
       icon: Check,
       color: 'bg-green-100 text-green-600',
       borderColor: 'border-green-200',
+    },
+    {
+      key: 'completed',
+      label: '完了',
+      icon: CheckCircle,
+      color: 'bg-emerald-100 text-emerald-600',
+      borderColor: 'border-emerald-200',
     },
     {
       key: 'cancelled',
