@@ -6,15 +6,11 @@ jest.mock('@/lib/db', () => ({
   getDbClient: jest.fn(),
 }))
 
-jest.mock('pg', () => ({
-  Client: jest.fn().mockImplementation(() => MockDbClient.getInstance())
-}))
-
 jest.mock('@/lib/admin-auth', () => ({
   validateAdminSession: jest.fn(),
 }))
 
-// Mock getDbClient to return MockDbClient instance
+// Mock getDbClient to return MockDbClient instance (outside describe for initialization)
 const { getDbClient } = require('@/lib/db')
 const mockClient = MockDbClient.getInstance()
 getDbClient.mockResolvedValue(mockClient)
@@ -27,14 +23,13 @@ describe('/api/admin/dashboard/stats', () => {
     await resetTestDatabase()
     mockClient = MockDbClient.getInstance()
     validateAdminSession.mockClear()
-    console.log('Before test: mockClient initialized', mockClient)
   })
 
   describe('GET /api/admin/dashboard/stats', () => {
     it('should return system statistics for admin user', async () => {
       // Arrange
-      const mockAdminUser = createMockUser({ 
-        id: 1, 
+      const mockAdminUser = createMockUser({
+        id: 1,
         username: 'admin',
         is_super_admin: true
       })
@@ -53,6 +48,8 @@ describe('/api/admin/dashboard/stats', () => {
         method: 'GET',
         headers: { 'x-session-token': 'admin-session' }
       })
+
+      console.log('DEBUG: About to call GET, client is', mockClient)
 
       // Act
       const response = await GET(request)

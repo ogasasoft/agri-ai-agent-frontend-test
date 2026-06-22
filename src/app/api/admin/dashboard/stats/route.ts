@@ -33,6 +33,17 @@ export async function GET(request: NextRequest) {
 
     const client = await getDbClient();
 
+
+    if (!client) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'データベース接続エラー',
+        },
+        { status: 500 }
+      );
+    }
+
     try {
       // Get system statistics
       const [
