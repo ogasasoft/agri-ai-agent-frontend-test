@@ -37,7 +37,6 @@
 
 ## Low Priority
 
-- [ ] Storybook for component documentation
 - [ ] Analytics integration
 - [ ] Scheduled reports generation
 
